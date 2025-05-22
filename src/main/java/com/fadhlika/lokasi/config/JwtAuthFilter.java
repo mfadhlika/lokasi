@@ -7,6 +7,8 @@ package com.fadhlika.lokasi.config;
 import java.io.IOException;
 
 import com.fadhlika.lokasi.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,32 +27,29 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- *
  * @author fadhl
  */
-@Component
 public class JwtAuthFilter extends OncePerRequestFilter {
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
 
-    @Autowired
     private JwtAuthService jwtAuthService;
 
-    @Autowired
     private UserService userService;
+
+    public JwtAuthFilter(JwtAuthService jwtAuthService, UserService userService) {
+        this.jwtAuthService = jwtAuthService;
+        this.userService = userService;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (request.getServletPath().startsWith("/api/v1")) {
-            final String authHeader = request.getHeader("Authorization");
-            String jwt = null;
-            String username = null;
+        final String authHeader = request.getHeader("Authorization");
+        String jwt = null;
+        String username = null;
 
-            if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
-                jwt = authHeader.substring(7);
-                username = jwtAuthService.decode(jwt).getSubject();
-            } else {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
+        if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
+            jwt = authHeader.substring(7);
+            username = jwtAuthService.decode(jwt).getSubject();
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 User user = (User) this.userService.loadUserByUsername(username);

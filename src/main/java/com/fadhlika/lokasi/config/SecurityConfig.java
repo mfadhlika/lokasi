@@ -1,17 +1,25 @@
 package com.fadhlika.lokasi.config;
 
+import com.fadhlika.lokasi.service.JwtAuthService;
+import com.fadhlika.lokasi.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -24,23 +32,53 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
-    private final AuthenticationProvider authenticationProvider;
-
     @Autowired
-    public SecurityConfig(AuthenticationProvider authenticationProvider, JwtAuthFilter jwtAuthFilter) {
-        this.authenticationProvider = authenticationProvider;
-        this.jwtAuthFilter = jwtAuthFilter;
+    public SecurityConfig(JwtAuthService jwtAuthService, UserService userService) {
+        this.jwtAuthFilter = new JwtAuthFilter(jwtAuthService, userService);
     }
 
     @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+    @Bean
+    @Order(1)
+    public SecurityFilterChain basicSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/api/owntracks")
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth
+                        -> auth.anyRequest().authenticated()
+                )
+                .sessionManagement(session
+                        -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .httpBasic(Customizer.withDefaults());
+        return http.build();
+    }
+
+    @Bean
+    @Order(2)
+    public SecurityFilterChain jwtSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/api/v1/**")
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth
+                        -> auth.requestMatchers("/api/v1/auth/login").permitAll()
+                        .requestMatchers("/api/v1/**").authenticated()
+                )
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        return http.build();
+    }
+
+    @Bean
+    @Order(3)
     public SecurityFilterChain sessionSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth
-                        -> auth.requestMatchers("/api/v1/auth/token").permitAll()
-                        .requestMatchers("/api/owntracks").authenticated()
-                        .requestMatchers("/api/v1/**").authenticated()
-                        .anyRequest().authenticated()
+                        -> auth.anyRequest().authenticated()
                 )
                 .formLogin(form
                         -> form
@@ -53,17 +91,9 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .deleteCookies("SESSION")
                 )
-                .httpBasic(configurer -> configurer.realmName("Lokasi"))
                 .sessionManagement(session
                         -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                )
-                .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                );
         return http.build();
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
     }
 }
