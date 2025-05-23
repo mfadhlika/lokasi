@@ -17,5 +17,5 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "_type")
 @JsonSubTypes({
     @Type(value = Location.class, name = "location"), @Type(value = Lwt.class, name = "lwt")})
-public abstract class Message {
+public interface Message {
 }

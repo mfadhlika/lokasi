@@ -7,59 +7,44 @@ package com.fadhlika.lokasi.dto.owntracks;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
- *
  * @author fadhl
  */
-public class Location extends Message {
-
-    public enum BatteryStatus {
-        UNKNOWN(0),
-        UNPLUGGED(1),
-        CHARGING(2),
-        FULL(3);
-
-        @JsonValue
-        public final int value;
-
-        private BatteryStatus(int value) {
-            this.value = value;
-        }
-    }
-
-    public int acc;
-    public int alt;
-    public BatteryStatus bs;
-    public int cog;
-    public double lat;
-    public double lon;
-    public int rad;
-    public String t;
-    public String tid;
-    public int tst;
-    public int vac;
-    public int vel;
-    public double p;
-    public String poi;
-    public String image;
-    @JsonProperty("imagename")
-    public String imageName;
-    public String conn;
-    public String tag;
-    public String topic;
-    @JsonProperty("inregions")
-    public List<String> inRegions;
-    @JsonProperty("inrids")
-    public List<String> inRids;
-    @JsonProperty("SSID")
-    public String ssid;
-    @JsonProperty("BSSID")
-    public String bssid;
-    @JsonProperty("created_at")
-    public int createdAt;
-    public int m;
-    @JsonProperty("_id")
-    public String id;
+@JsonTypeName("location")
+public record Location(
+        int acc,
+        int alt,
+        int bs,
+        int cog,
+        double lat,
+        double lon,
+        int rad,
+        String t,
+        String tid,
+        int tst,
+        int vac,
+        int vel,
+        double p,
+        String poi,
+        String image,
+        @JsonProperty("imagename")
+        String imageName,
+        String conn,
+        String tag,
+        String topic,
+        @JsonProperty("inregions")
+        List<String> inRegions,
+        @JsonProperty("inrids")
+        List<String> inRids,
+        @JsonProperty("SSID")
+        String ssid,
+        @JsonProperty("BSSID")
+        String bssid,
+        @JsonProperty("created_at")
+        int createdAt,
+        int m,
+        @JsonProperty("_id")
+        String id) implements Message {
 }

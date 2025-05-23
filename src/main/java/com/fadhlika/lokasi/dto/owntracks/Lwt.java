@@ -1,5 +1,7 @@
 package com.fadhlika.lokasi.dto.owntracks;
 
-public class Lwt extends Message {
-    public int tst;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+@JsonTypeName("lwt")
+public record Lwt(int tst) implements Message {
 }

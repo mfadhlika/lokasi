@@ -38,9 +38,9 @@ public class AuthController {
     @PostMapping("token")
     public Response login(@RequestBody LoginRequest loginRequest) {
         try {
-            UserDetails user = this.userService.loadUserByUsername(loginRequest.username);
+            UserDetails user = this.userService.loadUserByUsername(loginRequest.username());
 
-            if(!passwordEncoder.matches(loginRequest.password, user.getPassword())) {
+            if(!passwordEncoder.matches(loginRequest.password(), user.getPassword())) {
                 return new ErrorResponse("Wrong password");
             }
 

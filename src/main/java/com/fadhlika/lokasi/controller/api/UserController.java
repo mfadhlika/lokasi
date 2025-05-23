@@ -35,7 +35,7 @@ public class UserController {
 
     @PostMapping
     public Response createUser(@RequestBody RegisterRequest request) {
-        this.userService.createUser(request.username, request.password);
+        this.userService.createUser(request.username(), request.password());
 
         return new Response("successfully created user");
     }

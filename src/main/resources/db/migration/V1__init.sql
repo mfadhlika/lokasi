@@ -5,12 +5,22 @@ CREATE TABLE `user`(
     created_at DATETIME NOT NULL
 );
 
-CREATE TABLE `point`(
+CREATE TABLE `location`(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
-    `point` GEOMETRY NOT NULL,
-    speed FLOAT,
-    `timestamp` DATETIME NOT NULL,
+    device_id TEXT,
+    geometry GEOMETRY NOT NULL,
+    altitude INTEGER,
+    course INTEGER,
+    speed DOUBLE,
+    accuracy INTEGER,
+    vertical_accuracy INTEGER,
+    motions JSON,
+    battery_state INTEGER,
+    battery DOUBLE,
+    ssid TEXT,
+    raw_data JSON,
+    timestamp DATETIME NOT NULL,
     created_at DATETIME NOT NULL,
     FOREIGN KEY(user_id) REFERENCES user(id)
 );

@@ -8,8 +8,5 @@ package com.fadhlika.lokasi.dto;
  *
  * @author fadhl
  */
-public class RegisterRequest {
-
-    public String username;
-    public String password;
+public record RegisterRequest(String username, String password) {
 }

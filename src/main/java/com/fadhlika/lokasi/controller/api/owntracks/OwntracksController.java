@@ -5,23 +5,18 @@
 package com.fadhlika.lokasi.controller.api.owntracks;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+import com.fadhlika.lokasi.model.Location;
 import com.fadhlika.lokasi.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.fadhlika.lokasi.dto.owntracks.Location;
 import com.fadhlika.lokasi.dto.owntracks.Message;
-import com.fadhlika.lokasi.model.Point;
-import com.fadhlika.lokasi.service.PointService;
+import com.fadhlika.lokasi.service.LocationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
@@ -34,20 +29,35 @@ public class OwntracksController {
 
     private final Logger logger = LoggerFactory.getLogger(OwntracksController.class);
 
-    private final PointService pointService;
+    private final LocationService locationService;
 
     @Autowired
-    public OwntracksController(PointService pointService) {
-        this.pointService = pointService;
+    public OwntracksController(LocationService locationService) {
+        this.locationService = locationService;
     }
 
     @PostMapping
-    public void pub(@RequestBody Message message) throws JsonProcessingException {
+    public void pub(@RequestHeader("X-Limit-D") String deviceId, @RequestBody Message message) throws JsonProcessingException {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (message instanceof Location location) {
-            Point point = new Point(user.getId(), location.lon, location.lat, Instant.ofEpochSecond(location.tst).atOffset(ZoneOffset.UTC).toLocalDateTime());
-            this.pointService.createPoint(point);
+        if (message instanceof com.fadhlika.lokasi.dto.owntracks.Location location) {
+            Location l = new Location();
+
+            l.setUserId(user.getId());
+            l.setDeviceId(deviceId);
+            l.setGeometry(location.lat(), location.lon());
+            l.setAltitude(location.alt());
+            l.setBatteryState(location.bs());
+            l.setCourse(location.cog());
+            l.setAccuracy(location.acc());
+            l.setVerticalAccuracy(location.vac());
+            l.setSpeed(location.vel());
+            l.setSsid(location.ssid());
+            l.setTimestamp(Instant.ofEpochSecond(location.tst()).atOffset(ZoneOffset.UTC).toLocalDateTime());
+
+            l.setRawData(message);
+
+            this.locationService.createPoint(l);
         }
     }
 }

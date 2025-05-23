@@ -32,9 +32,9 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtAuthFilter extends OncePerRequestFilter {
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
 
-    private JwtAuthService jwtAuthService;
+    private final JwtAuthService jwtAuthService;
 
-    private UserService userService;
+    private final UserService userService;
 
     public JwtAuthFilter(JwtAuthService jwtAuthService, UserService userService) {
         this.jwtAuthService = jwtAuthService;
@@ -57,15 +57,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-
-                    filterChain.doFilter(request, response);
-
+                } else {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     return;
                 }
+            } else {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
             }
         }
 
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        filterChain.doFilter(request, response);
     }
 
     @Override
