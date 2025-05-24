@@ -32,4 +32,8 @@ public class Feature<T> {
     public T getProperties() {
         return properties;
     }
+
+    public String getType() {
+        return type;
+    }
 }

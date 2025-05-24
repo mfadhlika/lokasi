@@ -13,7 +13,7 @@
     <div layout:fragment="content">
       <div id="map" style="height:500px"></div>
       <script th:inline="javascript">
-        var map = L.map('map').setView([51.505, -0.09], 13);
+        var map = L.map('map').setView([ 106.96741372, -6.15592057 ], 13);
 
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
           maxZoom: 19,
@@ -22,7 +22,13 @@
 
         fetch('/api/v1/location')
                 .then(res => res.json())
-                .then(locations => L.geoJSON(locations).addTo(map))
+                .then(locations => {
+                  const lastLocation = locations.features[locations.features.length - 1].geometry.coordinates;
+                  console.log("set view at", lastLocation);
+                  map.setView([lastLocation[1], lastLocation[0]], 13)
+
+                  L.geoJSON(locations).addTo(map);
+                })
                 .catch(err => console.error(err));
       </script>
     </div>
