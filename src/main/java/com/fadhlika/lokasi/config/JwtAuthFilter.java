@@ -7,6 +7,7 @@ package com.fadhlika.lokasi.config;
 import java.io.IOException;
 
 import com.fadhlika.lokasi.model.User;
+import jakarta.servlet.http.Cookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,9 +50,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
             jwt = authHeader.substring(7);
-            username = jwtAuthService.decode(jwt).getSubject();
+        } else {
+            for(Cookie cookie : request.getCookies()) {
+                if (cookie.getName().equals("token")) {
+                    jwt = cookie.getValue();
+                }
+            }
+        }
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (jwt != null) {
+            if ((username = jwtAuthService.decode(jwt).getSubject()) != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 User user = (User) this.userService.loadUserByUsername(username);
                 if (jwtAuthService.isValid(jwt, user.getUsername())) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());

@@ -26,9 +26,12 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
+    private final SessionAuthenticationSuccessHandler sessionAuthenticationSuccessHandler;
+
     @Autowired
     public SecurityConfig(JwtAuthService jwtAuthService, UserService userService) {
         this.jwtAuthFilter = new JwtAuthFilter(jwtAuthService, userService);
+        this.sessionAuthenticationSuccessHandler = new SessionAuthenticationSuccessHandler(jwtAuthService);
     }
 
     @Bean
@@ -77,13 +80,14 @@ public class SecurityConfig {
                 .formLogin(form
                         -> form
                         .loginPage("/login").permitAll()
+                        .successHandler(sessionAuthenticationSuccessHandler)
                         .defaultSuccessUrl("/map", true)
                 )
                 .logout(logout
                         -> logout.permitAll()
                         .logoutSuccessUrl("/")
                         .invalidateHttpSession(true)
-                        .deleteCookies("SESSION")
+                        .deleteCookies("SESSION", "token")
                 )
                 .sessionManagement(session
                         -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
