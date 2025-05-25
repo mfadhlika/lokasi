@@ -40,7 +40,7 @@ public class LocationController {
     ) throws SQLException {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        List<Feature<HashMap<String, Object>>> features = this.locationService.find(user.getId(), start, end).stream().map(location -> {
+        List<Feature<HashMap<String, Object>>> features = this.locationService.findPoints(user.getId(), start, end).stream().map(location -> {
             HashMap<String, Object> props = new HashMap<>();
             props.put("timestamp", location.getTimestamp());
             return new Feature<>(location.getGeometry(), props);
@@ -50,7 +50,7 @@ public class LocationController {
     }
 
     @PostMapping
-    public Response addLocations(@RequestBody FeatureCollection featureCollection) {
+    public Response addLocations(@RequestBody FeatureCollection<HashMap<String, Object>> featureCollection) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         List<Location> locations = featureCollection.features().stream().map(feature -> {
@@ -61,6 +61,14 @@ public class LocationController {
 
             HashMap<String, Object> properties = feature.getProperties();
             l.setTimestamp(Instant.ofEpochSecond((int) properties.get("timestamp")).atZone(ZoneOffset.UTC).toLocalDateTime());
+            if (properties.get("altitude") != null) l.setAltitude((int) properties.get("altitude"));
+            if (properties.get("ssid") != null) l.setSsid((String) properties.get("ssid"));
+            if (properties.get("accuracy") != null) l.setAccuracy((int) properties.get("accuracy"));
+            if (properties.get("vertical_accuracy") != null) l.setVerticalAccuracy((int) properties.get("vertical_accuracy"));
+            if (properties.get("tracker_id") != null) l.setDeviceId((String) properties.get("tracker_id"));
+            if (properties.get("battery") != null) l.setBattery((int) properties.get("battery"));
+            if (properties.get("battery_state") != null) l.setBatteryState((String) properties.get("battery_state"));
+            if (properties.get("velocity") != null) l.setSpeed(Double.parseDouble((String) properties.get("velocity")));
 
             try {
                 l.setRawData(featureCollection);

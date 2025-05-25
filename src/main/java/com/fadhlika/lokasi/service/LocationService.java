@@ -5,7 +5,6 @@
 package com.fadhlika.lokasi.service;
 
 import com.fadhlika.lokasi.model.Location;
-import org.locationtech.jts.geom.GeometryCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,11 +40,7 @@ public class LocationService {
         locationRepository.createPoints(locations);
     }
 
-    public List<Location> find(int userId, LocalDateTime start, LocalDateTime end) throws SQLException {
-        return locationRepository.find(userId, start, end);
-    }
-
-    public GeometryCollection findGeometries(int userId, LocalDateTime start, LocalDateTime end) throws SQLException {
-        return locationRepository.listPoints(userId, start, end);
+    public List<Location> findPoints(int userId, LocalDateTime start, LocalDateTime end) throws SQLException {
+        return locationRepository.findPoints(userId, start, end);
     }
 }

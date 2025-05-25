@@ -6,8 +6,6 @@ package com.fadhlika.lokasi.repository;
 
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.fadhlika.lokasi.model.Location;
@@ -46,7 +44,16 @@ public class LocationRepository {
         @Override
         public Location mapRow(ResultSet rs, int rowNum) throws SQLException {
             Location location = new Location();
+            location.setDeviceId(rs.getString("device_id"));
+            location.setAltitude(rs.getInt("altitude"));
+            location.setCourse(rs.getInt("course"));
             location.setSpeed(rs.getDouble("speed"));
+            location.setAccuracy(rs.getInt("accuracy"));
+            location.setVerticalAccuracy(rs.getInt("vertical_accuracy"));
+//            location.setMotions(rs.getString("motions"));
+            location.setBatteryState(rs.getInt("battery_state"));
+            location.setBattery(rs.getDouble("battery"));
+            location.setSsid(rs.getString("ssid"));
             location.setTimestamp(LocalDateTime.parse(rs.getString("timestamp")));
             location.setCreatedAt(LocalDateTime.parse(rs.getString("created_at")));
             String pointWkt = rs.getString("geometry");
@@ -63,9 +70,38 @@ public class LocationRepository {
 
     public void createPoint(Location location) {
         try {
-            jdbcTemplate.update("INSERT INTO location(user_id, geometry, timestamp, created_at) VALUES(?, ?, ?, ?)", location.getUserId(),
+            jdbcTemplate.update(
+                    "INSERT INTO location(" +
+                            "user_id, " +
+                            "device_id, " +
+                            "geometry, " +
+                            "altitude, " +
+                            "course, " +
+                            "speed, " +
+                            "accuracy, " +
+                            "vertical_accuracy, " +
+                            "motions, " +
+                            "battery_state, " +
+                            "battery, " +
+                            "ssid, " +
+                            "timestamp, " +
+                            "raw_data, " +
+                            "created_at) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    location.getUserId(),
+                    location.getDeviceId(),
                     location.getGeometry(),
+                    location.getAltitude(),
+                    location.getCourse(),
+                    location.getSpeed(),
+                    location.getAccuracy(),
+                    location.getVerticalAccuracy(),
+                    location.getMotions(),
+                    location.getBatteryState(),
+                    location.getBattery(),
+                    location.getSsid(),
                     location.getTimestamp(),
+                    location.getRawData(),
+                    location.getRawData(),
                     location.getCreatedAt());
         } catch (DataAccessException e) {
             logger.error("error creating point: {}", e.getMessage(), e);
@@ -74,42 +110,55 @@ public class LocationRepository {
 
     public void createPoints(List<Location> locations) {
         try {
-            jdbcTemplate.batchUpdate("INSERT INTO location(user_id, geometry, timestamp, created_at) VALUES(?, ?, ?, ?)", new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    Location l = locations.get(i);
-                    ps.setInt(1, l.getUserId());
-                    ps.setObject(2, l.getGeometry());
-                    ps.setObject(3, l.getTimestamp());
-                    ps.setObject(4, l.getCreatedAt());
-                }
+            jdbcTemplate.batchUpdate(
+                    "INSERT INTO location(" +
+                            "user_id, " +
+                            "device_id, " +
+                            "geometry, " +
+                            "altitude, " +
+                            "course, " +
+                            "speed, " +
+                            "accuracy, " +
+                            "vertical_accuracy, " +
+                            "motions, " +
+                            "battery_state, " +
+                            "battery, " +
+                            "ssid, " +
+                            "timestamp, " +
+                            "raw_data, " +
+                            "created_at) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    new BatchPreparedStatementSetter() {
+                        @Override
+                        public void setValues(PreparedStatement ps, int i) throws SQLException {
+                            Location location = locations.get(i);
+                            ps.setInt(1, location.getUserId());
+                            ps.setString(2, location.getDeviceId());
+                            ps.setObject(3, location.getGeometry());
+                            ps.setInt(4, location.getAltitude());
+                            ps.setInt(5, location.getCourse());
+                            ps.setDouble(6, location.getSpeed());
+                            ps.setInt(7, location.getAccuracy());
+                            ps.setInt(8, location.getVerticalAccuracy());
+                            ps.setObject(9, location.getMotions());
+                            ps.setObject(10, location.getBatteryState());
+                            ps.setDouble(11, location.getBattery());
+                            ps.setString(12, location.getSsid());
+                            ps.setObject(13, location.getTimestamp());
+                            ps.setString(14, location.getRawData());
+                            ps.setObject(15, location.getCreatedAt());
+                        }
 
-                @Override
-                public int getBatchSize() {
-                    return locations.size();
-                }
-            });
+                        @Override
+                        public int getBatchSize() {
+                            return locations.size();
+                        }
+                    });
         } catch (DataAccessException e) {
             logger.error("error creating point: {}", e.getMessage(), e);
         }
     }
 
-    public List<Location> find(int userId, LocalDateTime start, LocalDateTime end) throws SQLException {
-        return jdbcTemplate.query("SELECT id, geometry, speed, timestamp, created_at FROM location", pointRowMapper);
-    }
-
-    public GeometryCollection listPoints(int userId, LocalDateTime start, LocalDateTime end) throws SQLException {
-        return jdbcTemplate.query("SELECT AsText(CastToGeometryCollection(ST_Collect(ST_GeomFromText(geometry)))) AS points FROM location WHERE user_id = ? AND timestamp BETWEEN ? AND ?", (rs) -> {
-            try {
-                String pointWkt = rs.getString("points");
-                if (pointWkt == null) {
-                    return new GeometryFactory().createGeometryCollection();
-                }
-
-                return (GeometryCollection) wktReader.read(rs.getString(1));
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
-            }
-        }, userId, start, end);
+    public List<Location> findPoints(int userId, LocalDateTime start, LocalDateTime end) throws SQLException {
+        return jdbcTemplate.query("SELECT * FROM location WHERE user_id = ? AND timestamp BETWEEN ? AND ? ORDER BY timestamp DESC", pointRowMapper, userId, start, end);
     }
 }

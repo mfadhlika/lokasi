@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.locationtech.jts.geom.Geometry;
 
 public class Feature<T> {
-    private final String type = "Feature";
 
     @JsonSerialize(using = GeometrySerializer.class)
     @JsonDeserialize(using = GeometryDeserializer.class)
@@ -34,6 +33,6 @@ public class Feature<T> {
     }
 
     public String getType() {
-        return type;
+        return "Feature";
     }
 }
