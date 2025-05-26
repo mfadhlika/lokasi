@@ -45,19 +45,16 @@
             var len = str.length;
             var char;
 
-            for (var i=0 ; i<len ; i++) {
+            for (var i = 0; i < len; i++) {
                 char = str.charAt(i);
 
-                if (i==0) {
+                if (i == 0) {
                     output += char.toUpperCase();
-                }
-                else if (char !== char.toLowerCase() && char === char.toUpperCase()) {
+                } else if (char !== char.toLowerCase() && char === char.toUpperCase()) {
                     output += " " + char;
-                }
-                else if (char == "-" || char == "_") {
+                } else if (char == "-" || char == "_") {
                     output += " ";
-                }
-                else {
+                } else {
                     output += char;
                 }
             }
@@ -69,22 +66,50 @@
             .map('map')
             .setView(/*[[${lastLocation}]]*/ [-6.1750, 106.8266], 13);
 
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
+        L
+            .tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            })
+            .addTo(map);
 
-        L.geoJSON(/*[[${locations}]]*/ null).bindPopup(function (layer) {
-            const content = document.createElement("p");
-            Object.keys(layer.feature.properties).forEach((key) => {
-                const value =  layer.feature.properties[key];
-                if(!value) return;
-                const data = document.createElement("span");
-                data.innerHTML = "<b>" + humanize(key) + ": </b>" +  value + "<br/>";
-                content.appendChild(data);
-            });
-            return content;
-        }).addTo(map);
+        const lines = /*[[${lines}]]*/ null;
+
+        L
+            .geoJSON(lines)
+            .bindPopup(function (layer) {
+                const content = document.createElement("p");
+                Object.keys(layer.feature.properties).forEach((key) => {
+                    const value = layer.feature.properties[key];
+                    if (!value) return;
+                    const data = document.createElement("span");
+                    data.innerHTML = "<b>" + humanize(key) + ": </b>" + value + "<br/>";
+                    content.appendChild(data);
+                });
+                return content;
+            })
+            .addTo(map);
+
+        const points = /*[[${points}]]*/ null;
+
+        L
+            .geoJSON(points, {
+                pointToLayer: function (point, latlng) {
+                    return L.circleMarker(latlng, {radius: 7, fillColor: "white", fillOpacity: 1});
+                }
+            })
+            .bindPopup(function (layer) {
+                const content = document.createElement("p");
+                Object.keys(layer.feature.properties).forEach((key) => {
+                    const value = layer.feature.properties[key];
+                    if (!value) return;
+                    const data = document.createElement("span");
+                    data.innerHTML = "<b>" + humanize(key) + ": </b>" + value + "<br/>";
+                    content.appendChild(data);
+                });
+                return content;
+            })
+            .addTo(map);
     </script>
 </div>
 </body>

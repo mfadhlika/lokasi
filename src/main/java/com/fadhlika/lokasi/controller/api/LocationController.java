@@ -40,17 +40,17 @@ public class LocationController {
     ) throws SQLException {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        List<Feature<HashMap<String, Object>>> features = this.locationService.findPoints(user.getId(), start, end).stream().map(location -> {
+        List<Feature> features = this.locationService.findPoints(user.getId(), start, end).stream().map(location -> {
             HashMap<String, Object> props = new HashMap<>();
             props.put("timestamp", location.getTimestamp());
-            return new Feature<>(location.getGeometry(), props);
+            return new Feature(location.getGeometry(), props);
         }).toList();
 
         return new FeatureCollection(features);
     }
 
     @PostMapping
-    public Response addLocations(@RequestBody FeatureCollection<HashMap<String, Object>> featureCollection) {
+    public Response addLocations(@RequestBody FeatureCollection featureCollection) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         List<Location> locations = featureCollection.features().stream().map(feature -> {
@@ -59,7 +59,7 @@ public class LocationController {
             l.setUserId(user.getId());
             l.setGeometry(feature.getGeometry());
 
-            HashMap<String, Object> properties = feature.getProperties();
+            HashMap<String, Object> properties = feature.convertProperties();
             l.setTimestamp(Instant.ofEpochSecond((int) properties.get("timestamp")).atZone(ZoneOffset.UTC).toLocalDateTime());
             if (properties.get("altitude") != null) l.setAltitude((int) properties.get("altitude"));
             if (properties.get("ssid") != null) l.setSsid((String) properties.get("ssid"));

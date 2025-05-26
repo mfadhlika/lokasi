@@ -14,16 +14,15 @@ import org.locationtech.jts.io.geojson.GeoJsonReader;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class OverlandInputDeserializer extends JsonDeserializer<Feature<Properties>> {
+public class OverlandInputDeserializer extends JsonDeserializer<Feature> {
 
     @Override
-    public Feature<Properties> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+    public Feature deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
         GeoJsonReader reader = new GeoJsonReader();
         try {
             Geometry geometry = reader.read(p.getText());
-            JsonNode node = p.getCodec().readTree(p);
-            Properties properties = p.readValueAs(Properties.class);
-            return new Feature<>(geometry, properties);
+            HashMap<String, Object> properties = p.readValueAs(HashMap.class);
+            return new Feature(geometry, properties);
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }

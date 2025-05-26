@@ -33,14 +33,14 @@ public class LocationService {
     }
 
     public void createPoint(Location location) {
-        locationRepository.createPoint(location);
+        locationRepository.createLocation(location);
     }
 
     public void createPoints(List<Location> locations) {
-        locationRepository.createPoints(locations);
+        locationRepository.createLocations(locations);
     }
 
     public List<Location> findPoints(int userId, LocalDateTime start, LocalDateTime end) throws SQLException {
-        return locationRepository.findPoints(userId, start, end);
+        return locationRepository.findLocations(userId, start, end);
     }
 }

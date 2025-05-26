@@ -36,7 +36,7 @@ public class OverlandController {
 
             l.setUserId(user.getId());
 
-            Properties props = feature.getProperties();
+            Properties props = feature.convertProperties();
             l.setDeviceId(props.deviceId());
             l.setGeometry(feature.getGeometry());
             l.setAltitude(props.altitude());

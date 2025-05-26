@@ -6,11 +6,10 @@ package com.fadhlika.lokasi.repository;
 
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fadhlika.lokasi.model.Location;
-import org.locationtech.jts.geom.GeometryCollection;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.slf4j.Logger;
@@ -40,7 +39,7 @@ public class LocationRepository {
         this.wktReader = new WKTReader();
     }
 
-    private final RowMapper<Location> pointRowMapper = new RowMapper<Location>() {
+    private final RowMapper<Location> locationRowMapper = new RowMapper<Location>() {
         @Override
         public Location mapRow(ResultSet rs, int rowNum) throws SQLException {
             Location location = new Location();
@@ -68,47 +67,13 @@ public class LocationRepository {
         }
     };
 
-    public void createPoint(Location location) {
-        try {
-            jdbcTemplate.update(
-                    "INSERT INTO location(" +
-                            "user_id, " +
-                            "device_id, " +
-                            "geometry, " +
-                            "altitude, " +
-                            "course, " +
-                            "speed, " +
-                            "accuracy, " +
-                            "vertical_accuracy, " +
-                            "motions, " +
-                            "battery_state, " +
-                            "battery, " +
-                            "ssid, " +
-                            "timestamp, " +
-                            "raw_data, " +
-                            "created_at) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    location.getUserId(),
-                    location.getDeviceId(),
-                    location.getGeometry(),
-                    location.getAltitude(),
-                    location.getCourse(),
-                    location.getSpeed(),
-                    location.getAccuracy(),
-                    location.getVerticalAccuracy(),
-                    location.getMotions(),
-                    location.getBatteryState(),
-                    location.getBattery(),
-                    location.getSsid(),
-                    location.getTimestamp(),
-                    location.getRawData(),
-                    location.getRawData(),
-                    location.getCreatedAt());
-        } catch (DataAccessException e) {
-            logger.error("error creating point: {}", e.getMessage(), e);
-        }
+    public void createLocation(Location location) {
+        createLocations(new ArrayList<>() {{
+            add(location);
+        }});
     }
 
-    public void createPoints(List<Location> locations) {
+    public void createLocations(List<Location> locations) {
         try {
             jdbcTemplate.batchUpdate(
                     "INSERT INTO location(" +
@@ -158,7 +123,7 @@ public class LocationRepository {
         }
     }
 
-    public List<Location> findPoints(int userId, LocalDateTime start, LocalDateTime end) throws SQLException {
-        return jdbcTemplate.query("SELECT * FROM location WHERE user_id = ? AND timestamp BETWEEN ? AND ? ORDER BY timestamp DESC", pointRowMapper, userId, start, end);
+    public List<Location> findLocations(int userId, LocalDateTime start, LocalDateTime end) throws SQLException {
+        return jdbcTemplate.query("SELECT * FROM location WHERE user_id = ? AND timestamp BETWEEN ? AND ? ORDER BY timestamp DESC", locationRowMapper, userId, start, end);
     }
 }

@@ -3,11 +3,11 @@ package com.fadhlika.lokasi.dto;
 import java.util.HashMap;
 import java.util.List;
 
-public record FeatureCollection<T>(
+public record FeatureCollection(
         String type,
-        List<Feature<T>> features) {
+        List<Feature> features) {
 
-    public FeatureCollection(List<Feature<T>> features) {
+    public FeatureCollection(List<Feature> features) {
         this("FeatureCollection", features);
     }
 }
