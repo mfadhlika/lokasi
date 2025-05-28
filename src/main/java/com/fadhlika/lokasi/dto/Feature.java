@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class Feature {
+    private final String type = "Feature";
 
     @JsonSerialize(using = GeometrySerializer.class)
     @JsonDeserialize(using = GeometryDeserializer.class)
