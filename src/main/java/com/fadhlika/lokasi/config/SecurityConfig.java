@@ -26,12 +26,9 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
-    private final SessionAuthenticationSuccessHandler sessionAuthenticationSuccessHandler;
-
     @Autowired
     public SecurityConfig(JwtAuthService jwtAuthService, UserService userService) {
         this.jwtAuthFilter = new JwtAuthFilter(jwtAuthService, userService);
-        this.sessionAuthenticationSuccessHandler = new SessionAuthenticationSuccessHandler(jwtAuthService);
     }
 
     @Bean
@@ -57,21 +54,6 @@ public class SecurityConfig {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain jwtSecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher("/api/v1/**")
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth
-                        -> auth.requestMatchers("/api/v1/auth/token").permitAll()
-                        .requestMatchers("/api/v1/**").authenticated()
-                )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-        return http.build();
-    }
-
-    @Bean
-    @Order(3)
     public SecurityFilterChain sessionSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth
@@ -80,7 +62,6 @@ public class SecurityConfig {
                 .formLogin(form
                         -> form
                         .loginPage("/login").permitAll()
-                        .successHandler(sessionAuthenticationSuccessHandler)
                         .defaultSuccessUrl("/map", true)
                 )
                 .logout(logout
