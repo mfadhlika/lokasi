@@ -57,7 +57,7 @@ public class OwntracksController {
 
             l.setRawData(message);
 
-            this.locationService.createPoint(l);
+            this.locationService.saveLocation(l);
         }
     }
 }

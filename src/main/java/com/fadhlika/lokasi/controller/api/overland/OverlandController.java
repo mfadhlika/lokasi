@@ -59,7 +59,7 @@ public class OverlandController {
             return l;
         }).toList();
 
-        locationService.createPoints(locations);
+        locationService.saveLocations(locations);
 
         return new Response("ok");
     }

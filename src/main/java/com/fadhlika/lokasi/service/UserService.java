@@ -37,7 +37,7 @@ public class UserService implements UserDetailsService {
         this.userRepository.createUser(user);
     }
 
-    public boolean hasUser() {
+    public boolean hasUsers() {
         return userRepository.hasUsers();
     }
 

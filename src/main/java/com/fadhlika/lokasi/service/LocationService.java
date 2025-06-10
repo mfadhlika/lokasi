@@ -32,15 +32,15 @@ public class LocationService {
         this.locationRepository = locationRepository;
     }
 
-    public void createPoint(Location location) {
+    public void saveLocation(Location location) {
         locationRepository.createLocation(location);
     }
 
-    public void createPoints(List<Location> locations) {
+    public void saveLocations(List<Location> locations) {
         locationRepository.createLocations(locations);
     }
 
-    public List<Location> findPoints(int userId, LocalDateTime start, LocalDateTime end) throws SQLException {
+    public List<Location> findLocations(int userId, LocalDateTime start, LocalDateTime end) throws SQLException {
         return locationRepository.findLocations(userId, start, end);
     }
 }

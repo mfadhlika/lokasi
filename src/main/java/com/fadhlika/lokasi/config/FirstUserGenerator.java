@@ -7,11 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Random;
-import java.util.random.RandomGenerator;
 
 @Configuration
 @Order(3)
@@ -24,7 +21,7 @@ public class FirstUserGenerator implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if(userService.hasUser()) {
+        if(userService.hasUsers()) {
             return;
         }
 

@@ -6,6 +6,7 @@ package com.fadhlika.lokasi.config;
 
 import java.io.IOException;
 
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.fadhlika.lokasi.model.User;
 import jakarta.servlet.http.Cookie;
 import org.slf4j.Logger;
@@ -50,26 +51,25 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
             jwt = authHeader.substring(7);
-        } else {
-            for(Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals("token")) {
-                    jwt = cookie.getValue();
-                }
-            }
         }
 
         if (jwt != null) {
-            if ((username = jwtAuthService.decode(jwt).getSubject()) != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                User user = (User) this.userService.loadUserByUsername(username);
-                if (jwtAuthService.isValid(jwt, user.getUsername())) {
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+            try {
+                if ((username = jwtAuthService.decodeAccessToken(jwt).getSubject()) != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    User user = (User) this.userService.loadUserByUsername(username);
+                    if (jwtAuthService.isAccessTokenValid(jwt, user.getUsername())) {
+                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        return;
+                    }
                 } else {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     return;
                 }
-            } else {
+            } catch (TokenExpiredException _) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
@@ -79,7 +79,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        return request.getServletPath().startsWith("/api/v1/auth/token");
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return request.getServletPath().startsWith("/api/v1/login") || request.getServletPath().startsWith("/api/v1/auth/refresh");
     }
 }

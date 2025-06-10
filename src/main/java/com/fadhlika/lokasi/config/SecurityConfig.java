@@ -54,25 +54,17 @@ public class SecurityConfig {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain sessionSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain jwtSecurityFilterChain(HttpSecurity http) throws Exception {
         http
+                .securityMatcher("/api/v1/**")
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth
-                        -> auth.anyRequest().authenticated()
+                        -> auth.requestMatchers("/api/v1/login").permitAll()
+                        .requestMatchers("/api/v1/auth/refresh").permitAll()
+                        .requestMatchers("/api/v1/**").authenticated()
                 )
-                .formLogin(form
-                        -> form
-                        .loginPage("/login").permitAll()
-                        .defaultSuccessUrl("/map", true)
-                )
-                .logout(logout
-                        -> logout.permitAll()
-                        .logoutSuccessUrl("/")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("SESSION", "token")
-                )
-                .sessionManagement(session
-                        -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                );
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }
