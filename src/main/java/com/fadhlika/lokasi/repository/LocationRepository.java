@@ -92,7 +92,8 @@ public class LocationRepository {
                             "ssid, " +
                             "timestamp, " +
                             "raw_data, " +
-                            "created_at) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            "created_at, " +
+                            "import_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     new BatchPreparedStatementSetter() {
                         @Override
                         public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -112,6 +113,7 @@ public class LocationRepository {
                             ps.setObject(13, location.getTimestamp());
                             ps.setString(14, location.getRawData());
                             ps.setObject(15, location.getCreatedAt());
+                            ps.setObject(16, location.getImportId());
                         }
 
                         @Override

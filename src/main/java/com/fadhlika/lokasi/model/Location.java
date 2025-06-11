@@ -20,6 +20,14 @@ import org.locationtech.jts.geom.GeometryFactory;
  */
 public class Location {
 
+    public int getImportId() {
+        return importId;
+    }
+
+    public void setImportId(int importId) {
+        this.importId = importId;
+    }
+
     public enum BatteryState {
         UNKNOWN(0),
         UNPLUGGED(1),
@@ -47,6 +55,7 @@ public class Location {
     private BatteryState batteryState;
     private double battery;
     private String ssid;
+    private int importId;
     private String rawData;
     private LocalDateTime createdAt;
 

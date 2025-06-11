@@ -36,6 +36,8 @@ export const ImportDialog = ({}: ImportDialogProps) => {
         }
     });
 
+    const {formState} = form;
+
     const fileRef = form.register("file");
 
     const onSubmit = (values: z.infer<typeof formSchema>) => {
@@ -47,12 +49,13 @@ export const ImportDialog = ({}: ImportDialogProps) => {
             headers: {
                 "Content-Type": "multipart/form-data"
             }
-        }).catch(err => {
-            console.error(err);
-            setOpen(false);
-        }).finally(() => {
-
-        });
+        })
+            .then(_ => {
+                setOpen(false);
+            })
+            .catch(err => {
+                console.error(err);
+            });
     }
 
     return (
@@ -78,7 +81,7 @@ export const ImportDialog = ({}: ImportDialogProps) => {
                                 <FormControl>
                                     <RadioGroup onValueChange={field.onChange} defaultValue={field.value}>
                                         <FormItem className="flex items-center gap-3">
-                                                 <FormControl>
+                                            <FormControl>
                                                 <RadioGroupItem value="dawarich"/>
                                             </FormControl>
                                             <FormLabel>Dawarich</FormLabel>
@@ -98,8 +101,8 @@ export const ImportDialog = ({}: ImportDialogProps) => {
                                            <FormMessage/>
                                        </FormItem>
                                    )}/>
-                        <Button type="submit" disabled={form.formState.isSubmitting}>
-                            {form.formState.isLoading && <Loader2Icon className="animate-spin"/>}
+                        <Button type="submit" disabled={formState.isSubmitting}>
+                            {formState.isSubmitting && <Loader2Icon className="animate-spin"/>}
                             Import
                         </Button>
                     </form>
