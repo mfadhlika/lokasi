@@ -39,7 +39,7 @@ export default function Maps() {
         if (date?.to) {
             params.set('end', date.to.toISOString());
         }
-        if (device) {
+        if (device && device !== 'all') {
             params.set('device', device);
         }
         axiosInstance.get(`v1/locations?${params.toString()}`)
