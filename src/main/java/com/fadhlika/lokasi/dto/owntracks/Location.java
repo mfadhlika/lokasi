@@ -4,10 +4,13 @@
  */
 package com.fadhlika.lokasi.dto.owntracks;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  * @author fadhl
@@ -47,4 +50,25 @@ public record Location(
         int m,
         @JsonProperty("_id")
         String id) implements Message {
+
+
+    public com.fadhlika.lokasi.model.Location toLocation(int userId, String deviceId) throws JsonProcessingException {
+        com.fadhlika.lokasi.model.Location l = new com.fadhlika.lokasi.model.Location();
+
+        l.setUserId(userId);
+        l.setDeviceId(deviceId);
+        l.setGeometry(this.lat(), this.lon());
+        l.setAltitude(this.alt());
+        l.setBatteryState(this.bs());
+        l.setCourse(this.cog());
+        l.setAccuracy(this.acc());
+        l.setVerticalAccuracy(this.vac());
+        l.setSpeed(this.vel());
+        l.setSsid(this.ssid());
+        l.setTimestamp(Instant.ofEpochSecond(this.tst()).atOffset(ZoneOffset.UTC).toLocalDateTime());
+
+        l.setRawData(this);
+
+        return l;
+    }
 }
