@@ -60,6 +60,7 @@ export const ImportDialog = ({}: ImportDialogProps) => {
             <DialogTrigger asChild>
                 <Button variant="outline" className="shadow-md">
                     <Upload/>
+                    Import
                 </Button>
             </DialogTrigger>
             <DialogContent className="z-10000">
