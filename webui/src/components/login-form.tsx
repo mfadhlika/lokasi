@@ -37,7 +37,7 @@ export function LoginForm({
             .then(res => res.json())
             .then(res => {
                 login(res.accessToken, () => {
-                    navigate("/maps");
+                    navigate("/");
                 })
             })
             .catch(err => {

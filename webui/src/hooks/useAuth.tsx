@@ -29,9 +29,12 @@ export const AuthProvider = ({children}: React.ComponentProps<"div">) => {
     };
 
     const logout = (callback: (() => void) | undefined = undefined) => {
-        setAccessToken(null);
-        localStorage.removeItem("accessToken");
-        if (callback) callback();
+        axiosInstance.post("v1/logout")
+            .then(_ => {
+                setAccessToken(null);
+                localStorage.removeItem("accessToken");
+                if (callback) callback();
+            }).catch(err => console.error(err));
     };
 
     const refreshToken = async (): Promise<string> => {
@@ -44,7 +47,7 @@ export const AuthProvider = ({children}: React.ComponentProps<"div">) => {
     useEffect(() => {
         const requestInterceptor = axiosInstance.interceptors.request.use(
             (req) => {
-                if (accessToken) req.headers.Authorization = "Bearer " + localStorage.getItem("accessToken");
+                if (accessToken) req.headers.Authorization = "Bearer " + accessToken;
                 return req;
             },
             (err) => {
@@ -62,7 +65,7 @@ export const AuthProvider = ({children}: React.ComponentProps<"div">) => {
 
                     try {
                         const accessToken = await refreshToken();
-                        if (accessToken) originalRequest.headers.Authorization = "Bearer " + localStorage.getItem("accessToken");
+                        if (accessToken) originalRequest.headers.Authorization = "Bearer " + accessToken;
                         return axios(originalRequest);
                     } catch (err) {
                         logout(() => {

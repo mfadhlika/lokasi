@@ -9,6 +9,7 @@ import L from 'leaflet';
 import {DatePicker} from "@/components/date-picker.tsx";
 import {ImportDialog} from "@/components/import-dialog.tsx";
 import {DeviceSelect} from "@/components/device-select.tsx";
+import {AccountDropdown} from "@/components/account-dropdown.tsx";
 
 export default function Maps() {
     const mapRef = useRef<L.Map | null>(null);
@@ -80,6 +81,11 @@ export default function Maps() {
                         <DatePicker className="shadow-md" date={date} setDate={setDate}/>
                         <DeviceSelect onSelectedDevice={setDevice}/>
                         <ImportDialog/>
+                    </div>
+                </div>
+                <div className="leaflet-top leaflet-right">
+                    <div className="leaflet-control flex gap-2">
+                        <AccountDropdown/>
                     </div>
                 </div>
             </MapContainer>

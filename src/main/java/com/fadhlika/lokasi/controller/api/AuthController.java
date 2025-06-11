@@ -28,7 +28,7 @@ public class AuthController {
     }
 
     @PostMapping("/api/v1/login")
-    public Response login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         if (!jwtAuthService.validateCredentials(loginRequest.username(), loginRequest.password())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
@@ -45,11 +45,26 @@ public class AuthController {
 
         response.addCookie(cookie);
 
-        return new LoginResponse(accessToken);
+        return new ResponseEntity<>(new LoginResponse(accessToken, refreshToken), HttpStatus.OK);
+    }
+
+    @PostMapping("/api/v1/logout")
+    public ResponseEntity<Object> logout(HttpServletResponse response) {
+
+        Cookie cookie = new Cookie("refreshToken", null) {{
+            setHttpOnly(true);
+            setSecure(true);
+            setMaxAge(0);
+            setAttribute("SameSite", "None");
+        }};
+
+        response.addCookie(cookie);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/api/v1/auth/refresh")
-    public Response refresh(@CookieValue(name = "refreshToken") String refreshToken) {
+    public ResponseEntity<LoginResponse> refresh(@CookieValue(name = "refreshToken") String refreshToken) {
         DecodedJWT decodedJWT = jwtAuthService.decodeRefreshToken(refreshToken);
 
         if (!jwtAuthService.isRefreshTokenValid(refreshToken, decodedJWT.getSubject())) {
@@ -58,6 +73,6 @@ public class AuthController {
 
         String accessToken = jwtAuthService.generateAccessToken(decodedJWT.getSubject());
 
-        return new LoginResponse(accessToken);
+        return new ResponseEntity<>(new LoginResponse(accessToken, refreshToken), HttpStatus.OK);
     }
 }
