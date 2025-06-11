@@ -8,6 +8,7 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.fadhlika.lokasi.model.Location;
 import org.locationtech.jts.io.ParseException;
@@ -123,7 +124,25 @@ public class LocationRepository {
         }
     }
 
-    public List<Location> findLocations(int userId, LocalDateTime start, LocalDateTime end) throws SQLException {
-        return jdbcTemplate.query("SELECT * FROM location WHERE user_id = ? AND timestamp BETWEEN ? AND ? ORDER BY timestamp DESC", locationRowMapper, userId, start, end);
+    public List<Location> findLocations(int userId, LocalDateTime start, LocalDateTime end, Optional<String> device) throws SQLException {
+        List<String> where = new ArrayList<>() {{
+            add("user_id = ?");
+            add("timestamp BETWEEN ? AND ?");
+        }};
+
+        List<Object> args = new ArrayList<Object>() {
+            {
+                add(userId);
+                add(start);
+                add(end);
+            }
+        };
+
+        device.ifPresent((d) -> {
+            where.add("device_id = ?");
+            args.add(d);
+        });
+
+        return jdbcTemplate.query("SELECT * FROM location WHERE " + String.join(" AND ", where), locationRowMapper, args.toArray());
     }
 }

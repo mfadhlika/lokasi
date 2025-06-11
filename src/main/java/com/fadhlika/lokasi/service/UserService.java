@@ -14,8 +14,9 @@ import org.springframework.stereotype.Service;
 import com.fadhlika.lokasi.model.User;
 import com.fadhlika.lokasi.repository.UserRepository;
 
+import java.util.List;
+
 /**
- *
  * @author fadhl
  */
 @Service
@@ -39,6 +40,10 @@ public class UserService implements UserDetailsService {
 
     public boolean hasUsers() {
         return userRepository.hasUsers();
+    }
+
+    public List<String> getUserDevices(int userId) {
+        return userRepository.getUserDevices(userId);
     }
 
     @Override

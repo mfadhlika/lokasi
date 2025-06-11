@@ -5,6 +5,7 @@
 package com.fadhlika.lokasi.repository;
 
 import java.sql.ResultSet;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -58,5 +59,9 @@ public class UserRepository {
 
     public boolean hasUsers() {
         return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM `user`", Integer.class) > 0;
+    }
+
+    public List<String> getUserDevices(int userId) {
+        return jdbcTemplate.queryForList("SELECT DISTINCT device_id FROM `location` WHERE user_id = ?", String.class, userId);
     }
 }

@@ -15,6 +15,7 @@ import com.fadhlika.lokasi.repository.LocationRepository;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  *
@@ -41,6 +42,10 @@ public class LocationService {
     }
 
     public List<Location> findLocations(int userId, LocalDateTime start, LocalDateTime end) throws SQLException {
-        return locationRepository.findLocations(userId, start, end);
+        return findLocations(userId, start, end, Optional.empty());
+    }
+
+    public List<Location> findLocations(int userId, LocalDateTime start, LocalDateTime end, Optional<String> device) throws SQLException {
+        return locationRepository.findLocations(userId, start, end, device);
     }
 }

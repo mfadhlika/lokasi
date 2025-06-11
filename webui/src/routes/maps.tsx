@@ -8,6 +8,7 @@ import type {DateRange} from "react-day-picker";
 import L from 'leaflet';
 import {DatePicker} from "@/components/date-picker.tsx";
 import {ImportDialog} from "@/components/import-dialog.tsx";
+import {DeviceSelect} from "@/components/device-select.tsx";
 
 export default function Maps() {
     const mapRef = useRef<L.Map | null>(null);
@@ -26,6 +27,7 @@ export default function Maps() {
             to: end,
         };
     });
+    const [device, setDevice] = useState<string | undefined>(undefined);
 
     useEffect(() => {
         setLocations(undefined);
@@ -36,6 +38,9 @@ export default function Maps() {
         if (date?.to) {
             params.set('end', date.to.toISOString());
         }
+        if (device) {
+            params.set('device', device);
+        }
         axiosInstance.get(`v1/locations?${params.toString()}`)
             .then((res) => {
                 const data = res.data as FeatureCollection & { message: string }
@@ -44,7 +49,7 @@ export default function Maps() {
                 const last = locations.features[locations.features.length - 1].geometry as Point;
                 setPosition([last.coordinates[1], last.coordinates[0]]);
             });
-    }, [date]);
+    }, [date, device]);
 
     useEffect(() => {
         mapRef.current?.setView(position);
@@ -73,6 +78,7 @@ export default function Maps() {
                 <div className="leaflet-top leaflet-left">
                     <div className="leaflet-control flex gap-2">
                         <DatePicker className="shadow-md" date={date} setDate={setDate}/>
+                        <DeviceSelect onSelectedDevice={setDevice}/>
                         <ImportDialog/>
                     </div>
                 </div>

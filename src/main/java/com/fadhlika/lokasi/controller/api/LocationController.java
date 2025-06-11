@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/locations")
@@ -41,13 +42,15 @@ public class LocationController {
             LocalDateTime start,
             @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atTime(T(java.time.LocalTime).MAX)}")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime end
+            LocalDateTime end,
+            @RequestParam
+            Optional<String> device
     ) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         List<Feature> features = null;
         try {
-            features = this.locationService.findLocations(user.getId(), start, end).stream().map(location -> {
+            features = this.locationService.findLocations(user.getId(), start, end, device).stream().map(location -> {
                 HashMap<String, Object> props = new HashMap<>();
                 props.put("timestamp", location.getTimestamp());
                 return new Feature(location.getGeometry(), props);
