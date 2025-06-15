@@ -83,6 +83,7 @@ public class LocationRepository {
                             "geometry, " +
                             "altitude, " +
                             "course, " +
+                            "course_accuracy, " +
                             "speed, " +
                             "accuracy, " +
                             "vertical_accuracy, " +
@@ -93,7 +94,7 @@ public class LocationRepository {
                             "timestamp, " +
                             "raw_data, " +
                             "created_at, " +
-                            "import_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            "import_id) VALUES(?, ?, ST_GeomFromText(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     new BatchPreparedStatementSetter() {
                         @Override
                         public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -103,17 +104,18 @@ public class LocationRepository {
                             ps.setObject(3, location.getGeometry());
                             ps.setInt(4, location.getAltitude());
                             ps.setInt(5, location.getCourse());
-                            ps.setDouble(6, location.getSpeed());
-                            ps.setInt(7, location.getAccuracy());
-                            ps.setInt(8, location.getVerticalAccuracy());
-                            ps.setObject(9, location.getMotions());
-                            ps.setObject(10, location.getBatteryState());
-                            ps.setDouble(11, location.getBattery());
-                            ps.setString(12, location.getSsid());
-                            ps.setObject(13, location.getTimestamp());
-                            ps.setString(14, location.getRawData());
-                            ps.setObject(15, location.getCreatedAt());
-                            ps.setObject(16, location.getImportId());
+                            ps.setInt(6, location.getCourseAccuracy());
+                            ps.setDouble(7, location.getSpeed());
+                            ps.setInt(8, location.getAccuracy());
+                            ps.setInt(9, location.getVerticalAccuracy());
+                            ps.setObject(10, location.getMotions());
+                            ps.setObject(11, location.getBatteryState());
+                            ps.setDouble(12, location.getBattery());
+                            ps.setString(13, location.getSsid());
+                            ps.setObject(14, location.getTimestamp());
+                            ps.setString(15, location.getRawData());
+                            ps.setObject(16, location.getCreatedAt());
+                            ps.setObject(17, location.getImportId());
                         }
 
                         @Override

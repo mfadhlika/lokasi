@@ -1,12 +1,7 @@
 package com.fadhlika.lokasi.controller.api.overland;
 
-import com.fadhlika.lokasi.dto.overland.InputRequest;
-import com.fadhlika.lokasi.dto.overland.Properties;
-import com.fadhlika.lokasi.dto.overland.Response;
-import com.fadhlika.lokasi.model.Location;
-import com.fadhlika.lokasi.model.User;
-import com.fadhlika.lokasi.service.LocationService;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +9,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.fadhlika.lokasi.dto.overland.InputRequest;
+import com.fadhlika.lokasi.dto.overland.Properties;
+import com.fadhlika.lokasi.dto.overland.Response;
+import com.fadhlika.lokasi.model.Location;
+import com.fadhlika.lokasi.model.User;
+import com.fadhlika.lokasi.service.LocationService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 @RestController
 public class OverlandController {
@@ -44,6 +45,7 @@ public class OverlandController {
             l.setBattery(props.batteryLevel());
             l.setMotions(props.motion());
             l.setCourse(props.course());
+            l.setCourseAccuracy(props.courseAccuracy());
             l.setAccuracy(props.horizontalAccuracy());
             l.setVerticalAccuracy(props.verticalAccuracy());
             l.setSpeed(props.speed());

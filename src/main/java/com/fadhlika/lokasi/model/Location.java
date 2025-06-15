@@ -8,25 +8,18 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author fadhl
  */
 public class Location {
-
-    public int getImportId() {
-        return importId;
-    }
-
-    public void setImportId(int importId) {
-        this.importId = importId;
-    }
 
     public enum BatteryState {
         UNKNOWN(0),
@@ -48,6 +41,7 @@ public class Location {
     private LocalDateTime timestamp;
     private int altitude;
     private int course;
+    private int courseAccuracy;
     private double speed;
     private int accuracy;
     private int verticalAccuracy;
@@ -206,4 +200,20 @@ public class Location {
         this.createdAt = createdAt;
     }
 
+
+    public int getImportId() {
+        return importId;
+    }
+
+    public void setImportId(int importId) {
+        this.importId = importId;
+    }
+
+    public int getCourseAccuracy() {
+        return courseAccuracy;
+    }
+
+    public void setCourseAccuracy(int courseAccuracy) {
+        this.courseAccuracy = courseAccuracy;
+    }
 }
