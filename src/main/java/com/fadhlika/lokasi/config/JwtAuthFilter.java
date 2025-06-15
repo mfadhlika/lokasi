@@ -6,20 +6,16 @@ package com.fadhlika.lokasi.config;
 
 import java.io.IOException;
 
-import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.fadhlika.lokasi.model.User;
-import jakarta.servlet.http.Cookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.fadhlika.lokasi.model.User;
 import com.fadhlika.lokasi.service.JwtAuthService;
 import com.fadhlika.lokasi.service.UserService;
 
@@ -80,6 +76,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return request.getServletPath().startsWith("/api/v1/login") || request.getServletPath().startsWith("/api/v1/auth/refresh");
+        return request.getServletPath().startsWith("/api/v1/login") || request.getServletPath().startsWith("/api/v1/logout") || request.getServletPath().startsWith("/api/v1/auth/refresh");
     }
 }

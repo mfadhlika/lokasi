@@ -1,7 +1,5 @@
 package com.fadhlika.lokasi.config;
 
-import com.fadhlika.lokasi.service.JwtAuthService;
-import com.fadhlika.lokasi.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +15,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.fadhlika.lokasi.service.JwtAuthService;
+import com.fadhlika.lokasi.service.UserService;
 
 @Configuration
 @EnableWebSecurity
@@ -62,6 +63,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth
                         -> auth.requestMatchers("/api/v1/login").permitAll()
                         .requestMatchers("/api/v1/auth/refresh").permitAll()
+                        .requestMatchers("/api/v1/logout").permitAll()
                         .requestMatchers("/api/v1/**").authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
