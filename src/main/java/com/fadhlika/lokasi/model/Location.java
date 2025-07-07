@@ -21,6 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class Location {
 
+    private final int R = 6371 * 1000;
+
     public enum BatteryState {
         UNKNOWN(0),
         UNPLUGGED(1),
@@ -223,5 +225,11 @@ public class Location {
 
     public void setCourseAccuracy(int courseAccuracy) {
         this.courseAccuracy = courseAccuracy;
+    }
+
+    public double getDistanceInMeters(Location location) {
+        Double distance = Math.abs(this.geometry.distance(location.geometry));
+
+        return distance * Math.PI / 180 * R;
     }
 }
