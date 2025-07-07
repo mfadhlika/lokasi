@@ -1,29 +1,28 @@
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {useEffect, useState} from "react";
-import {axiosInstance} from "@/lib/request.ts";
-import {Smartphone} from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useEffect, useState } from "react";
+import { axiosInstance } from "@/lib/request.ts";
+import { Smartphone } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface DeviceSelectProps {
-    onSelectedDevice: (device: string | undefined) => void
+    className?: string,
+    selectedDevice: string,
+    onSelectedDevice: (device: string) => void
 }
 
-export const DeviceSelect = ({onSelectedDevice}: DeviceSelectProps) => {
+export const DeviceSelect = ({ className, selectedDevice, onSelectedDevice }: DeviceSelectProps) => {
     const [devices, setDevices] = useState<string[]>([]);
-    const [value, setValue] = useState<string>('all')
 
     useEffect(() => {
         axiosInstance.get("v1/user/devices").then(res => setDevices(res.data));
     }, []);
 
-    useEffect(() => {
-        onSelectedDevice(value);
-    }, [value]);
 
     return (
-        <Select value={value} onValueChange={setValue}>
-            <SelectTrigger className="bg-white">
-                <Smartphone/>
-                <SelectValue placeholder="Select a device"/>
+        <Select value={selectedDevice} onValueChange={onSelectedDevice}>
+            <SelectTrigger className={cn("bg-white shadow-none border-none", className)}>
+                <Smartphone />
+                <SelectValue placeholder="Select a device" />
             </SelectTrigger>
             <SelectContent className="z-10000">
                 <SelectItem key="all" value="all">All devices</SelectItem>

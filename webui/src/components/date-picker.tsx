@@ -9,7 +9,7 @@ import { PopoverTrigger } from "@radix-ui/react-popover";
 import { CalendarIcon } from "lucide-react";
 
 export type DatePickerProps = {
-    className: string,
+    className?: string,
     date: DateRange | undefined,
     setDate: (date: DateRange | undefined) => void
 }
@@ -79,7 +79,7 @@ export function DatePicker({
         <div className={cn("grid gap-2", className)}>
             <Popover>
                 <PopoverTrigger asChild>
-                    <Button id="date" variant="outline" className={cn(
+                    <Button id="date" variant="ghost" className={cn(
                         "w-auto justify-start text-left font-normal",
                         !date && "text-muted-foreground"
                     )}>
