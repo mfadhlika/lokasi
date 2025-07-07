@@ -69,12 +69,16 @@ public class LocationRepository {
                     throw new RuntimeException(e);
                 }
             }
-            try {
-                ObjectMapper mapper = new ObjectMapper();
-                location.setMotions(mapper.readValue(rs.getString("motions"), new TypeReference<List<String>>() {
-                }));
-            } catch (JsonProcessingException e) {
-                // DO NOTHING
+
+            String motions = rs.getString("motions");
+            if (motions != null) {
+                try {
+                    ObjectMapper mapper = new ObjectMapper();
+                    location.setMotions(mapper.readValue(motions, new TypeReference<List<String>>() {
+                    }));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
             }
             return location;
         }
@@ -101,7 +105,7 @@ public class LocationRepository {
                     + "speed, "
                     + "accuracy, "
                     + "vertical_accuracy, "
-                    + "IFNULL(motions, \"[]\") AS motions, "
+                    + "motions, "
                     + "battery_state, "
                     + "battery, "
                     + "ssid, "

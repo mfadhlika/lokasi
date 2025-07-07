@@ -1,5 +1,8 @@
 package com.fadhlika.lokasi.dto;
 
+import java.util.HashMap;
+
+import org.locationtech.jts.geom.Geometry;
 
 import com.fadhlika.lokasi.util.GeometryDeserializer;
 import com.fadhlika.lokasi.util.GeometrySerializer;
@@ -8,13 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.locationtech.jts.geom.Geometry;
-
-import java.io.IOException;
-import java.util.HashMap;
 
 public class Feature {
-    private final String type = "Feature";
 
     @JsonSerialize(using = GeometrySerializer.class)
     @JsonDeserialize(using = GeometryDeserializer.class)

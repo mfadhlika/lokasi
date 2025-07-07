@@ -30,5 +30,4 @@ public class FlywayMigration implements CommandLineRunner {
         flyway.baseline();
         flyway.migrate();
     }
-
 }

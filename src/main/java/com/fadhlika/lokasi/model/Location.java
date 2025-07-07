@@ -86,7 +86,6 @@ public class Location {
         this.deviceId = deviceId;
     }
 
-
     public int getAltitude() {
         return altitude;
     }
@@ -141,21 +140,31 @@ public class Location {
 
     public void setBatteryState(int bs) {
         this.batteryState = switch (bs) {
-            case 0 -> BatteryState.UNKNOWN;
-            case 1 -> BatteryState.UNPLUGGED;
-            case 2 -> BatteryState.CHARGING;
-            case 3 -> BatteryState.FULL;
-            default -> throw new IllegalStateException("Unexpected value: " + bs);
+            case 0 ->
+                BatteryState.UNKNOWN;
+            case 1 ->
+                BatteryState.UNPLUGGED;
+            case 2 ->
+                BatteryState.CHARGING;
+            case 3 ->
+                BatteryState.FULL;
+            default ->
+                throw new IllegalStateException("Unexpected value: " + bs);
         };
     }
 
     public void setBatteryState(String bs) {
         this.batteryState = switch (bs) {
-            case "unknown" -> BatteryState.UNKNOWN;
-            case "unplugged" -> BatteryState.UNPLUGGED;
-            case "charging" -> BatteryState.CHARGING;
-            case "full" -> BatteryState.FULL;
-            default -> throw new IllegalStateException("Unexpected value: " + bs);
+            case "unknown" ->
+                BatteryState.UNKNOWN;
+            case "unplugged" ->
+                BatteryState.UNPLUGGED;
+            case "charging" ->
+                BatteryState.CHARGING;
+            case "full" ->
+                BatteryState.FULL;
+            default ->
+                throw new IllegalStateException("Unexpected value: " + bs);
         };
     }
 
@@ -199,7 +208,6 @@ public class Location {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
-
 
     public int getImportId() {
         return importId;
