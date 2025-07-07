@@ -52,7 +52,7 @@ export default function MapsPage() {
             <div className="w-1/5 h-full flex flex-col flex-none">
                 <div className="flex flex-col gap-4">
                     <DatePicker date={date} setDate={setDate} />
-                    <DeviceSelect selectedDevice={device} onSelectedDevice={setDevice} />
+                    <DeviceSelect className="shadow-none border-none" selectedDevice={device} onSelectedDevice={setDevice} />
                     <Separator />
                 </div>
             </div>

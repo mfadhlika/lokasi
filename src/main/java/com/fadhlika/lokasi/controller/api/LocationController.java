@@ -49,7 +49,8 @@ public class LocationController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
             @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atTime(T(java.time.LocalTime).MAX)}")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
-            @RequestParam Optional<String> device
+            @RequestParam Optional<String> device,
+            @RequestParam(defaultValue = "false") Optional<Boolean> raw
     ) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -61,40 +62,44 @@ public class LocationController {
                     Location curr = locations.get(i);
 
                     HashMap<String, Object> props = new HashMap<>();
-                    // props.put("altitude", location.getAltitude());
-                    // props.put("course", location.getCourse());
-                    // props.put("courseAccuracy", location.getCourseAccuracy());
-                    // props.put("battery", location.getBattery());
-                    // props.put("batteryStatus", location.getBatteryState());
-                    // props.put("timestamp", location.getTimestamp());
-                    // features.add(new Feature(location.getGeometry(), props));
-                    Location prev = locations.get(i - 1);
+                    if (raw.get()) {
+                        props.put("device", curr.getDeviceId());
+                        props.put("altitude", curr.getAltitude());
+                        props.put("course", curr.getCourse());
+                        props.put("courseAccuracy", curr.getCourseAccuracy());
+                        props.put("battery", curr.getBattery());
+                        props.put("batteryStatus", curr.getBatteryState());
+                        props.put("timestamp", curr.getTimestamp());
+                        features.add(new Feature(curr.getGeometry(), props));
+                    } else if (i > 0) {
+                        Location prev = locations.get(i - 1);
 
-                    Duration duration = Duration.between(prev.getTimestamp(), curr.getTimestamp());
+                        Duration duration = Duration.between(prev.getTimestamp(), curr.getTimestamp());
 
-                    if (duration.getSeconds() > 15 * 60) {
-                        continue;
+                        if (duration.getSeconds() > 15 * 60) {
+                            continue;
+                        }
+
+                        Coordinate[] twoPoints = {
+                            prev.getGeometry().getCoordinate(),
+                            curr.getGeometry().getCoordinate()
+                        };
+
+                        GeometryFactory gf = new GeometryFactory();
+                        LineString ls = gf.createLineString(twoPoints);
+
+                        Double distance = curr.getDistanceInMeters(prev);
+                        Double speed = (distance / 1000.0) / (duration.getSeconds() / 3600.0);
+
+                        DecimalFormat df = new DecimalFormat("0.##");
+
+                        props.put("distance", df.format(distance));
+                        props.put("speed", df.format(speed));
+                        props.put("startAt", curr.getTimestamp());
+                        props.put("endAt", prev.getTimestamp());
+
+                        features.add(new Feature(ls, props));
                     }
-
-                    Coordinate[] twoPoints = {
-                        prev.getGeometry().getCoordinate(),
-                        curr.getGeometry().getCoordinate()
-                    };
-
-                    GeometryFactory gf = new GeometryFactory();
-                    LineString ls = gf.createLineString(twoPoints);
-
-                    Double distance = curr.getDistanceInMeters(prev);
-                    Double speed = (distance / 1000.0) / (duration.getSeconds() / 3600.0);
-
-                    DecimalFormat df = new DecimalFormat("0.##");
-
-                    props.put("distance", df.format(distance));
-                    props.put("speed", df.format(speed));
-                    props.put("startAt", curr.getTimestamp());
-                    props.put("endAt", prev.getTimestamp());
-
-                    features.add(new Feature(ls, props));
                 } catch (Exception e) {
                     logger.error(e.getMessage());
                 }

@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 export interface DeviceSelectProps {
     className?: string,
     selectedDevice: string,
-    onSelectedDevice: (device: string) => void
+    onSelectedDevice: (device: string) => void,
 }
 
 export const DeviceSelect = ({ className, selectedDevice, onSelectedDevice }: DeviceSelectProps) => {
@@ -20,7 +20,7 @@ export const DeviceSelect = ({ className, selectedDevice, onSelectedDevice }: De
 
     return (
         <Select value={selectedDevice} onValueChange={onSelectedDevice}>
-            <SelectTrigger className={cn("bg-white shadow-none border-none", className)}>
+            <SelectTrigger className={cn("bg-white", className)}>
                 <Smartphone />
                 <SelectValue placeholder="Select a device" />
             </SelectTrigger>

@@ -11,13 +11,15 @@ import { CalendarIcon } from "lucide-react";
 export type DatePickerProps = {
     className?: string,
     date: DateRange | undefined,
-    setDate: (date: DateRange | undefined) => void
+    setDate: (date: DateRange | undefined) => void,
+    variant?: "default" | "link" | "destructive" | "outline" | "secondary" | "ghost" | null | undefined
 }
 
 export function DatePicker({
     className,
     date,
-    setDate
+    setDate,
+    variant
 }: DatePickerProps) {
 
     const endOfDay = () => {
@@ -79,7 +81,7 @@ export function DatePicker({
         <div className={cn("grid gap-2", className)}>
             <Popover>
                 <PopoverTrigger asChild>
-                    <Button id="date" variant="ghost" className={cn(
+                    <Button id="date" variant={variant ?? "ghost"} className={cn(
                         "w-auto justify-start text-left font-normal",
                         !date && "text-muted-foreground"
                     )}>
