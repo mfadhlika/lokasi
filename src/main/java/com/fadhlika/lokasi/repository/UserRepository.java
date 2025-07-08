@@ -43,14 +43,18 @@ public class UserRepository {
     );
 
     public void createUser(User user) {
-        try {
-            jdbcTemplate.update("INSERT INTO user(username, password, created_at) VALUES(?, ?, ?)", user.getUsername(),
-                    user.getPassword(),
-                    user.getCreatedAt()
-            );
-        } catch (DataAccessException e) {
-            logger.error("error create user: {}", e.getMessage(), e);
-        }
+        jdbcTemplate.update("INSERT INTO user(username, password, created_at) VALUES(?, ?, ?)", user.getUsername(),
+                user.getPassword(),
+                user.getCreatedAt()
+        );
+    }
+
+    public void updateUser(User user) {
+        jdbcTemplate.update("UPDATE user SET username = ?, password = ? WHERE id = ?",
+                user.getUsername(),
+                user.getPassword(),
+                user.getId()
+        );
     }
 
     public User getUser(String username) {

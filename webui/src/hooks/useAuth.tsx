@@ -1,12 +1,16 @@
 import { createContext, useContext, useMemo, useState } from "react";
 import * as React from "react";
-
+import { jwtDecode } from "jwt-decode";
 interface AuthContextType {
+    userInfo: {
+        username: string
+    } | null | undefined;
     accessToken: string | null | undefined;
     login: (accessToken: string, callback: () => void) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
+    userInfo: undefined,
     accessToken: null,
     login: (_accessToken: string, _callback: () => void) => void {
 
@@ -22,10 +26,19 @@ export const AuthProvider = ({ children }: React.ComponentProps<"div">) => {
         callback();
     };
 
-    const value = useMemo(() => ({
-        accessToken,
-        login,
-    }), [accessToken]);
+
+    const value = useMemo(() => {
+        let decoded;
+        if (accessToken) decoded = jwtDecode(accessToken);
+
+        return {
+            accessToken,
+            userInfo: decoded && {
+                username: decoded['sub']!
+            },
+            login,
+        };
+    }, [accessToken]);
 
     return (
         <AuthContext.Provider value={value}>

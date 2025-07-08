@@ -49,6 +49,12 @@ public class User implements UserDetails {
         this.createdAt = Timestamp.valueOf(LocalDateTime.now());
     }
 
+    public User(int id, String username, String password) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+    }
+
     public User(int id, String username, String password, Timestamp createdAt) {
         this.id = id;
         this.username = username;
@@ -66,9 +72,17 @@ public class User implements UserDetails {
         return this.password;
     }
 
+    public void setPassword(String username) {
+        this.username = username;
+    }
+
     @Override
     public String getUsername() {
         return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public Timestamp getCreatedAt() {

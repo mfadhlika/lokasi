@@ -5,7 +5,8 @@ import Login from "@/pages/login";
 import { ProtectedRoute } from "@/components/protected-route.tsx";
 import { AuthProvider } from "@/hooks/useAuth.tsx";
 import Maps from "@/pages/maps";
-import { Data } from '@/pages/data';
+import Data from '@/pages/data';
+import Settings from '@/pages/settings';
 
 createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
@@ -15,6 +16,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route element={<ProtectedRoute />}>
                     <Route path="/" element={<Maps />} />
                     <Route path="/data" element={<Data />} />
+                    <Route path="/settings" element={<Settings />} />
                 </Route>
             </Routes>
         </AuthProvider>

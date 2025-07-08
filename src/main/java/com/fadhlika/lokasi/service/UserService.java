@@ -38,6 +38,12 @@ public class UserService implements UserDetailsService {
         this.userRepository.createUser(user);
     }
 
+    public void updateUser(int userId, String username, String password) {
+        String hash = passwordEncoder.encode(password);
+        User user = new User(userId, username, hash);
+        this.userRepository.updateUser(user);
+    }
+
     public boolean hasUsers() {
         return userRepository.hasUsers();
     }

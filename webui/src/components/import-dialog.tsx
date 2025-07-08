@@ -6,27 +6,23 @@ import {
     DialogTitle,
     DialogTrigger
 } from "@/components/ui/dialog.tsx";
-import {Button} from "@/components/ui/button.tsx";
-import {Loader2Icon, Upload} from "lucide-react";
-import {Input} from "@/components/ui/input.tsx";
-import {z} from "zod/v4";
-import {zodResolver} from "@hookform/resolvers/zod"
-import {useForm} from "react-hook-form";
-import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form.tsx";
-import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group.tsx";
-import {axiosInstance} from "@/lib/request.ts";
-import {useState} from "react";
+import { Button } from "@/components/ui/button.tsx";
+import { Loader2Icon, Upload } from "lucide-react";
+import { Input } from "@/components/ui/input.tsx";
+import { z } from "zod/v4";
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form.tsx";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
+import { axiosInstance } from "@/lib/request.ts";
+import { useState } from "react";
 
 const formSchema = z.object({
     source: z.string(),
     file: z.instanceof(FileList)
-})
+});
 
-export interface ImportDialogProps {
-
-}
-
-export const ImportDialog = ({}: ImportDialogProps) => {
+export const ImportDialog = () => {
     const [open, setOpen] = useState(false);
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -36,7 +32,7 @@ export const ImportDialog = ({}: ImportDialogProps) => {
         }
     });
 
-    const {formState} = form;
+    const { formState } = form;
 
     const fileRef = form.register("file");
 
@@ -62,7 +58,7 @@ export const ImportDialog = ({}: ImportDialogProps) => {
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button variant="outline" className="shadow-md">
-                    <Upload/>
+                    <Upload />
                     Import
                 </Button>
             </DialogTrigger>
@@ -75,34 +71,34 @@ export const ImportDialog = ({}: ImportDialogProps) => {
                                 Upload exported location from another sources
                             </DialogDescription>
                         </DialogHeader>
-                        <FormField control={form.control} name="source" render={({field}) => (
+                        <FormField control={form.control} name="source" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Source</FormLabel>
                                 <FormControl>
                                     <RadioGroup onValueChange={field.onChange} defaultValue={field.value}>
                                         <FormItem className="flex items-center gap-3">
                                             <FormControl>
-                                                <RadioGroupItem value="dawarich"/>
+                                                <RadioGroupItem value="dawarich" />
                                             </FormControl>
                                             <FormLabel>Dawarich</FormLabel>
                                         </FormItem>
                                     </RadioGroup>
                                 </FormControl>
-                                <FormMessage/>
+                                <FormMessage />
                             </FormItem>
-                        )}/>
+                        )} />
                         <FormField control={form.control} name="file"
-                                   render={({}) => (
-                                       <FormItem>
-                                           <FormLabel>File to import</FormLabel>
-                                           <FormControl>
-                                               <Input type="file" {...fileRef} />
-                                           </FormControl>
-                                           <FormMessage/>
-                                       </FormItem>
-                                   )}/>
+                            render={() => (
+                                <FormItem>
+                                    <FormLabel>File to import</FormLabel>
+                                    <FormControl>
+                                        <Input type="file" {...fileRef} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
                         <Button type="submit" disabled={formState.isSubmitting}>
-                            {formState.isSubmitting && <Loader2Icon className="animate-spin"/>}
+                            {formState.isSubmitting && <Loader2Icon className="animate-spin" />}
                             Import
                         </Button>
                     </form>

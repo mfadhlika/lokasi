@@ -35,7 +35,7 @@ const columns: ColumnDef<Location>[] = [
 ];
 
 
-export function Data() {
+export default function Data() {
     const [data, setData] = useState<Location[]>([]);
     const [date, setDate] = useState<DateRange | undefined>(() => {
         const start = new Date();
