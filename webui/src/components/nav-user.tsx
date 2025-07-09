@@ -22,15 +22,11 @@ import {
     useSidebar,
 } from "@/components/ui/sidebar"
 import { Link } from "react-router"
+import { useAuth } from "@/hooks/useAuth"
 
-export function NavUser({
-    user,
-}: {
-    user: {
-        name: string
-    }
-}) {
+export function NavUser() {
     const { isMobile } = useSidebar()
+    const { userInfo } = useAuth();
 
     return (
         <SidebarMenu>
@@ -42,10 +38,10 @@ export function NavUser({
                             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                         >
                             <Avatar className="h-8 w-8 rounded-lg">
-                                <AvatarFallback className="rounded-lg">{user.name.at(0)?.toUpperCase()}</AvatarFallback>
+                                <AvatarFallback className="rounded-lg">{userInfo?.username.at(0)?.toUpperCase()}</AvatarFallback>
                             </Avatar>
                             <div className="grid flex-1 text-left text-sm leading-tight">
-                                <span className="truncate font-medium">{user.name}</span>
+                                <span className="truncate font-medium">{userInfo?.username}</span>
                             </div>
                             <ChevronsUpDown className="ml-auto size-4" />
                         </SidebarMenuButton>

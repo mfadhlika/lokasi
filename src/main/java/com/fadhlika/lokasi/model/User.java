@@ -4,13 +4,13 @@
  */
 package com.fadhlika.lokasi.model;
 
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  *
@@ -36,6 +36,10 @@ public class User implements UserDetails {
         public String getValue() {
             return value;
         }
+    }
+
+    public class Extra {
+
     }
 
     private int id;

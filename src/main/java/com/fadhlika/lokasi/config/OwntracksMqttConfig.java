@@ -1,11 +1,8 @@
 package com.fadhlika.lokasi.config;
 
-import com.fadhlika.lokasi.controller.mqtt.owntracks.OwntracksMqttController;
-import com.fadhlika.lokasi.dto.owntracks.Message;
-import com.fadhlika.lokasi.service.LocationService;
-import com.fadhlika.lokasi.service.UserService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +17,12 @@ import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.fadhlika.lokasi.controller.mqtt.owntracks.OwntracksMqttController;
+import com.fadhlika.lokasi.dto.owntracks.Message;
+import com.fadhlika.lokasi.service.LocationService;
+import com.fadhlika.lokasi.service.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
 class OwntracksMqttConfig {
@@ -98,12 +99,11 @@ class OwntracksMqttConfig {
             }
 
             switch (command) {
-                case "":
+                case "" ->
                     this.owntracksMqttController.addLocation(username, deviceId, (com.fadhlika.lokasi.dto.owntracks.Location) message.getPayload());
-                    break;
-                case "cmd":
-                    break;
-                default:
+                case "cmd" -> {
+                }
+                default ->
                     throw new RuntimeException("Unknown command: " + command);
             }
         }).get();

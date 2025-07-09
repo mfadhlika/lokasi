@@ -12,7 +12,6 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -47,6 +46,7 @@ public class UserRepository {
                 user.getPassword(),
                 user.getCreatedAt()
         );
+        jdbcTemplate.update("INSERT INTO integration(user_id) VALUES((SELECT id FROM user WHERE username = ?))", user.getUsername());
     }
 
     public void updateUser(User user) {
@@ -59,6 +59,10 @@ public class UserRepository {
 
     public User getUser(String username) {
         return jdbcTemplate.queryForObject("SELECT id, username, password, created_at FROM `user` WHERE username = ?", userRowMapper, username);
+    }
+
+    public User getUser(int userId) {
+        return jdbcTemplate.queryForObject("SELECT id, username, password, created_at FROM `user` WHERE id = ?", userRowMapper, userId);
     }
 
     public boolean hasUsers() {
