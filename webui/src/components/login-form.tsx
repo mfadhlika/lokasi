@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Label } from "@/components/ui/label.tsx";
 import { type FormEvent, useState } from "react";
-import { useAuth } from "@/hooks/useAuth.tsx";
+import { useAuth } from "@/hooks/use-auth.tsx";
 import { useNavigate } from "react-router";
 import { Card, CardContent } from "@/components/ui/card";
 

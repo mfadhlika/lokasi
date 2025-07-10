@@ -22,7 +22,7 @@ import {
     useSidebar,
 } from "@/components/ui/sidebar"
 import { Link } from "react-router"
-import { useAuth } from "@/hooks/useAuth"
+import { useAuth } from "@/hooks/use-auth"
 
 export function NavUser() {
     const { isMobile } = useSidebar()

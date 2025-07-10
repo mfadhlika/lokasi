@@ -1,4 +1,4 @@
-import { useAuth } from "@/hooks/useAuth.tsx";
+import { useAuth } from "@/hooks/use-auth.tsx";
 import { Navigate, Outlet } from "react-router";
 import { AppSidebar } from "./app-sidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";

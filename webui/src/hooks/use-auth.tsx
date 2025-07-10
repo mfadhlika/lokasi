@@ -7,12 +7,16 @@ interface AuthContextType {
     } | null | undefined;
     accessToken: string | null | undefined;
     login: (accessToken: string, callback: () => void) => void;
+    logout: (callback: () => void) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
     userInfo: undefined,
     accessToken: null,
     login: (_accessToken: string, _callback: () => void) => void {
+
+    },
+    logout: (_callback: () => void) => void {
 
     },
 });
@@ -26,6 +30,11 @@ export const AuthProvider = ({ children }: React.ComponentProps<"div">) => {
         callback();
     };
 
+    const logout = (callback: () => void) => {
+        localStorage.removeItem("accessToken");
+        setAccessToken(null);
+        callback();
+    };
 
     const value = useMemo(() => {
         let decoded;
@@ -37,6 +46,7 @@ export const AuthProvider = ({ children }: React.ComponentProps<"div">) => {
                 username: decoded['sub']!
             },
             login,
+            logout,
         };
     }, [accessToken]);
 

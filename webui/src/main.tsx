@@ -3,7 +3,7 @@ import './index.css'
 import { BrowserRouter, Route, Routes } from "react-router";
 import Login from "@/pages/login";
 import { ProtectedRoute } from "@/components/protected-route.tsx";
-import { AuthProvider } from "@/hooks/useAuth.tsx";
+import { AuthProvider } from "@/hooks/use-auth.tsx";
 import Maps from "@/pages/maps";
 import Data from '@/pages/data';
 import Settings from '@/pages/settings';

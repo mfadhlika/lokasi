@@ -4,20 +4,20 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu.tsx";
-import {Button} from "@/components/ui/button.tsx";
-import {User} from "lucide-react";
-import {useAuth} from "@/hooks/useAuth.tsx";
-import {useNavigate} from "react-router";
+import { Button } from "@/components/ui/button.tsx";
+import { User } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth.tsx";
+import { useNavigate } from "react-router";
 
 export const AccountDropdown = () => {
-    const {logout} = useAuth();
+    const { logout } = useAuth();
     const navigate = useNavigate();
 
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="outline">
-                    <User/>
+                    <User />
                     My Account
                 </Button>
             </DropdownMenuTrigger>
