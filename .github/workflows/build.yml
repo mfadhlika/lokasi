@@ -86,6 +86,9 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
+      - name: Install Spatialite
+        run: sudo apt install libspatialite-dev libsqlite3-mod-spatialite spatialite-bin
+
       - name: Build
         run: mvn native:compile -Pnative
 
