@@ -4,18 +4,20 @@
  */
 package com.fadhlika.lokasi.service;
 
-import com.fadhlika.lokasi.model.Location;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.fadhlika.lokasi.repository.LocationRepository;
-
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.stereotype.Service;
+
+import com.fadhlika.lokasi.exception.InternalErrorException;
+import com.fadhlika.lokasi.model.Location;
+import com.fadhlika.lokasi.repository.LocationRepository;
 
 /**
  *
@@ -34,7 +36,11 @@ public class LocationService {
     }
 
     public void saveLocation(Location location) {
-        locationRepository.createLocation(location);
+        try {
+            locationRepository.createLocation(location);
+        } catch (DataAccessException ex) {
+            throw new InternalErrorException(ex.getMessage());
+        }
     }
 
     public void saveLocations(List<Location> locations) {

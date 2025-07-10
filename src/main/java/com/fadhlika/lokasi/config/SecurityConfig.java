@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -29,10 +28,13 @@ public class SecurityConfig {
 
     private final OwntracksAuthFilter owntracksAuthFilter;
 
+    private final OverlandAuthFilter overlandAuthFilter;
+
     @Autowired
     public SecurityConfig(JwtAuthService jwtAuthService, UserService userService, IntegrationService integrationService) {
         this.jwtAuthFilter = new JwtAuthFilter(jwtAuthService, userService);
         this.owntracksAuthFilter = new OwntracksAuthFilter(userService, integrationService);
+        this.overlandAuthFilter = new OverlandAuthFilter(userService, integrationService);
     }
 
     @Bean
@@ -41,8 +43,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Order(1)
-    public SecurityFilterChain basicSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain owntracksSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher("/api/owntracks")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -57,7 +58,21 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Order(2)
+    public SecurityFilterChain overlandSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/api/overland")
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth
+                        -> auth.anyRequest().authenticated()
+                )
+                .sessionManagement(session
+                        -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .addFilterBefore(overlandAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        return http.build();
+    }
+
+    @Bean
     public SecurityFilterChain jwtSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher("/api/v1/**")

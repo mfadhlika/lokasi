@@ -70,6 +70,14 @@ public class IntegrationService {
         }
     }
 
+    public Integration getIntegrationByOverlandApiKey(String apiKey) {
+        try {
+            return integrationRepository.getByOverlandApiKey(apiKey);
+        } catch (SQLException ex) {
+            throw new InternalError(ex.getMessage());
+        }
+    }
+
     public boolean validatePassword(String password, String hashPassword) {
         return passwordEncoder.matches(password, hashPassword);
     }

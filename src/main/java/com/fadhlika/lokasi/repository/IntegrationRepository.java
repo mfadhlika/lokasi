@@ -53,4 +53,8 @@ public class IntegrationRepository {
     public Integration getByOwntracksUsername(String username) throws SQLException {
         return jdbcTemplate.queryForObject("SELECT * FROM integration WHERE owntracks_username = ?", rowMapper, username);
     }
+
+    public Integration getByOverlandApiKey(String apikey) throws SQLException {
+        return jdbcTemplate.queryForObject("SELECT * FROM integration WHERE overland_api_key = ?", rowMapper, apikey);
+    }
 }

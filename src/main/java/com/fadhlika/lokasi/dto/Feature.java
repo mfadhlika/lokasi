@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import org.locationtech.jts.geom.Geometry;
 
+import com.fadhlika.lokasi.exception.InternalErrorException;
 import com.fadhlika.lokasi.util.GeometryDeserializer;
 import com.fadhlika.lokasi.util.GeometrySerializer;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -44,10 +45,13 @@ public class Feature {
         return properties;
     }
 
-    public <T> T convertProperties() {
+    public <T> T convertProperties(TypeReference<T> typeRef) {
         ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
-        return mapper.convertValue(properties, new TypeReference<>() {
-        });
+        try {
+            return mapper.convertValue(properties, typeRef);
+        } catch (IllegalArgumentException ex) {
+            throw new InternalErrorException(ex.getMessage());
+        }
     }
 
     public String getType() {

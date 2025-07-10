@@ -1,13 +1,13 @@
 package com.fadhlika.lokasi.dto.overland;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record Properties(
         @JsonProperty("timestamp")
-        LocalDateTime timestamp,
+        ZonedDateTime timestamp,
         @JsonProperty("altitude")
         int altitude,
         @JsonProperty("speed")

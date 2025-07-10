@@ -156,6 +156,11 @@ public class Location {
     }
 
     public void setBatteryState(String bs) {
+        if (bs == null) {
+            this.batteryState = BatteryState.UNKNOWN;
+            return;
+        }
+
         this.batteryState = switch (bs) {
             case "unknown" ->
                 BatteryState.UNKNOWN;

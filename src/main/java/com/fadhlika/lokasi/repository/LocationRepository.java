@@ -84,7 +84,7 @@ public class LocationRepository {
         }
     };
 
-    public void createLocation(Location location) {
+    public void createLocation(Location location) throws DataAccessException {
         createLocations(new ArrayList<>() {
             {
                 add(location);
@@ -92,58 +92,54 @@ public class LocationRepository {
         });
     }
 
-    public void createLocations(List<Location> locations) {
-        try {
-            jdbcTemplate.batchUpdate(
-                    "INSERT INTO location("
-                    + "user_id, "
-                    + "device_id, "
-                    + "geometry, "
-                    + "altitude, "
-                    + "course, "
-                    + "course_accuracy, "
-                    + "speed, "
-                    + "accuracy, "
-                    + "vertical_accuracy, "
-                    + "motions, "
-                    + "battery_state, "
-                    + "battery, "
-                    + "ssid, "
-                    + "timestamp, "
-                    + "raw_data, "
-                    + "created_at, "
-                    + "import_id) VALUES(?, ?, ST_GeomFromText(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    Location location = locations.get(i);
-                    ps.setInt(1, location.getUserId());
-                    ps.setString(2, location.getDeviceId());
-                    ps.setObject(3, location.getGeometry());
-                    ps.setInt(4, location.getAltitude());
-                    ps.setInt(5, location.getCourse());
-                    ps.setInt(6, location.getCourseAccuracy());
-                    ps.setDouble(7, location.getSpeed());
-                    ps.setInt(8, location.getAccuracy());
-                    ps.setInt(9, location.getVerticalAccuracy());
-                    ps.setObject(10, location.getMotions());
-                    ps.setObject(11, location.getBatteryState());
-                    ps.setDouble(12, location.getBattery());
-                    ps.setString(13, location.getSsid());
-                    ps.setObject(14, location.getTimestamp());
-                    ps.setString(15, location.getRawData());
-                    ps.setObject(16, location.getCreatedAt());
-                    ps.setObject(17, location.getImportId());
-                }
+    public void createLocations(List<Location> locations) throws DataAccessException {
+        jdbcTemplate.batchUpdate(
+                "INSERT INTO location("
+                + "user_id, "
+                + "device_id, "
+                + "geometry, "
+                + "altitude, "
+                + "course, "
+                + "course_accuracy, "
+                + "speed, "
+                + "accuracy, "
+                + "vertical_accuracy, "
+                + "motions, "
+                + "battery_state, "
+                + "battery, "
+                + "ssid, "
+                + "timestamp, "
+                + "raw_data, "
+                + "created_at, "
+                + "import_id) VALUES(?, ?, ST_GeomFromText(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                Location location = locations.get(i);
+                ps.setInt(1, location.getUserId());
+                ps.setString(2, location.getDeviceId());
+                ps.setObject(3, location.getGeometry());
+                ps.setInt(4, location.getAltitude());
+                ps.setInt(5, location.getCourse());
+                ps.setInt(6, location.getCourseAccuracy());
+                ps.setDouble(7, location.getSpeed());
+                ps.setInt(8, location.getAccuracy());
+                ps.setInt(9, location.getVerticalAccuracy());
+                ps.setObject(10, location.getMotions());
+                ps.setObject(11, location.getBatteryState());
+                ps.setDouble(12, location.getBattery());
+                ps.setString(13, location.getSsid());
+                ps.setObject(14, location.getTimestamp());
+                ps.setString(15, location.getRawData());
+                ps.setObject(16, location.getCreatedAt());
+                ps.setObject(17, location.getImportId());
+            }
 
-                @Override
-                public int getBatchSize() {
-                    return locations.size();
-                }
-            });
-        } catch (DataAccessException e) {
-            logger.error("error creating point: {}", e.getMessage(), e);
-        }
+            @Override
+            public int getBatchSize() {
+                return locations.size();
+            }
+        });
     }
 
     public List<Location> findLocations(int userId, LocalDateTime start, LocalDateTime end, Optional<String> device) throws SQLException {
