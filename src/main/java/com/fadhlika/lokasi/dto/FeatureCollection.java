@@ -1,6 +1,5 @@
 package com.fadhlika.lokasi.dto;
 
-import java.util.HashMap;
 import java.util.List;
 
 public record FeatureCollection(

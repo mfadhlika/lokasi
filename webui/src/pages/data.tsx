@@ -7,6 +7,7 @@ import { DataTable } from "@/components/data-table";
 import { DatePicker } from "@/components/date-picker";
 import { DeviceSelect } from "@/components/device-select";
 import { Button } from "@/components/ui/button";
+import { ImportDialog } from "@/components/import-dialog";
 
 type Location = {
     timestamp: string,
@@ -82,6 +83,7 @@ export default function Data() {
             <div className="flex items-center gap-4 py-4">
                 <DatePicker variant="outline" date={date} setDate={setDate} />
                 <DeviceSelect className="shadow-xs border-solid" selectedDevice={device} onSelectedDevice={setDevice} />
+                <ImportDialog className="self-end" />
             </div>
             <DataTable columns={columns} data={data} />
 

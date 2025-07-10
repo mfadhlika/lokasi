@@ -16,13 +16,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
 import { axiosInstance } from "@/lib/request.ts";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
     source: z.string(),
     file: z.instanceof(FileList)
 });
 
-export const ImportDialog = () => {
+export const ImportDialog = ({ className }: React.ComponentProps<"div">) => {
     const [open, setOpen] = useState(false);
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -57,7 +58,7 @@ export const ImportDialog = () => {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" className="shadow-md">
+                <Button variant="outline" className={cn("shadow-xs", className)}>
                     <Upload />
                     Import
                 </Button>

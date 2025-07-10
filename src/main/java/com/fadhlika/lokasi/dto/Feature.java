@@ -15,6 +15,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class Feature {
 
+    private final String type = "Feature";
+
     @JsonSerialize(using = GeometrySerializer.class)
     @JsonDeserialize(using = GeometryDeserializer.class)
     private Geometry geometry;
@@ -55,6 +57,6 @@ public class Feature {
     }
 
     public String getType() {
-        return "Feature";
+        return type;
     }
 }

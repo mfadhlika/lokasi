@@ -17,7 +17,6 @@ export const DeviceSelect = ({ className, selectedDevice, onSelectedDevice }: De
         axiosInstance.get("v1/user/devices").then(res => setDevices(res.data));
     }, []);
 
-
     return (
         <Select value={selectedDevice} onValueChange={onSelectedDevice}>
             <SelectTrigger className={cn("bg-white", className)}>
@@ -26,7 +25,7 @@ export const DeviceSelect = ({ className, selectedDevice, onSelectedDevice }: De
             </SelectTrigger>
             <SelectContent className="z-10000">
                 <SelectItem key="all" value="all">All devices</SelectItem>
-                {devices.map(device => <SelectItem key={device} value={device}>{device}</SelectItem>)}
+                {devices.filter(device => device !== "").map(device => <SelectItem key={device} value={device}>{device}</SelectItem>)}
             </SelectContent>
         </Select>
     );
