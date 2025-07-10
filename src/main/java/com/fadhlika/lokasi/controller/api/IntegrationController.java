@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fadhlika.lokasi.dto.SaveIntegrationRequest;
 import com.fadhlika.lokasi.model.Integration;
 import com.fadhlika.lokasi.model.User;
 import com.fadhlika.lokasi.service.IntegrationService;
@@ -25,16 +26,22 @@ public class IntegrationController {
     }
 
     @PutMapping
-    public void saveIntegration(@RequestBody Integration integration) {
+    public ResponseEntity<Integration> saveIntegration(@RequestBody SaveIntegrationRequest request) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        integration = new Integration(
+        Integration integration = new Integration(
                 user.getId(),
-                integration.owntracksEnable(),
-                integration.owntracksUsername(),
-                integration.owntracksPassword()
+                request.owntracksEnable(),
+                request.owntracksUsername(),
+                request.owntracksPassword(),
+                request.overlandEnable(),
+                request.overlandApiKey()
         );
         integrationService.saveIntegration(integration);
+
+        Integration savedIntegration = integrationService.getIntegration(user.getId());
+
+        return ResponseEntity.ok(savedIntegration);
     }
 
     @GetMapping

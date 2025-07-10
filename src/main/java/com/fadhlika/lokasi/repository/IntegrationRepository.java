@@ -19,7 +19,9 @@ public class IntegrationRepository {
             rs.getInt("user_id"),
             rs.getBoolean("owntracks_enable"),
             rs.getString("owntracks_username"),
-            rs.getString("owntracks_password"));
+            null,
+            rs.getBoolean("overland_enable"),
+            rs.getString("overland_api_key"));
 
     @Autowired
     public IntegrationRepository(JdbcTemplate jdbcTemplate) {
@@ -32,16 +34,20 @@ public class IntegrationRepository {
             SET 
                 owntracks_enable = ?, 
                 owntracks_username = ?, 
-                owntracks_password = ?
+                owntracks_password = IFNULL(?, owntracks_password),
+                overland_enable = ?,
+                overland_api_key = ?
                 WHERE user_id = ?""",
                 integration.owntracksEnable(),
                 integration.owntracksUsername(),
                 integration.owntracksPassword(),
+                integration.overlandEnable(),
+                integration.overlandApiKey(),
                 integration.userId());
     }
 
     public Integration get(int userId) throws SQLException {
-        return jdbcTemplate.queryForObject("SELECT * FROM integration WHERE user_id = ?", rowMapper, userId);
+        return jdbcTemplate.queryForObject("SELECT user_id, owntracks_enable, owntracks_username, overland_enable, overland_api_key FROM integration WHERE user_id = ?", rowMapper, userId);
     }
 
     public Integration getByOwntracksUsername(String username) throws SQLException {

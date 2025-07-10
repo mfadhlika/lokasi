@@ -1,7 +1,6 @@
-package com.fadhlika.lokasi.model;
+package com.fadhlika.lokasi.dto;
 
-public record Integration(
-        int userId,
+public record SaveIntegrationRequest(
         boolean owntracksEnable,
         String owntracksUsername,
         String owntracksPassword,

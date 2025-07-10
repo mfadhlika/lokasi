@@ -26,10 +26,18 @@ const owntracksFormSchema = z.object({
     password: z.string(),
 });
 
+const overlandFormSchema = z.object({
+    enable: z.boolean(),
+    apiKey: z.string(),
+});
+
+
 type Integration = {
     owntracksEnable: boolean;
     owntracksUsername: string;
     owntracksPassword: string;
+    overlandEnable: boolean;
+    overlandApiKey: string;
 }
 
 function AccountSettingsTab() {
@@ -88,36 +96,33 @@ function AccountSettingsTab() {
     );
 }
 
-function OwntracksIntegrationItem({ integration }: { integration?: Integration }) {
+function OwntracksIntegrationItem({ integration, doSubmit }: { integration: Integration, doSubmit: (integration: Integration) => void }) {
     const owntracksForm = useForm<z.infer<typeof owntracksFormSchema>>({
         resolver: zodResolver(owntracksFormSchema),
         defaultValues: {
-            enable: integration.owntracksEnable,
-            username: integration.owntracksUsername ?? "",
+            enable: integration?.owntracksEnable ?? false,
+            username: integration?.owntracksUsername ?? "",
         }
     });
 
     const onSubmit = (values: z.infer<typeof owntracksFormSchema>) => {
-        axiosInstance.put("v1/integration", {
+        doSubmit({
             ...integration,
             owntracksEnable: values.enable,
             owntracksUsername: values.username,
             owntracksPassword: values.password,
-        })
-            .catch(err => {
-                console.error(err);
-            });
+        });
     }
 
     return (
         <Form {...owntracksForm}>
             <form onSubmit={owntracksForm.handleSubmit(onSubmit)} className="flex flex-col gap-4">
                 <FormField control={owntracksForm.control} name="enable" render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Enable</FormLabel>
+                    <FormItem className="flex">
                         <FormControl>
                             <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                         </FormControl>
+                        <FormLabel>Enable</FormLabel>
                     </FormItem>
                 )} />
                 <FormField control={owntracksForm.control} name="username" render={({ field }) => (
@@ -142,20 +147,85 @@ function OwntracksIntegrationItem({ integration }: { integration?: Integration }
     );
 }
 
-function IntegrationSettingsTab() {
-    const [integration, setIntegration] = useState<Integration>();
+function OverlandIntegrationItem({ integration, doSubmit }: { integration: Integration, doSubmit: (integration: Integration) => void }) {
+    const overlandForm = useForm<z.infer<typeof overlandFormSchema>>({
+        resolver: zodResolver(overlandFormSchema),
+        defaultValues: {
+            enable: integration?.overlandEnable ?? false,
+            apiKey: integration?.overlandApiKey ?? "",
+        }
+    });
 
+    const onSubmit = (values: z.infer<typeof overlandFormSchema>) => {
+        doSubmit({
+            ...integration,
+            overlandEnable: values.enable,
+            overlandApiKey: values.apiKey,
+        })
+    }
+
+    return (
+        <Form {...overlandForm}>
+            <form onSubmit={overlandForm.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+                <FormField control={overlandForm.control} name="enable" render={({ field }) => (
+                    <FormItem className="flex">
+                        <FormControl>
+                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                        </FormControl>
+                        <FormLabel>Enable</FormLabel>
+                    </FormItem>
+                )} />
+                <FormField control={overlandForm.control} name="apiKey" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Api Key</FormLabel>
+                        <FormControl>
+                            <Input type="text" disabled {...field} />
+                        </FormControl>
+                    </FormItem>
+                )} />
+                <Button type="submit" className="w-[100px] self-end" disabled={overlandForm.formState.isSubmitting}>Save</Button>
+            </form>
+        </Form>
+    );
+}
+
+function IntegrationSettingsTab() {
+    const [integration, setIntegration] = useState<Integration>({
+        owntracksEnable: false,
+        owntracksUsername: "",
+        owntracksPassword: "",
+        overlandEnable: false,
+        overlandApiKey: ""
+    });
 
     useEffect(() => {
-        axiosInstance.get("v1/integration").then(res => setIntegration(res.data)).catch(err => console.error(err));
+        axiosInstance.get("v1/integration").then(res => {
+            setIntegration({ ...res.data });
+        }).catch(err => console.error(err));
     }, []);
+
+    const doSubmit = (data: Integration) => {
+        axiosInstance.put("v1/integration", data)
+            .then(res => {
+                setIntegration({ ...res.data });
+            })
+            .catch(err => {
+                console.error(err);
+            });
+    }
 
     return (
         <Accordion type="multiple">
             <AccordionItem value="owntracks">
                 <AccordionTrigger>Owntracks</AccordionTrigger>
                 <AccordionContent>
-                    <OwntracksIntegrationItem integration={integration} />
+                    <OwntracksIntegrationItem integration={integration} doSubmit={doSubmit} />
+                </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="overland">
+                <AccordionTrigger>Overland</AccordionTrigger>
+                <AccordionContent>
+                    <OverlandIntegrationItem integration={integration} doSubmit={doSubmit} />
                 </AccordionContent>
             </AccordionItem>
         </Accordion>
