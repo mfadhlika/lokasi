@@ -12,7 +12,7 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public void handleGenericException(RuntimeException ex) {
-        logger.error("Exception handled: {}", ex.getMessage(), ex);
+        logger.error("Exception handled: {}", ex.getMessage());
         throw ex;
     }
 }
