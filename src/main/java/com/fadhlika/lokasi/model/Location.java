@@ -4,8 +4,8 @@
  */
 package com.fadhlika.lokasi.model;
 
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.locationtech.jts.geom.Coordinate;
@@ -35,12 +35,28 @@ public class Location {
         BatteryState(int value) {
             this.value = value;
         }
+
+        @Override
+        public String toString() {
+            return switch (this.value) {
+                case 0 ->
+                    "unknown";
+                case 1 ->
+                    "unplugged";
+                case 2 ->
+                    "charging";
+                case 3 ->
+                    "full";
+                default ->
+                    "unknown";
+            };
+        }
     }
 
     private int userId;
     private String deviceId;
     private Geometry geometry;
-    private LocalDateTime timestamp;
+    private ZonedDateTime timestamp;
     private int altitude;
     private int course;
     private int courseAccuracy;
@@ -53,10 +69,10 @@ public class Location {
     private String ssid;
     private int importId;
     private String rawData;
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
     public Location() {
-        this.createdAt = LocalDateTime.now().atZone(ZoneOffset.UTC).toLocalDateTime();
+        this.createdAt = ZonedDateTime.now(ZoneOffset.UTC);
     }
 
     public int getUserId() {
@@ -200,19 +216,19 @@ public class Location {
         this.rawData = mapper.writeValueAsString(rawData);
     }
 
-    public LocalDateTime getTimestamp() {
+    public ZonedDateTime getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
+    public void setTimestamp(ZonedDateTime timestamp) {
         this.timestamp = timestamp;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

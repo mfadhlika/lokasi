@@ -64,7 +64,7 @@ public class ImportService {
 
                 HashMap<String, Object> properties = feature.getProperties();
 
-                l.setTimestamp(Instant.ofEpochSecond((int) properties.get("timestamp")).atZone(ZoneOffset.UTC).toLocalDateTime());
+                l.setTimestamp(Instant.ofEpochSecond((int) properties.get("timestamp")).atZone(ZoneOffset.UTC));
                 if (properties.get("altitude") != null) {
                     l.setAltitude((int) properties.get("altitude"));
                 }

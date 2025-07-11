@@ -5,7 +5,7 @@
 package com.fadhlika.lokasi.service;
 
 import java.sql.SQLException;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,11 +47,19 @@ public class LocationService {
         locationRepository.createLocations(locations);
     }
 
-    public List<Location> findLocations(int userId, LocalDateTime start, LocalDateTime end) throws SQLException {
-        return findLocations(userId, start, end, Optional.empty());
+    public List<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end) {
+        return findLocations(userId, start, end, Optional.empty(), Optional.empty(), Optional.empty());
     }
 
-    public List<Location> findLocations(int userId, LocalDateTime start, LocalDateTime end, Optional<String> device) throws SQLException {
-        return locationRepository.findLocations(userId, start, end, device);
+    public List<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end, Optional<String> device) {
+        return findLocations(userId, start, end, device, Optional.empty(), Optional.empty());
+    }
+
+    public List<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end, Optional<String> device, Optional<Integer> offset, Optional<Integer> limit) {
+        try {
+            return locationRepository.findLocations(userId, start, end, device, offset, limit);
+        } catch (SQLException ex) {
+            throw new InternalErrorException(ex.getMessage());
+        }
     }
 }

@@ -51,7 +51,6 @@ public record Location(
         @JsonProperty("_id")
         String id) implements Message {
 
-
     public com.fadhlika.lokasi.model.Location toLocation(int userId, String deviceId) throws JsonProcessingException {
         com.fadhlika.lokasi.model.Location l = new com.fadhlika.lokasi.model.Location();
 
@@ -65,7 +64,8 @@ public record Location(
         l.setVerticalAccuracy(this.vac());
         l.setSpeed(this.vel());
         l.setSsid(this.ssid());
-        l.setTimestamp(Instant.ofEpochSecond(this.tst()).atOffset(ZoneOffset.UTC).toLocalDateTime());
+        l.setTimestamp(Instant.ofEpochSecond(this.tst()).atZone(ZoneOffset.UTC
+        ));
 
         l.setRawData(this);
 

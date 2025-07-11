@@ -7,15 +7,19 @@ package com.fadhlika.lokasi.controller.api.owntracks;
 import java.time.Instant;
 import java.time.ZoneOffset;
 
-import com.fadhlika.lokasi.model.Location;
-import com.fadhlika.lokasi.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.fadhlika.lokasi.dto.owntracks.Message;
+import com.fadhlika.lokasi.model.Location;
+import com.fadhlika.lokasi.model.User;
 import com.fadhlika.lokasi.service.LocationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -53,7 +57,7 @@ public class OwntracksController {
             l.setVerticalAccuracy(location.vac());
             l.setSpeed(location.vel());
             l.setSsid(location.ssid());
-            l.setTimestamp(Instant.ofEpochSecond(location.tst()).atOffset(ZoneOffset.UTC).toLocalDateTime());
+            l.setTimestamp(Instant.ofEpochSecond(location.tst()).atZone(ZoneOffset.UTC));
 
             l.setRawData(message);
 
