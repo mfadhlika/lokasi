@@ -21,12 +21,14 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar"
-import { Link } from "react-router"
+import { useNavigate } from "react-router"
 import { useAuth } from "@/hooks/use-auth"
+import { Button } from "./ui/button"
 
 export function NavUser() {
     const { isMobile } = useSidebar()
-    const { userInfo } = useAuth();
+    const { userInfo, logout } = useAuth();
+    const navigate = useNavigate();
 
     return (
         <SidebarMenu>
@@ -53,10 +55,10 @@ export function NavUser() {
                         sideOffset={4}
                     >
                         <DropdownMenuItem>
-                            <Link to="/logout" className="inline-flex gap-2 items-center">
+                            <Button variant="link" className="inline-flex gap-2 items-center" onClick={() => { logout(() => navigate("/login")) }}>
                                 <LogOut />
                                 Log out
-                            </Link>
+                            </Button>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
