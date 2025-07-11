@@ -5,7 +5,9 @@
 package com.fadhlika.lokasi.repository;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -58,9 +60,9 @@ public class LocationRepository {
             location.setBatteryState(rs.getInt("battery_state"));
             location.setBattery(rs.getDouble("battery"));
             location.setSsid(rs.getString("ssid"));
-            location.setTimestamp(LocalDateTime.parse(rs.getString("timestamp")));
+            location.setTimestamp(ZonedDateTime.parse(rs.getString("timestamp")));
             location.setCourseAccuracy(rs.getInt("course_accuracy"));
-            location.setCreatedAt(LocalDateTime.parse(rs.getString("created_at")));
+            location.setCreatedAt(ZonedDateTime.parse(rs.getString("created_at")));
             String pointWkt = rs.getString("geometry");
             if (pointWkt != null) {
                 try {
@@ -148,7 +150,7 @@ public class LocationRepository {
         });
     }
 
-    public List<Location> findLocations(int userId, LocalDateTime start, LocalDateTime end, Optional<String> device) throws SQLException {
+    public List<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end, Optional<String> device, Optional<Integer> offset, Optional<Integer> limit) throws SQLException {
         List<String> where = new ArrayList<>() {
             {
                 add("user_id = ?");
@@ -169,7 +171,7 @@ public class LocationRepository {
             args.add(d);
         });
 
-        return jdbcTemplate.query("SELECT "
+        StringBuilder sqlBuilder = new StringBuilder("SELECT "
                 + "id, "
                 + "user_id, "
                 + "device_id, "
@@ -188,6 +190,19 @@ public class LocationRepository {
                 + "created_at, "
                 + "import_id, "
                 + "course_accuracy FROM location WHERE "
-                + String.join(" AND ", where), locationRowMapper, args.toArray());
+                + String.join(" AND ", where)
+                + " ORDER BY timestamp DESC");
+
+        limit.ifPresent((l) -> {
+            sqlBuilder.append(" LIMIT ?");
+            args.add(l);
+        });
+
+        offset.ifPresent((o) -> {
+            sqlBuilder.append(" OFFSET ?");
+            args.add(o);
+        });
+
+        return jdbcTemplate.query(sqlBuilder.toString(), locationRowMapper, args.toArray());
     }
 }

@@ -14,6 +14,14 @@ type Location = {
     coordinates: string,
     device: string,
     altitude: number,
+    speed: number,
+    accuracy: number,
+    motions: string[],
+    course: number,
+    courseAccuracy: number,
+    battery: number,
+    batteryState: string,
+    ssid: string
 }
 
 const columns: ColumnDef<Location>[] = [
@@ -32,6 +40,38 @@ const columns: ColumnDef<Location>[] = [
     {
         accessorKey: "altitude",
         header: "Altitude"
+    },
+    {
+        accessorKey: "speed",
+        header: "Speed"
+    },
+    {
+        accessorKey: "accuracy",
+        header: "Accuracy"
+    },
+    {
+        accessorKey: "motions",
+        header: "Motions"
+    },
+    {
+        accessorKey: "course",
+        header: "Course"
+    },
+    {
+        accessorKey: "courseAccuracy",
+        header: "Course Accuracy"
+    },
+    {
+        accessorKey: "battery",
+        header: "Battery"
+    },
+    {
+        accessorKey: "batteryState",
+        header: "Battery State"
+    },
+    {
+        accessorKey: "ssid",
+        header: "SSID"
     }
 ];
 
@@ -51,9 +91,13 @@ export default function Data() {
         };
     });
     const [device, setDevice] = useState<string>('all');
+    const [offset, setOffset] = useState<number>(0);
+    const [limit, _setLimit] = useState<number>(25);
+
     useEffect(() => {
         const params = new URLSearchParams();
-        params.set('raw', "true");
+        params.set('offset', `${offset}`);
+        params.set('limit', `${limit}`);
         if (date?.from) {
             params.set('start', date.from.toISOString());
         }
@@ -63,21 +107,21 @@ export default function Data() {
         if (device !== 'all') {
             params.set('device', device);
         }
-        axiosInstance.get(`v1/locations?${params.toString()}`)
+        axiosInstance.get(`v1/locations/raw?${params.toString()}`)
             .then((res) => {
                 const newData = (res.data as FeatureCollection).features.map(feature => {
                     const coordinates = (feature.geometry as Point).coordinates;
-                    const properties = feature.properties!;
                     return {
-                        timestamp: properties['timestamp'],
+                        ...feature.properties,
+                        timestamp: (new Date(feature.properties!['timestamp'] * 1000)).toLocaleString(),
                         coordinates: `${coordinates[1]}, ${coordinates[0]}`,
-                        device: properties['device'],
-                        altitude: properties['altitude']
-                    };
+                    } as Location;
                 })
                 setData(newData);
             });
-    }, [date, device]);
+    }, [date, device, limit, offset]);
+
+
     return (
         <div className="w-full h-full p-4">
             <div className="flex items-center gap-4 py-4">
@@ -91,15 +135,19 @@ export default function Data() {
                 <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => { }}
-                    disabled={false}
+                    onClick={() => {
+                        if (offset - limit >= 0) setOffset(offset - limit);
+                    }}
+                    disabled={offset === 0}
                 >
                     Previous
                 </Button>
                 <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => { }}
+                    onClick={() => {
+                        setOffset(offset + limit);
+                    }}
                     disabled={false}
                 >
                     Next

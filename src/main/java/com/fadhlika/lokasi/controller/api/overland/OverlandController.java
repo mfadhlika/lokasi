@@ -55,7 +55,7 @@ public class OverlandController {
             l.setVerticalAccuracy(props.verticalAccuracy());
             l.setSpeed(props.speed());
             l.setSsid(props.wifi());
-            l.setTimestamp(props.timestamp().toLocalDateTime());
+            l.setTimestamp(props.timestamp());
 
             try {
                 l.setRawData(input);
