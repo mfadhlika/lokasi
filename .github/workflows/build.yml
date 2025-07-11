@@ -57,7 +57,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: webui-production-files
-          path: ${{ runner.temp }}/webui/dist
+          path: ./webui/dist
 
       - uses: graalvm/setup-graalvm@v1
         with:
