@@ -115,6 +115,8 @@ public class LocationRepository {
                 new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ObjectMapper mapper = new ObjectMapper();
+
                 Location location = locations.get(i);
                 ps.setInt(1, location.getUserId());
                 ps.setString(2, location.getDeviceId());
@@ -125,7 +127,11 @@ public class LocationRepository {
                 ps.setDouble(7, location.getSpeed());
                 ps.setInt(8, location.getAccuracy());
                 ps.setInt(9, location.getVerticalAccuracy());
-                ps.setObject(10, location.getMotions());
+                try {
+                    ps.setObject(10, mapper.writeValueAsString(location.getMotions()));
+                } catch (JsonProcessingException ex) {
+                    throw new RuntimeException(ex.getMessage());
+                }
                 ps.setObject(11, location.getBatteryState());
                 ps.setDouble(12, location.getBattery());
                 ps.setString(13, location.getSsid());
