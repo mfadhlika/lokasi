@@ -10,7 +10,7 @@ const axiosInstance = axios.create({
 });
 
 function logout() {
-    axiosInstance.post("v1/logout")
+    axiosInstance.delete("v1/logout")
         .then(() => {
             localStorage.removeItem("accessToken");
             redirect("/login");

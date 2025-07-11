@@ -1,6 +1,7 @@
 import { createContext, useContext, useMemo, useState } from "react";
 import * as React from "react";
 import { jwtDecode } from "jwt-decode";
+import { axiosInstance } from "@/lib/request";
 interface AuthContextType {
     userInfo: {
         username: string
@@ -34,6 +35,7 @@ export const AuthProvider = ({ children }: React.ComponentProps<"div">) => {
         localStorage.removeItem("accessToken");
         setAccessToken(null);
         callback();
+        axiosInstance.delete("v1/logout").catch(err => console.log(err));
     };
 
     const value = useMemo(() => {

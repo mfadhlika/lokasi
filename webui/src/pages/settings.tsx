@@ -11,6 +11,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Checkbox } from "@/components/ui/checkbox";
 import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { useNavigate } from "react-router";
 
 const accountFormSchema = z.object({
     username: z.string(),
@@ -43,6 +44,7 @@ type Integration = {
 
 function AccountSettingsTab() {
     const { userInfo, logout } = useAuth();
+    const navigate = useNavigate();
 
     const accountForm = useForm<z.infer<typeof accountFormSchema>>({
         resolver: zodResolver(accountFormSchema),
@@ -61,7 +63,7 @@ function AccountSettingsTab() {
             .then((_res) => {
                 if (values.username !== userInfo?.username) {
                     logout(() => {
-
+                        navigate("/login");
                     });
                 }
             })

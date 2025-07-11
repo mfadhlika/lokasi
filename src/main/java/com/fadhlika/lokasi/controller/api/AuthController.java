@@ -1,25 +1,27 @@
 package com.fadhlika.lokasi.controller.api;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fadhlika.lokasi.dto.LoginRequest;
 import com.fadhlika.lokasi.dto.LoginResponse;
-import com.fadhlika.lokasi.dto.Response;
-import com.fadhlika.lokasi.model.User;
 import com.fadhlika.lokasi.service.JwtAuthService;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.time.Duration;
 
 @RestController
 public class AuthController {
+
     private final JwtAuthService jwtAuthService;
 
     @Autowired
@@ -36,27 +38,31 @@ public class AuthController {
         String accessToken = jwtAuthService.generateAccessToken(loginRequest.username());
         String refreshToken = jwtAuthService.generateRefreshToken(loginRequest.username());
 
-        Cookie cookie = new Cookie("refreshToken", refreshToken) {{
-            setHttpOnly(true);
-            setSecure(true);
-            setMaxAge(86400);
-            setAttribute("SameSite", "None");
-        }};
+        Cookie cookie = new Cookie("refreshToken", refreshToken) {
+            {
+                setHttpOnly(true);
+                setSecure(true);
+                setMaxAge(86400);
+                setAttribute("SameSite", "None");
+            }
+        };
 
         response.addCookie(cookie);
 
         return new ResponseEntity<>(new LoginResponse(accessToken, refreshToken), HttpStatus.OK);
     }
 
-    @PostMapping("/api/v1/logout")
+    @DeleteMapping("/api/v1/logout")
     public ResponseEntity<Object> logout(HttpServletResponse response) {
 
-        Cookie cookie = new Cookie("refreshToken", null) {{
-            setHttpOnly(true);
-            setSecure(true);
-            setMaxAge(0);
-            setAttribute("SameSite", "None");
-        }};
+        Cookie cookie = new Cookie("refreshToken", null) {
+            {
+                setHttpOnly(true);
+                setSecure(true);
+                setMaxAge(0);
+                setAttribute("SameSite", "None");
+            }
+        };
 
         response.addCookie(cookie);
 
