@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useEffect, useState } from "react";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 
 const accountFormSchema = z.object({
     username: z.string(),
@@ -41,7 +42,7 @@ type Integration = {
 }
 
 function AccountSettingsTab() {
-    const { userInfo } = useAuth();
+    const { userInfo, logout } = useAuth();
 
     const accountForm = useForm<z.infer<typeof accountFormSchema>>({
         resolver: zodResolver(accountFormSchema),
@@ -57,6 +58,13 @@ function AccountSettingsTab() {
             username: values.username,
             password: values.password,
         })
+            .then((_res) => {
+                if (values.username !== userInfo?.username) {
+                    logout(() => {
+
+                    });
+                }
+            })
             .catch(err => {
                 console.error(err);
             });
@@ -65,34 +73,49 @@ function AccountSettingsTab() {
     return (
         <Form {...accountForm}>
             <form onSubmit={accountForm.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-                <FormField control={accountForm.control} name="username" render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Username</FormLabel>
-                        <FormControl>
-                            <Input type="text" autoComplete="username"  {...field} />
-                        </FormControl>
-                    </FormItem>
-                )} />
-                <FormField control={accountForm.control} name="password" render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                            <Input type="password" autoComplete="password"  {...field} />
-                        </FormControl>
-                    </FormItem>
-                )} />
-                <FormField control={accountForm.control} name="confirmPassword" render={({ field, fieldState }) => (
-                    <FormItem>
-                        <FormLabel>Confirm Password</FormLabel>
-                        <FormControl>
-                            <Input type="password" autoComplete="password" {...field} />
-                        </FormControl>
-                        {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
-                    </FormItem>
-                )} />
-                <Button type="submit" className="w-[100px] self-end" disabled={accountForm.formState.isSubmitting}>Submit</Button>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Account</CardTitle>
+                        <CardDescription>
+                            Change your username and password here. After saving, you&apos;ll be logged
+                            out.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid gap-6">
+                        <FormField control={accountForm.control} name="username" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Username</FormLabel>
+                                <FormControl>
+                                    <Input type="text" autoComplete="username"  {...field} />
+                                </FormControl>
+                            </FormItem>
+                        )} />
+                        <FormField control={accountForm.control} name="password" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Password</FormLabel>
+                                <FormControl>
+                                    <Input type="password" autoComplete="password"  {...field} />
+                                </FormControl>
+                            </FormItem>
+                        )} />
+                        <FormField control={accountForm.control} name="confirmPassword" render={({ field, fieldState }) => (
+                            <FormItem>
+                                <FormLabel>Confirm Password</FormLabel>
+                                <FormControl>
+                                    <Input type="password" autoComplete="password" {...field} />
+                                </FormControl>
+                                {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
+                            </FormItem>
+                        )} />
+                    </CardContent>
+                    <CardFooter>
+                        <Button type="submit" className="w-[100px] self-end" disabled={accountForm.formState.isSubmitting}>Submit</Button>
+                    </CardFooter>
+
+                </Card>
             </form>
         </Form>
+
     );
 }
 
@@ -215,20 +238,30 @@ function IntegrationSettingsTab() {
     }
 
     return (
-        <Accordion type="multiple">
-            <AccordionItem value="owntracks">
-                <AccordionTrigger>Owntracks</AccordionTrigger>
-                <AccordionContent>
-                    <OwntracksIntegrationItem integration={integration} doSubmit={doSubmit} />
-                </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="overland">
-                <AccordionTrigger>Overland</AccordionTrigger>
-                <AccordionContent>
-                    <OverlandIntegrationItem integration={integration} doSubmit={doSubmit} />
-                </AccordionContent>
-            </AccordionItem>
-        </Accordion>
+        <Card>
+            <CardHeader>
+                <CardTitle>Integration</CardTitle>
+                <CardDescription>
+                    Configure integration with other apps here.
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-6">
+                <Accordion key={JSON.stringify(integration)} type="multiple">
+                    <AccordionItem value="owntracks">
+                        <AccordionTrigger>Owntracks</AccordionTrigger>
+                        <AccordionContent>
+                            <OwntracksIntegrationItem integration={integration} doSubmit={doSubmit} />
+                        </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="overland">
+                        <AccordionTrigger>Overland</AccordionTrigger>
+                        <AccordionContent>
+                            <OverlandIntegrationItem integration={integration} doSubmit={doSubmit} />
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
+            </CardContent>
+        </Card>
     );
 }
 
@@ -240,7 +273,9 @@ export default function Settings() {
                     <TabsTrigger value="account">Account</TabsTrigger>
                     <TabsTrigger value="integration">Integration</TabsTrigger>
                 </TabsList>
-                <TabsContent value="account"><AccountSettingsTab /></TabsContent>
+                <TabsContent value="account">
+                    <AccountSettingsTab />
+                </TabsContent>
                 <TabsContent value="integration"><IntegrationSettingsTab /></TabsContent>
             </Tabs>
         </div >
