@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.fadhlika.lokasi.model.User;
 import com.fadhlika.lokasi.service.JwtAuthService;
@@ -65,7 +66,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     return;
                 }
-            } catch (TokenExpiredException _) {
+            } catch (TokenExpiredException | SignatureVerificationException _) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
