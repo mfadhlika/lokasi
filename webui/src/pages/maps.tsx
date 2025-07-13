@@ -8,6 +8,7 @@ import { DeviceSelect } from "@/components/device-select.tsx";
 import { Separator } from "@/components/ui/separator";
 import { Maps } from "@/components/maps";
 import type { FeatureCollection, LineString } from "geojson";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function MapsPage() {
     const [locations, setLocations] = useState<FeatureCollection>({ type: 'FeatureCollection', features: [] } as FeatureCollection);
@@ -47,9 +48,11 @@ export default function MapsPage() {
             });
     }, [date, device]);
 
+    const isMobile = useIsMobile();
+
     return (
-        <div className="flex gap-4 m-4 h-full">
-            <div className="w-1/5 h-full flex flex-col flex-none">
+        <div className={`flex gap-4 m-4 h-full ${isMobile ? "flex-col" : ""}`}>
+            <div className={isMobile ? `w-full flex` : `w-1/5 h-full flex flex-col flex-none`}>
                 <div className="flex flex-col gap-4">
                     <DatePicker date={date} setDate={setDate} />
                     <DeviceSelect className="shadow-none border-none" selectedDevice={device} onSelectedDevice={setDevice} />
