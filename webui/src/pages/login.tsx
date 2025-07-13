@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 
-export default function Login() {
+export default function LoginPage() {
     const { userInfo } = useAuth();
     const navigate = useNavigate();
 

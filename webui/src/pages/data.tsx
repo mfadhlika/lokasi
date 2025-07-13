@@ -9,10 +9,13 @@ import { DeviceSelect } from "@/components/device-select";
 import { Button } from "@/components/ui/button";
 import { ImportDialog } from "@/components/import-dialog";
 import { Header } from "@/components/header";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
+import RawDataSheet, { useRawDataDialogState } from "@/components/raw-data-sheet";
 
 type Location = {
     timestamp: string,
-    coordinates: string,
+    coordinates: Point,
     device: string,
     altitude: number,
     speed: number,
@@ -22,62 +25,12 @@ type Location = {
     courseAccuracy: number,
     battery: number,
     batteryState: string,
-    ssid: string
+    ssid: string,
+    rawData: string
 }
 
-const columns: ColumnDef<Location>[] = [
-    {
-        accessorKey: "timestamp",
-        header: "Timestamp"
-    },
-    {
-        accessorKey: "coordinates",
-        header: "Coordinates"
-    },
-    {
-        accessorKey: "device",
-        header: "Device"
-    },
-    {
-        accessorKey: "altitude",
-        header: "Altitude"
-    },
-    {
-        accessorKey: "speed",
-        header: "Speed"
-    },
-    {
-        accessorKey: "accuracy",
-        header: "Accuracy"
-    },
-    {
-        accessorKey: "motions",
-        header: "Motions"
-    },
-    {
-        accessorKey: "course",
-        header: "Course"
-    },
-    {
-        accessorKey: "courseAccuracy",
-        header: "Course Accuracy"
-    },
-    {
-        accessorKey: "battery",
-        header: "Battery"
-    },
-    {
-        accessorKey: "batteryState",
-        header: "Battery State"
-    },
-    {
-        accessorKey: "ssid",
-        header: "SSID"
-    }
-];
 
-
-export default function Data() {
+export default function DataPage() {
     const [data, setData] = useState<Location[]>([]);
     const [date, setDate] = useState<DateRange | undefined>(() => {
         const start = new Date();
@@ -111,16 +64,96 @@ export default function Data() {
         axiosInstance.get(`v1/locations/raw?${params.toString()}`)
             .then((res) => {
                 const newData = (res.data as FeatureCollection).features.map(feature => {
-                    const coordinates = (feature.geometry as Point).coordinates;
                     return {
                         ...feature.properties,
-                        timestamp: (new Date(feature.properties!['timestamp'] * 1000)).toLocaleString(),
-                        coordinates: `${coordinates[1]}, ${coordinates[0]}`,
+                        coordinates: feature.geometry,
                     } as Location;
                 })
                 setData(newData);
             });
     }, [date, device, limit, offset]);
+
+    const { isOpen, toggleModal, data: rawData, setData: setRawData } = useRawDataDialogState();
+
+    const columns: ColumnDef<Location>[] = [
+        {
+            accessorKey: "timestamp",
+            header: "Timestamp",
+            cell: ({ row }) => (<span>{(new Date(row.getValue('timestamp') as number * 1000)).toLocaleString()}</span>)
+        },
+        {
+            accessorKey: "coordinates",
+            header: "Coordinates",
+            cell: ({ row }) => {
+                const coordinates = (row.getValue("coordinates") as Point).coordinates;
+                return (<span>{`${coordinates[1]}, ${coordinates[0]}`}</span>);
+            }
+        },
+        {
+            accessorKey: "device",
+            header: "Device"
+        },
+        {
+            accessorKey: "altitude",
+            header: "Altitude"
+        },
+        {
+            accessorKey: "speed",
+            header: "Speed"
+        },
+        {
+            accessorKey: "accuracy",
+            header: "Accuracy"
+        },
+        {
+            accessorKey: "motions",
+            header: "Motions"
+        },
+        {
+            accessorKey: "course",
+            header: "Course"
+        },
+        {
+            accessorKey: "courseAccuracy",
+            header: "Course Accuracy"
+        },
+        {
+            accessorKey: "battery",
+            header: "Battery"
+        },
+        {
+            accessorKey: "batteryState",
+            header: "Battery State"
+        },
+        {
+            accessorKey: "ssid",
+            header: "SSID"
+        },
+        {
+            id: "actions",
+            enableHiding: false,
+            cell: ({ row }) => (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                            <Button variant="ghost" onClick={() => {
+                                setRawData(JSON.stringify(JSON.parse(row.original.rawData), null, 2));
+                                toggleModal();
+                            }}>
+                                View raw data
+                            </Button>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            )
+        }
+    ];
 
     return (
         <>
@@ -132,6 +165,8 @@ export default function Data() {
             <div className="flex flex-1 flex-col gap-4">
                 <div className="w-full h-full p-4">
                     <DataTable columns={columns} data={data} />
+                    <RawDataSheet isOpen={isOpen} toggleModal={toggleModal} data={rawData} />
+
 
                     <div className="flex items-center justify-end space-x-2 py-4">
                         <Button

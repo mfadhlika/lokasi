@@ -216,6 +216,10 @@ public class Location {
         this.rawData = mapper.writeValueAsString(rawData);
     }
 
+    public void setRawData(String rawData) {
+        this.rawData = rawData;
+    }
+
     public ZonedDateTime getTimestamp() {
         return timestamp;
     }

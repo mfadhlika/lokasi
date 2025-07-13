@@ -63,6 +63,7 @@ public class LocationRepository {
             location.setTimestamp(ZonedDateTime.parse(rs.getString("timestamp")));
             location.setCourseAccuracy(rs.getInt("course_accuracy"));
             location.setCreatedAt(ZonedDateTime.parse(rs.getString("created_at")));
+            location.setRawData(rs.getString("raw_data"));
             String pointWkt = rs.getString("geometry");
             if (pointWkt != null) {
                 try {

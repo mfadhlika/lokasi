@@ -2,7 +2,6 @@ package com.fadhlika.lokasi.controller.api;
 
 import java.text.DecimalFormat;
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -122,7 +121,8 @@ public class LocationController {
                     curr.getBatteryState().toString(),
                     curr.getBattery(),
                     curr.getDeviceId(),
-                    curr.getSsid()
+                    curr.getSsid(),
+                    curr.getRawData()
             );
             features.add(new Feature(curr.getGeometry(), props));
         }

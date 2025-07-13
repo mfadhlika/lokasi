@@ -268,7 +268,7 @@ function IntegrationSettingsTab() {
     );
 }
 
-export default function Settings() {
+export default function SettingsPage() {
     return (
         <Tabs defaultValue="account" className="w-full">
             <Header>
