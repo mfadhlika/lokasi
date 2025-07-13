@@ -10,6 +10,8 @@ import java.util.UUID;
 
 import com.auth0.jwt.JWTCreator;
 import com.fadhlika.lokasi.repository.UserRepository;
+import com.fadhlika.lokasi.util.RandomStringGenerator;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -46,8 +48,23 @@ public class JwtAuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    private String getJwtSecret() {
+        if(jwtSecret == null || jwtSecret.isBlank()) {
+            jwtSecret = RandomStringGenerator.generate(16);
+        }
+
+        return jwtSecret;
+    }
+
+    private String getJwtRefreshSecret() {
+        if(jwtRefreshSecret == null || jwtRefreshSecret.isBlank()) {
+            jwtRefreshSecret = RandomStringGenerator.generate(16);
+        }
+        return jwtRefreshSecret;
+    }
+
     public String generateAccessToken(String username, Instant expiresAt, Boolean withId) {
-        Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
+        Algorithm algorithm = Algorithm.HMAC256(getJwtSecret());
 
         JWTCreator.Builder builder = JWT.create().withSubject(username);
         if (expiresAt != null) {
@@ -65,17 +82,17 @@ public class JwtAuthService {
     }
 
     public String generateRefreshToken(String username) {
-        Algorithm algorithm = Algorithm.HMAC256(jwtRefreshSecret);
+        Algorithm algorithm = Algorithm.HMAC256(getJwtRefreshSecret());
         return JWT.create().withJWTId(UUID.randomUUID().toString()).withSubject(username).withExpiresAt(Instant.now().plusSeconds(jwtRefreshExpiry)).sign(algorithm);
     }
 
     public DecodedJWT decodeAccessToken(String token) {
-        Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
+        Algorithm algorithm = Algorithm.HMAC256(getJwtSecret());
         return JWT.require(algorithm).build().verify(token);
     }
 
     public DecodedJWT decodeRefreshToken(String token) {
-        Algorithm algorithm = Algorithm.HMAC256(jwtRefreshSecret);
+        Algorithm algorithm = Algorithm.HMAC256(getJwtRefreshSecret());
         return JWT.require(algorithm).build().verify(token);
     }
 
