@@ -162,12 +162,9 @@ export default function DataPage() {
                 <DeviceSelect className="shadow-xs border-solid" selectedDevice={device} onSelectedDevice={setDevice} />
                 <ImportDialog />
             </Header>
-            <div className="flex flex-1 flex-col gap-4">
-                <div className="w-full h-full p-4">
+            <div className="flex flex-1 flex-col">
+                <div className="@container/main flex flex-1 flex-col gap-4 p-4">
                     <DataTable columns={columns} data={data} />
-                    <RawDataSheet isOpen={isOpen} toggleModal={toggleModal} data={rawData} />
-
-
                     <div className="flex items-center justify-end space-x-2 py-4">
                         <Button
                             variant="outline"
@@ -192,6 +189,7 @@ export default function DataPage() {
                     </div>
                 </div>
             </div>
+            <RawDataSheet isOpen={isOpen} toggleModal={toggleModal} data={rawData} />
         </>
     );
 }
