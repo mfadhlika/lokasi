@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.auth0.jwt.exceptions.SignatureVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fadhlika.lokasi.dto.LoginRequest;
 import com.fadhlika.lokasi.dto.LoginResponse;
@@ -71,7 +73,8 @@ public class AuthController {
 
     @GetMapping("/api/v1/auth/refresh")
     public ResponseEntity<LoginResponse> refresh(@CookieValue(name = "refreshToken") String refreshToken) {
-        DecodedJWT decodedJWT = jwtAuthService.decodeRefreshToken(refreshToken);
+        try {
+            DecodedJWT decodedJWT = jwtAuthService.decodeRefreshToken(refreshToken);
 
         if (!jwtAuthService.isRefreshTokenValid(refreshToken, decodedJWT.getSubject())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
@@ -80,5 +83,8 @@ public class AuthController {
         String accessToken = jwtAuthService.generateAccessToken(decodedJWT.getSubject());
 
         return new ResponseEntity<>(new LoginResponse(accessToken, refreshToken), HttpStatus.OK);
+        } catch(TokenExpiredException | SignatureVerificationException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 }
