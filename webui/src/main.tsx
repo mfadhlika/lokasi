@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/use-auth.tsx";
 import Maps from "@/pages/maps";
 import DataPage from '@/pages/data';
 import SettingsPage from '@/pages/settings';
+import { Toaster } from '@/components/ui/sonner';
 
 createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
@@ -19,6 +20,7 @@ createRoot(document.getElementById('root')!).render(
                     <Route path="/settings" element={<SettingsPage />} />
                 </Route>
             </Routes>
+            <Toaster />
         </AuthProvider>
     </BrowserRouter>
 )

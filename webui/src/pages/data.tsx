@@ -12,6 +12,7 @@ import { Header } from "@/components/header";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import RawDataSheet, { useRawDataDialogState } from "@/components/raw-data-sheet";
+import { toast } from "sonner";
 
 type Location = {
     timestamp: string,
@@ -70,7 +71,7 @@ export default function DataPage() {
                     } as Location;
                 })
                 setData(newData);
-            });
+            }).catch(err => toast.error(`Failed to get user's location data: ${err}`));
     }, [date, device, limit, offset]);
 
     const { isOpen, toggleModal, data: rawData, setData: setRawData } = useRawDataDialogState();

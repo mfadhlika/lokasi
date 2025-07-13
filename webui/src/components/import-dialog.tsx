@@ -17,6 +17,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
 import { axiosInstance } from "@/lib/request.ts";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const formSchema = z.object({
     source: z.string(),
@@ -48,10 +49,11 @@ export const ImportDialog = ({ className }: React.ComponentProps<"div">) => {
             }
         })
             .then(_ => {
+                toast.success("File uploaded succesfully");
                 setOpen(false);
             })
             .catch(err => {
-                console.error(err);
+                toast.error(`Failed to get user's devices: ${err}`);
             });
     }
 

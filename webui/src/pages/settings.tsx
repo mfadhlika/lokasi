@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { useNavigate } from "react-router";
 import { Header } from "@/components/header";
+import { toast } from "sonner";
 
 const accountFormSchema = z.object({
     username: z.string(),
@@ -69,7 +70,7 @@ function AccountSettingsTab() {
                 }
             })
             .catch(err => {
-                console.error(err);
+                toast.error(`Failed to updated user's account: ${err}`);
             });
     }
 
@@ -234,9 +235,10 @@ function IntegrationSettingsTab() {
         axiosInstance.put("v1/integration", data)
             .then(res => {
                 setIntegration({ ...res.data });
+                toast.success("Integration saved succesfully");
             })
             .catch(err => {
-                console.error(err);
+                toast.error(`Failed to update integration: ${err}`);
             });
     }
 

@@ -8,6 +8,7 @@ import { DeviceSelect } from "@/components/device-select.tsx";
 import { Maps } from "@/components/maps";
 import type { FeatureCollection, LineString } from "geojson";
 import { Header } from "@/components/header";
+import { toast } from "sonner";
 
 export default function MapsPage() {
     const [locations, setLocations] = useState<FeatureCollection>({ type: 'FeatureCollection', features: [] } as FeatureCollection);
@@ -44,7 +45,8 @@ export default function MapsPage() {
                 if (!data || data.features.length == 0) return;
                 const last = data.features[data.features.length - 1].geometry as LineString;
                 setPosition([last.coordinates[1][1], last.coordinates[1][0]]);
-            });
+            })
+            .catch(err => toast.error(`Failed to get user's locations: ${err}`));
     }, [date, device]);
 
     return (
