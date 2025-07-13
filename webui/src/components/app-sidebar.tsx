@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Command, Database, Map, Plane, Settings } from "lucide-react"
+import { Database, Map, Plane, Settings } from "lucide-react"
 
 import { NavUser } from "@/components/nav-user"
 import {
@@ -45,26 +45,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const location = useLocation();
 
     return (
-        <Sidebar
-            collapsible="icon"
-            className="overflow-hidden *:data-[sidebar=sidebar] w-[calc(var(--sidebar-width-icon)+1px)]!"
-            {...props}
-        >
+        <Sidebar {...props}>
             <SidebarHeader>
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild className="md:h-8 md:p-0">
-                            <a href="#">
-                                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                                    <Command className="size-4" />
-                                </div>
-                                <div className="grid flex-1 text-left text-sm leading-tight">
-                                    <span className="truncate font-medium">Lokasi</span>
-                                </div>
-                            </a>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
             </SidebarHeader>
             <SidebarContent>
                 <SidebarGroup>
@@ -83,6 +65,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                     >
                                         <Link to={item.url}>
                                             <item.icon />
+                                            {item.title}
                                         </Link>
 
                                     </SidebarMenuButton>
