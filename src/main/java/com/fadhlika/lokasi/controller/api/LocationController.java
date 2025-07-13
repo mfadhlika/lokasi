@@ -82,9 +82,12 @@ public class LocationController {
             DecimalFormat df = new DecimalFormat("0.##");
 
             props.put("distance", df.format(distance));
+            props.put("distance_unit", "km");
             props.put("speed", df.format(speed));
+            props.put("speed_unit", "kmph");
             props.put("startAt", curr.getTimestamp());
             props.put("endAt", prev.getTimestamp());
+            props.put("motions", curr.getMotions());
 
             features.add(new Feature(ls, props));
         }
