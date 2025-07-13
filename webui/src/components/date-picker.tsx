@@ -1,4 +1,4 @@
-import type { DateRange } from "react-day-picker"
+import { type DateRange } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -7,6 +7,8 @@ import { format, subDays, subMonths, subWeeks } from "date-fns";
 import { Popover, PopoverContent } from "./ui/popover";
 import { PopoverTrigger } from "@radix-ui/react-popover";
 import { CalendarIcon } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@/components/ui/select";
+import { useState } from "react";
 
 export type DatePickerProps = {
     className?: string,
@@ -21,6 +23,8 @@ export function DatePicker({
     setDate,
     variant
 }: DatePickerProps) {
+    const [value, setValue] = useState<string>();
+    const [key, setKey] = useState<number>(0);
 
     const endOfDay = () => {
         const end = new Date();
@@ -77,6 +81,25 @@ export function DatePicker({
         });
     };
 
+    const onValueChange = (value: string) => {
+        switch (value) {
+            case "today":
+                setToday();
+                break;
+            case "yesterday":
+                setYesterday();
+                break;
+            case "lastweek":
+                setLastWeek();
+                break;
+            case "lastmonth":
+                setLastMonth();
+                break;
+        }
+
+        setValue(value);
+    }
+
     return (
         <div className={cn("grid gap-2", className)}>
             <Popover>
@@ -101,20 +124,31 @@ export function DatePicker({
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0 z-100000" align="start">
-                    <div className={cn("flex rounded-md gap-2 shadow-md", className)}>
+                    <div className={cn("flex flex-1 flex-col rounded-md gap-2 shadow-md", className)}>
+                        <div className="flex flex-1 pr-2 pt-2 justify-end">
+                            <Select key={key} value={value} onValueChange={onValueChange}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a period" />
+                                </SelectTrigger>
+                                <SelectContent className="z-10000000">
+                                    <SelectItem value="today">Today</SelectItem>
+                                    <SelectItem value="yesterday">Yesterday</SelectItem>
+                                    <SelectItem value="lastweek">Last Week</SelectItem>
+                                    <SelectItem value="lastmonth">Last Month</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                         <Calendar
                             autoFocus
                             mode="range"
                             selected={date}
-                            onSelect={setDate}
+                            onSelect={(d) => {
+                                setDate(d);
+                                setValue(undefined);
+                                setKey((k) => k + 1);
+                            }}
                             className="border-r-2"
                         />
-                        <div className="flex flex-col gap-2 pt-2 pr-2 items-start">
-                            <Button variant="ghost" className="w-full justify-start" onClick={setToday}>Today</Button>
-                            <Button variant="ghost" className="w-full justify-start" onClick={setYesterday}>Yesterday</Button>
-                            <Button variant="ghost" className="w-full justify-start" onClick={setLastWeek}>Last Week</Button>
-                            <Button variant="ghost" className="w-full justify-start" onClick={setLastMonth}>Last Month</Button>
-                        </div>
                     </div>
                 </PopoverContent>
             </Popover>
