@@ -8,6 +8,7 @@ import { DatePicker } from "@/components/date-picker";
 import { DeviceSelect } from "@/components/device-select";
 import { Button } from "@/components/ui/button";
 import { ImportDialog } from "@/components/import-dialog";
+import { Header } from "@/components/header";
 
 type Location = {
     timestamp: string,
@@ -121,38 +122,41 @@ export default function Data() {
             });
     }, [date, device, limit, offset]);
 
-
     return (
-        <div className="w-full h-full p-4">
-            <div className="flex items-center gap-4 py-4">
+        <>
+            <Header>
                 <DatePicker variant="outline" date={date} setDate={setDate} />
                 <DeviceSelect className="shadow-xs border-solid" selectedDevice={device} onSelectedDevice={setDevice} />
-                <ImportDialog className="self-end" />
-            </div>
-            <DataTable columns={columns} data={data} />
+                <ImportDialog />
+            </Header>
+            <div className="flex flex-1 flex-col gap-4">
+                <div className="w-full h-full p-4">
+                    <DataTable columns={columns} data={data} />
 
-            <div className="flex items-center justify-end space-x-2 py-4">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                        if (offset - limit >= 0) setOffset(offset - limit);
-                    }}
-                    disabled={offset === 0}
-                >
-                    Previous
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                        setOffset(offset + limit);
-                    }}
-                    disabled={false}
-                >
-                    Next
-                </Button>
+                    <div className="flex items-center justify-end space-x-2 py-4">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                                if (offset - limit >= 0) setOffset(offset - limit);
+                            }}
+                            disabled={offset === 0}
+                        >
+                            Previous
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                                setOffset(offset + limit);
+                            }}
+                            disabled={false}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                </div>
             </div>
-        </div>
+        </>
     );
 }

@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { useNavigate } from "react-router";
+import { Header } from "@/components/header";
 
 const accountFormSchema = z.object({
     username: z.string(),
@@ -269,17 +270,19 @@ function IntegrationSettingsTab() {
 
 export default function Settings() {
     return (
-        <div className="w-full h-full p-4">
-            <Tabs defaultValue="account" className="w-full">
+        <Tabs defaultValue="account" className="w-full">
+            <Header>
                 <TabsList>
                     <TabsTrigger value="account">Account</TabsTrigger>
                     <TabsTrigger value="integration">Integration</TabsTrigger>
                 </TabsList>
+            </Header>
+            <div className="pr-4 pl-4">
                 <TabsContent value="account">
                     <AccountSettingsTab />
                 </TabsContent>
                 <TabsContent value="integration"><IntegrationSettingsTab /></TabsContent>
-            </Tabs>
-        </div >
+            </div>
+        </Tabs>
     );
 }

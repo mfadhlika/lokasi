@@ -5,10 +5,9 @@ import { axiosInstance } from "@/lib/request.ts";
 import type { DateRange } from "react-day-picker";
 import { DatePicker } from "@/components/date-picker.tsx";
 import { DeviceSelect } from "@/components/device-select.tsx";
-import { Separator } from "@/components/ui/separator";
 import { Maps } from "@/components/maps";
 import type { FeatureCollection, LineString } from "geojson";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { Header } from "@/components/header";
 
 export default function MapsPage() {
     const [locations, setLocations] = useState<FeatureCollection>({ type: 'FeatureCollection', features: [] } as FeatureCollection);
@@ -48,19 +47,16 @@ export default function MapsPage() {
             });
     }, [date, device]);
 
-    const isMobile = useIsMobile();
-
     return (
-        <div className={`flex gap-4 m-4 h-full ${isMobile ? "flex-col" : ""}`}>
-            <div className={isMobile ? `w-full flex` : `w-1/5 h-full flex flex-col flex-none`}>
-                <div className="flex flex-col gap-4">
-                    <DatePicker date={date} setDate={setDate} />
-                    <DeviceSelect className="shadow-none border-none" selectedDevice={device} onSelectedDevice={setDevice} />
-                    <Separator />
-                </div>
+        <>
+            <Header>
+                <DatePicker variant="outline" date={date} setDate={setDate} />
+                <DeviceSelect className="" selectedDevice={device} onSelectedDevice={setDevice} />
+            </Header>
+            <div className="flex flex-1 flex-col gap-4">
+                <Maps position={position} locations={locations} />
             </div>
-            <Maps position={position} locations={locations} />
-        </div>
+        </>
     )
 
 }
