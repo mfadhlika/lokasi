@@ -12,8 +12,8 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
 import com.fadhlika.lokasi.model.User;
@@ -27,49 +27,61 @@ public class UserRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(UserRepository.class);
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcClient jdbcClient;
 
     @Autowired
     public UserRepository(DataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcClient = JdbcClient.create(dataSource);
     }
 
     private final RowMapper<User> userRowMapper = (ResultSet rs, int rowNum) -> new User(
             rs.getInt("id"),
             rs.getString("username"),
             rs.getString("password"),
-            rs.getTimestamp("created_at")
-    );
+            rs.getTimestamp("created_at"));
 
     public void createUser(User user) {
-        jdbcTemplate.update("INSERT INTO user(username, password, created_at) VALUES(?, ?, ?)", user.getUsername(),
-                user.getPassword(),
-                user.getCreatedAt()
-        );
-        jdbcTemplate.update("INSERT INTO integration(user_id) VALUES((SELECT id FROM user WHERE username = ?))", user.getUsername());
+        jdbcClient.sql("INSERT INTO user(username, password, created_at) VALUES(?, ?, ?)")
+                .param(user.getUsername())
+                .param(user.getPassword())
+                .param(user.getCreatedAt())
+                .update();
+        jdbcClient.sql("INSERT INTO integration(user_id) VALUES((SELECT id FROM user WHERE username = ?))")
+                .param(user.getUsername())
+                .update();
+
     }
 
     public void updateUser(User user) {
-        jdbcTemplate.update("UPDATE user SET username = ?, password = ? WHERE id = ?",
-                user.getUsername(),
-                user.getPassword(),
-                user.getId()
-        );
+        jdbcClient.sql("UPDATE user SET username = ?, password = ? WHERE id = ?")
+                .param(user.getUsername())
+                .param(user.getPassword())
+                .param(user.getId())
+                .update();
     }
 
     public User getUser(String username) {
-        return jdbcTemplate.queryForObject("SELECT id, username, password, created_at FROM `user` WHERE username = ?", userRowMapper, username);
+        return jdbcClient.sql("SELECT id, username, password, created_at FROM `user` WHERE username = ?")
+                .param(username)
+                .query(userRowMapper)
+                .single();
     }
 
     public User getUser(int userId) {
-        return jdbcTemplate.queryForObject("SELECT id, username, password, created_at FROM `user` WHERE id = ?", userRowMapper, userId);
+        return jdbcClient.sql("SELECT id, username, password, created_at FROM `user` WHERE id = ?")
+                .param(userId)
+                .query(userRowMapper)
+                .single();
     }
 
     public boolean hasUsers() {
-        return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM `user`", Integer.class) > 0;
+        return jdbcClient.sql("SELECT COUNT(*) FROM `user`").query(Integer.class).single() > 0;
     }
 
     public List<String> getUserDevices(int userId) {
-        return jdbcTemplate.queryForList("SELECT DISTINCT device_id FROM `location` WHERE user_id = ?", String.class, userId);
+        return jdbcClient.sql("SELECT DISTINCT device_id FROM `location` WHERE user_id = ?")
+                .param(userId)
+                .query(String.class)
+                .list();
     }
 }
