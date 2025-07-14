@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
 import com.fadhlika.lokasi.model.Integration;
@@ -13,7 +14,7 @@ import com.fadhlika.lokasi.model.Integration;
 @Repository
 public class IntegrationRepository {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcClient jdbcClient;
 
     private final RowMapper<Integration> rowMapper = (ResultSet rs, int rowNum) -> new Integration(
             rs.getInt("user_id"),
@@ -25,36 +26,47 @@ public class IntegrationRepository {
 
     @Autowired
     public IntegrationRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+        this.jdbcClient = JdbcClient.create(jdbcTemplate);
     }
 
     public void save(Integration integration) throws SQLException {
-        jdbcTemplate.update("""
-            UPDATE integration 
-            SET 
-                owntracks_enable = ?, 
-                owntracks_username = ?, 
-                owntracks_password = IFNULL(?, owntracks_password),
-                overland_enable = ?,
-                overland_api_key = ?
-                WHERE user_id = ?""",
-                integration.owntracksEnable(),
-                integration.owntracksUsername(),
-                integration.owntracksPassword(),
-                integration.overlandEnable(),
-                integration.overlandApiKey(),
-                integration.userId());
+        jdbcClient.sql("""
+                UPDATE integration
+                SET
+                    owntracks_enable = ?,
+                    owntracks_username = ?,
+                    owntracks_password = IFNULL(?, owntracks_password),
+                    overland_enable = ?,
+                    overland_api_key = ?
+                    WHERE user_id = ?""")
+                .param(integration.owntracksEnable())
+                .param(integration.owntracksUsername())
+                .param(integration.owntracksPassword())
+                .param(integration.overlandEnable())
+                .param(integration.overlandApiKey())
+                .param(integration.userId())
+                .update();
     }
 
     public Integration get(int userId) throws SQLException {
-        return jdbcTemplate.queryForObject("SELECT user_id, owntracks_enable, owntracks_username, overland_enable, overland_api_key FROM integration WHERE user_id = ?", rowMapper, userId);
+        return jdbcClient.sql(
+                "SELECT user_id, owntracks_enable, owntracks_username, overland_enable, overland_api_key FROM integration WHERE user_id = ?")
+                .param(userId)
+                .query(rowMapper)
+                .single();
     }
 
     public Integration getByOwntracksUsername(String username) throws SQLException {
-        return jdbcTemplate.queryForObject("SELECT * FROM integration WHERE owntracks_username = ?", rowMapper, username);
+        return jdbcClient.sql("SELECT * FROM integration WHERE owntracks_username = ?")
+                .param(username)
+                .query(rowMapper)
+                .single();
     }
 
     public Integration getByOverlandApiKey(String apikey) throws SQLException {
-        return jdbcTemplate.queryForObject("SELECT * FROM integration WHERE overland_api_key = ?", rowMapper, apikey);
+        return jdbcClient.sql("SELECT * FROM integration WHERE overland_api_key = ?")
+                .param(apikey)
+                .query(rowMapper)
+                .single();
     }
 }
