@@ -5,8 +5,6 @@
 package com.fadhlika.lokasi.repository;
 
 import java.sql.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +18,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.jdbc.core.simple.JdbcClient.StatementSpec;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -37,13 +36,13 @@ public class LocationRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(LocationRepository.class);
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcClient jdbcClient;
 
     private final WKTReader wktReader;
 
     @Autowired
     public LocationRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+        this.jdbcClient = JdbcClient.create(jdbcTemplate);
         this.wktReader = new WKTReader();
     }
 
@@ -87,71 +86,49 @@ public class LocationRepository {
         }
     };
 
-    public void createLocation(Location location) throws DataAccessException {
-        createLocations(new ArrayList<>() {
-            {
-                add(location);
-            }
-        });
-    }
-
-    public void createLocations(List<Location> locations) throws DataAccessException {
-        jdbcTemplate.batchUpdate(
+    public void createLocation(Location location) throws DataAccessException, JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        jdbcClient.sql(
                 "INSERT INTO location("
-                + "user_id, "
-                + "device_id, "
-                + "geometry, "
-                + "altitude, "
-                + "course, "
-                + "course_accuracy, "
-                + "speed, "
-                + "accuracy, "
-                + "vertical_accuracy, "
-                + "motions, "
-                + "battery_state, "
-                + "battery, "
-                + "ssid, "
-                + "timestamp, "
-                + "raw_data, "
-                + "created_at, "
-                + "import_id) VALUES(?, ?, ST_GeomFromText(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                ObjectMapper mapper = new ObjectMapper();
-
-                Location location = locations.get(i);
-                ps.setInt(1, location.getUserId());
-                ps.setString(2, location.getDeviceId());
-                ps.setObject(3, location.getGeometry());
-                ps.setInt(4, location.getAltitude());
-                ps.setInt(5, location.getCourse());
-                ps.setInt(6, location.getCourseAccuracy());
-                ps.setDouble(7, location.getSpeed());
-                ps.setInt(8, location.getAccuracy());
-                ps.setInt(9, location.getVerticalAccuracy());
-                try {
-                    ps.setObject(10, mapper.writeValueAsString(location.getMotions()));
-                } catch (JsonProcessingException ex) {
-                    throw new RuntimeException(ex.getMessage());
-                }
-                ps.setObject(11, location.getBatteryState());
-                ps.setDouble(12, location.getBattery());
-                ps.setString(13, location.getSsid());
-                ps.setObject(14, location.getTimestamp());
-                ps.setString(15, location.getRawData());
-                ps.setObject(16, location.getCreatedAt());
-                ps.setObject(17, location.getImportId());
-            }
-
-            @Override
-            public int getBatchSize() {
-                return locations.size();
-            }
-        });
+                        + "user_id, "
+                        + "device_id, "
+                        + "geometry, "
+                        + "altitude, "
+                        + "course, "
+                        + "course_accuracy, "
+                        + "speed, "
+                        + "accuracy, "
+                        + "vertical_accuracy, "
+                        + "motions, "
+                        + "battery_state, "
+                        + "battery, "
+                        + "ssid, "
+                        + "timestamp, "
+                        + "raw_data, "
+                        + "created_at, "
+                        + "import_id) VALUES(?, ?, ST_GeomFromText(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+                .param(location.getUserId())
+                .param(location.getDeviceId())
+                .param(location.getGeometry())
+                .param(location.getAltitude())
+                .param(location.getCourse())
+                .param(location.getCourseAccuracy())
+                .param(location.getSpeed())
+                .param(location.getAccuracy())
+                .param(location.getVerticalAccuracy())
+                .param(mapper.writeValueAsString(location.getMotions()))
+                .param(location.getBatteryState())
+                .param(location.getBattery())
+                .param(location.getSsid())
+                .param(location.getTimestamp())
+                .param(location.getRawData())
+                .param(location.getCreatedAt())
+                .param(location.getImportId())
+                .update();
     }
 
-    public List<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end, Optional<String> device, Optional<Integer> offset, Optional<Integer> limit) throws SQLException {
+    public List<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end, Optional<String> device,
+            Optional<Integer> offset, Optional<Integer> limit) throws SQLException {
         List<String> where = new ArrayList<>() {
             {
                 add("user_id = ?");
@@ -204,6 +181,10 @@ public class LocationRepository {
             args.add(o);
         });
 
-        return jdbcTemplate.query(sqlBuilder.toString(), locationRowMapper, args.toArray());
+        StatementSpec stmt = jdbcClient.sql(sqlBuilder.toString());
+        for (Object arg : args) {
+            stmt = stmt.param(arg);
+        }
+        return stmt.query(locationRowMapper).list();
     }
 }

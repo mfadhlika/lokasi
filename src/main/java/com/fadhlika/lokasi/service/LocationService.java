@@ -14,10 +14,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.fadhlika.lokasi.exception.InternalErrorException;
 import com.fadhlika.lokasi.model.Location;
 import com.fadhlika.lokasi.repository.LocationRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  *
@@ -30,21 +32,32 @@ public class LocationService {
 
     private final LocationRepository locationRepository;
 
+    private final TransactionTemplate transactionTemplate;
+
     @Autowired
-    public LocationService(LocationRepository locationRepository) {
+    public LocationService(LocationRepository locationRepository, TransactionTemplate transactionTemplate) {
         this.locationRepository = locationRepository;
+        this.transactionTemplate = transactionTemplate;
     }
 
     public void saveLocation(Location location) {
         try {
             locationRepository.createLocation(location);
-        } catch (DataAccessException ex) {
+        } catch (DataAccessException | JsonProcessingException ex) {
             throw new InternalErrorException(ex.getMessage());
         }
     }
 
     public void saveLocations(List<Location> locations) {
-        locationRepository.createLocations(locations);
+        transactionTemplate.executeWithoutResult(_ -> {
+            for (Location location : locations) {
+                try {
+                    locationRepository.createLocation(location);
+                } catch (DataAccessException | JsonProcessingException e) {
+                    throw new InternalErrorException(e.getMessage());
+                }
+            }
+        });
     }
 
     public List<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end) {
@@ -55,7 +68,8 @@ public class LocationService {
         return findLocations(userId, start, end, device, Optional.empty(), Optional.empty());
     }
 
-    public List<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end, Optional<String> device, Optional<Integer> offset, Optional<Integer> limit) {
+    public List<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end, Optional<String> device,
+            Optional<Integer> offset, Optional<Integer> limit) {
         try {
             return locationRepository.findLocations(userId, start, end, device, offset, limit);
         } catch (SQLException ex) {
