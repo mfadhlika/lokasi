@@ -6,7 +6,13 @@
         "allDeclaredMethods": true
     },
     {
-        "name": "com.fadhlika.lokasi.dto.Properties",
+        "name": "com.fadhlika.lokasi.dto.PointProperties",
+        "allDeclaredConstructors": true,
+        "allDeclaredFields": true,
+        "allDeclaredMethods": true
+    },
+    {
+        "name": "com.fadhlika.lokasi.dto.LineStringProperties",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
