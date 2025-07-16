@@ -1,5 +1,7 @@
 import axios from "axios";
-import { redirect } from "react-router";
+import router from "./router";
+
+let refreshTokenPromise: Promise<string> | null = null;
 
 const axiosInstance = axios.create({
     baseURL: "/api",
@@ -13,7 +15,7 @@ function logout() {
     axiosInstance.delete("v1/logout")
         .then(() => {
             localStorage.removeItem("accessToken");
-            redirect("/login");
+            router.navigate("/login");
         }).catch(err => console.error(err));
 };
 
@@ -39,19 +41,34 @@ axiosInstance.interceptors.response.use(
     async (err) => {
         const originalRequest = err.config;
 
-        if (err.response?.status == 401 && !originalRequest._retry) {
+        if (!/^(v1\/auth\/refresh|v1\/login)$/.test(originalRequest.url) &&
+            err.response?.status == 401 &&
+            !originalRequest._retry) {
             originalRequest._retry = true;
 
             try {
-                const accessToken = await refreshToken();
+                if (!refreshTokenPromise) {
+                    console.debug("refreshing token");
+                    refreshTokenPromise = refreshToken()
+                        .then((token) => {
+                            refreshTokenPromise = null;
+                            return token;
+                        });
+
+                }
+
+                const accessToken = await refreshTokenPromise;
+
                 if (accessToken) originalRequest.headers.Authorization = "Bearer " + accessToken;
+
+                console.debug("retry request");
                 return axios(originalRequest);
             } catch {
+                console.debug("failed refreshing token");
                 logout();
             }
-        } else if (err.response?.status == 403) {
-            logout();
         }
+
         return Promise.reject(err);
     }
 );

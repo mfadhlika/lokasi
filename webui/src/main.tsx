@@ -1,26 +1,13 @@
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import { BrowserRouter, Route, Routes } from "react-router";
-import LoginPage from "@/pages/login";
-import { ProtectedRoute } from "@/components/protected-route.tsx";
+import { RouterProvider } from "react-router";
 import { AuthProvider } from "@/hooks/use-auth.tsx";
-import Maps from "@/pages/maps";
-import DataPage from '@/pages/data';
-import SettingsPage from '@/pages/settings';
 import { Toaster } from '@/components/ui/sonner';
+import router from './lib/router';
 
 createRoot(document.getElementById('root')!).render(
-    <BrowserRouter>
-        <AuthProvider>
-            <Routes>
-                <Route path="/login" element={<LoginPage />} />
-                <Route element={<ProtectedRoute />}>
-                    <Route path="/" element={<Maps />} />
-                    <Route path="/data" element={<DataPage />} />
-                    <Route path="/settings" element={<SettingsPage />} />
-                </Route>
-            </Routes>
-            <Toaster />
-        </AuthProvider>
-    </BrowserRouter>
+    <AuthProvider>
+        <RouterProvider router={router} />
+        <Toaster />
+    </AuthProvider>
 )
