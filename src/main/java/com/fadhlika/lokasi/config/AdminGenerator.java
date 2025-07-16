@@ -3,6 +3,7 @@ package com.fadhlika.lokasi.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -12,9 +13,15 @@ import com.fadhlika.lokasi.util.RandomStringGenerator;
 
 @Configuration
 @Order(3)
-public class FirstUserGenerator implements CommandLineRunner {
+public class AdminGenerator implements CommandLineRunner {
 
-    private static final Logger logger = LoggerFactory.getLogger(FirstUserGenerator.class);
+    private static final Logger logger = LoggerFactory.getLogger(AdminGenerator.class);
+
+    @Value("${admin.username:admin}")
+    private String adminUsername;
+
+    @Value("${admin.password:}")
+    private String adminPassword;
 
     @Autowired
     private UserService userService;
@@ -25,10 +32,12 @@ public class FirstUserGenerator implements CommandLineRunner {
             return;
         }
 
-        String password = RandomStringGenerator.generate(16);
+        if (adminPassword.isBlank()) {
+            adminPassword = RandomStringGenerator.generate(16);
+        }
 
-        userService.createUser("admin", password);
+        userService.createUser(adminUsername, adminPassword);
 
-        logger.info("Created new user with username {} and password: {}", "admin", password);
+        logger.info("Created new user with username {} and password: {}", adminUsername, adminPassword);
     }
 }
