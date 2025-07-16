@@ -80,7 +80,7 @@ export default function DataPage() {
         {
             accessorKey: "timestamp",
             header: "Timestamp",
-            cell: ({ row }) => (<span>{(new Date(row.getValue('timestamp') as number * 1000)).toLocaleString()}</span>)
+            cell: ({ row }) => (<span>{(new Date(row.getValue('timestamp'))).toLocaleString()}</span>)
         },
         {
             accessorKey: "coordinates",
