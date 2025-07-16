@@ -4,6 +4,7 @@ import { MapContainer, ZoomControl, TileLayer, GeoJSON } from "react-leaflet";
 import 'leaflet/dist/leaflet.css';
 import React from "react";
 import hash from "object-hash";
+import type { LineStringProperties } from "@/types/properties";
 
 export function Maps({ locations, position }: React.ComponentProps<"div"> & {
     locations: FeatureCollection,
@@ -38,10 +39,13 @@ export function Maps({ locations, position }: React.ComponentProps<"div"> & {
                 }}
                 onEachFeature={(feature, layer) => {
                     if (feature.properties) {
+                        const props = feature.properties as LineStringProperties;
                         let content = "<div>";
-                        Object.keys(feature.properties).forEach(key => {
-                            content += `<strong>${key}</strong>: ${feature.properties[key]}<br/>`;
-                        })
+                        content += `<strong>Distance</strong>: ${props.distance.toFixed(2)} ${props.distanceUnit}<br/>`;
+                        content += `<strong>Speed</strong>: ${props.speed.toFixed(2)} ${props.speedUnit}<br/>`;
+                        content += `<strong>Start at</strong>: ${(new Date(props.startAt)).toLocaleString()}<br/>`;
+                        content += `<strong>End at</strong>: ${(new Date(props.endAt)).toLocaleString()}<br/>`;
+                        if (props.motions) content += `<strong>Motions</strong>: ${props.motions.join(",")}<br/>`;
                         content += "</div>";
                         layer.bindPopup(content);
                     }
