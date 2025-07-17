@@ -1,7 +1,6 @@
 import { axiosInstance } from "@/lib/request";
 import type { FeatureCollection, Point } from "geojson";
 import { useState, useEffect } from "react";
-import type { DateRange } from "react-day-picker";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/data-table";
 import { DatePicker } from "@/components/date-picker";
@@ -13,6 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { MoreHorizontal } from "lucide-react";
 import RawDataSheet, { useRawDataDialogState } from "@/components/raw-data-sheet";
 import { toast } from "sonner";
+import { useLocationFilter } from "@/hooks/use-location-filter";
 
 type Location = {
     timestamp: string,
@@ -33,21 +33,12 @@ type Location = {
 
 export default function DataPage() {
     const [data, setData] = useState<Location[]>([]);
-    const [date, setDate] = useState<DateRange | undefined>(() => {
-        const start = new Date();
-        start.setHours(0, 0, 0, 0);
+    const [filter, setFilter] = useLocationFilter();
 
-        const end = new Date();
-        end.setHours(23, 59, 59, 59);
-
-        return {
-            from: start,
-            to: end,
-        };
-    });
-    const [device, setDevice] = useState<string>('all');
-    const [offset, setOffset] = useState<number>(0);
-    const [limit, _setLimit] = useState<number>(25);
+    const date = filter.date;
+    const device = filter.device || 'all';
+    const offset = filter.offset || 0;
+    const limit = filter.limit || 25;
 
     useEffect(() => {
         const params = new URLSearchParams();
@@ -59,7 +50,7 @@ export default function DataPage() {
         if (date?.to) {
             params.set('end', date.to.toISOString());
         }
-        if (device !== 'all') {
+        if (device && device !== 'all') {
             params.set('device', device);
         }
         axiosInstance.get(`v1/locations/raw?${params.toString()}`)
@@ -159,8 +150,11 @@ export default function DataPage() {
     return (
         <>
             <Header>
-                <DatePicker variant="outline" date={date} setDate={setDate} />
-                <DeviceSelect className="shadow-xs border-solid" selectedDevice={device} onSelectedDevice={setDevice} />
+                <DatePicker variant="outline" date={date} setDate={(date) => setFilter({
+                    ...filter,
+                    date,
+                })} />
+                <DeviceSelect className="shadow-xs border-solid" selectedDevice={device} onSelectedDevice={(device) => setFilter({ ...filter, device })} />
                 <ImportDialog />
             </Header>
             <div className="flex flex-1 flex-col">
@@ -171,7 +165,10 @@ export default function DataPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                                if (offset - limit >= 0) setOffset(offset - limit);
+                                if (offset - limit >= 0) setFilter({
+                                    ...filter,
+                                    offset: offset - limit
+                                });
                             }}
                             disabled={offset === 0}
                         >
@@ -181,7 +178,7 @@ export default function DataPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                                setOffset(offset + limit);
+                                setFilter({ ...filter, offset: offset + limit });
                             }}
                             disabled={false}
                         >
