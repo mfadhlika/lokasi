@@ -2,7 +2,10 @@ package com.fadhlika.lokasi.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
@@ -12,6 +15,14 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public void handleGenericException(RuntimeException ex) {
+        logger.error("Exception handled: {}", ex.getMessage());
+        throw ex;
+    }
+
+    @ExceptionHandler(MissingRequestCookieException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public void handleMissingRequestCookieException(MissingRequestCookieException ex)
+            throws MissingRequestCookieException {
         logger.error("Exception handled: {}", ex.getMessage());
         throw ex;
     }
