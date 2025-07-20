@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.auth0.jwt.exceptions.SignatureVerificationException;
+
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
@@ -23,6 +25,14 @@ public class ApiExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public void handleMissingRequestCookieException(MissingRequestCookieException ex)
             throws MissingRequestCookieException {
+        logger.error("Exception handled: {}", ex.getMessage());
+        throw ex;
+    }
+
+    @ExceptionHandler(SignatureVerificationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public void handleSignatureVerificationException(SignatureVerificationException ex)
+            throws SignatureVerificationException {
         logger.error("Exception handled: {}", ex.getMessage());
         throw ex;
     }
