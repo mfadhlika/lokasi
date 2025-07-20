@@ -16,5 +16,11 @@
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
+    },
+    {
+        "name": "com.fadhlika.lokasi.dto.TripProperties",
+        "allDeclaredConstructors": true,
+        "allDeclaredFields": true,
+        "allDeclaredMethods": true
     }
 ]

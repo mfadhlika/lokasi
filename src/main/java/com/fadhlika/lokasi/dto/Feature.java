@@ -1,7 +1,11 @@
 package com.fadhlika.lokasi.dto;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 
 import com.fadhlika.lokasi.exception.InternalErrorException;
@@ -21,6 +25,8 @@ public class Feature {
     @JsonDeserialize(using = GeometryDeserializer.class)
     private Geometry geometry;
 
+    private List<Double> bbox = new ArrayList<>();
+
     private HashMap<String, Object> properties;
 
     public Feature() {
@@ -29,11 +35,19 @@ public class Feature {
 
     public Feature(Geometry geometry, HashMap<String, Object> properties) {
         this.geometry = geometry;
+        for (Coordinate coordinate : geometry.getBoundary().getCoordinates()) {
+            this.bbox.add(coordinate.y);
+            this.bbox.add(coordinate.x);
+        }
         this.properties = properties;
     }
 
     public <T> Feature(Geometry geometry, T properties) {
         this.geometry = geometry;
+        for (Coordinate coordinate : geometry.getBoundary().getCoordinates()) {
+            this.bbox.add(coordinate.y);
+            this.bbox.add(coordinate.x);
+        }
         ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
         this.properties = mapper.convertValue(properties, new TypeReference<>() {
         });
@@ -58,5 +72,9 @@ public class Feature {
 
     public String getType() {
         return type;
+    }
+
+    public List<Double> getBbox() {
+        return bbox;
     }
 }

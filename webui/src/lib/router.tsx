@@ -4,6 +4,7 @@ import { createBrowserRouter } from "react-router"
 import DataPage from "@/pages/data";
 import SettingsPage from "@/pages/settings";
 import LoginPage from "@/pages/login";
+import TripsPage from "@/pages/trips";
 
 const router = createBrowserRouter([
     {
@@ -20,7 +21,7 @@ const router = createBrowserRouter([
             },
             {
                 path: "/trips",
-                element: <div>WIP</div>
+                element: <TripsPage />
             },
             {
                 path: "/data",

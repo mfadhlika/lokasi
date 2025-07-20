@@ -24,4 +24,10 @@ type LineStringProperties = {
     motions: string[]
 };
 
-export type { PointProperties, LineStringProperties };
+type TripProperties = {
+    title: string,
+    startAt: string,
+    endAt: string
+}
+
+export type { PointProperties, LineStringProperties, TripProperties };
