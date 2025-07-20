@@ -56,7 +56,7 @@ public class LocationRepository {
             location.setSpeed(rs.getDouble("speed"));
             location.setAccuracy(rs.getInt("accuracy"));
             location.setVerticalAccuracy(rs.getInt("vertical_accuracy"));
-            location.setBatteryState(rs.getInt("battery_state"));
+            location.setBatteryState(rs.getString("battery_state"));
             location.setBattery(rs.getDouble("battery"));
             location.setSsid(rs.getString("ssid"));
             location.setTimestamp(ZonedDateTime.parse(rs.getString("timestamp")));
