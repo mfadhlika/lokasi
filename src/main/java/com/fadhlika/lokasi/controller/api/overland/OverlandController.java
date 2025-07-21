@@ -58,7 +58,7 @@ public class OverlandController {
             l.setTimestamp(props.timestamp());
 
             try {
-                l.setRawData(input);
+                l.setRawData(feature);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
