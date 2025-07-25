@@ -25,7 +25,7 @@ public class ApiExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public void handleMissingRequestCookieException(MissingRequestCookieException ex)
             throws MissingRequestCookieException {
-        logger.error("Exception handled: {}", ex.getMessage());
+        logger.error("MissingRequestCookieException: {}", ex.getMessage());
         throw ex;
     }
 
@@ -33,7 +33,7 @@ public class ApiExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public void handleSignatureVerificationException(SignatureVerificationException ex)
             throws SignatureVerificationException {
-        logger.error("Exception handled: {}", ex.getMessage());
+        logger.error("SignatureVerificationException: {}", ex.getMessage());
         throw ex;
     }
 }
