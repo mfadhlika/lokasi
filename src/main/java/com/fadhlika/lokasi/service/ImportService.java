@@ -1,27 +1,32 @@
 package com.fadhlika.lokasi.service;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.io.InputStream;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.HashMap;
-import java.util.List;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
+import org.jobrunr.scheduling.BackgroundJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
+import com.fadhlika.lokasi.dto.Feature;
 import com.fadhlika.lokasi.dto.FeatureCollection;
 import com.fadhlika.lokasi.exception.BadRequestException;
 import com.fadhlika.lokasi.model.Import;
 import com.fadhlika.lokasi.model.Location;
 import com.fadhlika.lokasi.repository.ImportRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -29,38 +34,54 @@ public class ImportService {
 
     private static final Logger logger = LoggerFactory.getLogger(ImportService.class);
 
-    private final ImportRepository importRepository;
-
-    private final LocationService locationService;
+    @Autowired
+    private ImportRepository importRepository;
 
     @Autowired
-    public ImportService(ImportRepository importRepository, LocationService locationService) {
-        this.importRepository = importRepository;
-        this.locationService = locationService;
-    }
+    private LocationService locationService;
 
-    public int saveImport(int userId, String source, String filename, ByteBuffer content) throws IOException {
-        Checksum crc32 = new CRC32();
-        crc32.update(content);
-        String checksum = Long.toHexString(crc32.getValue());
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
-        return this.importRepository.saveImport(new Import(userId, source, filename, null, null, checksum, false, LocalDateTime.now()));
+    private void saveImport(int userId, String source, String filename, InputStream content) {
+        try {
+            byte[] contentBytes = content.readAllBytes();
+            Checksum crc32 = new CRC32();
+            crc32.update(contentBytes);
+            String checksum = Long.toHexString(crc32.getValue());
+
+            InputStream is = new ByteArrayInputStream(contentBytes);
+
+            this.importRepository
+                    .saveImport(
+                            new Import(userId, source, filename, is, checksum));
+        } catch (Exception e) {
+            throw new InternalError(e.getMessage());
+        }
     }
 
     public void deleteImport(int importId) throws IOException {
         this.importRepository.deleteImport(importId);
     }
 
-    public void importFromDawarich(int userId, int importId, ByteBuffer content) {
+    public void importFromDawarich(int userId, String filename)
+            throws StreamReadException, DatabindException, IOException {
+        Import anImport = importRepository.fetch(filename);
+
+        logger.info("Starting import {}", anImport.id());
+
         ObjectMapper mapper = new ObjectMapper();
+        FeatureCollection featureCollection = mapper.readValue(anImport.content(), FeatureCollection.class);
+
+        TransactionStatus status = transactionManager.getTransaction(new DefaultTransactionDefinition());
+
         try {
-            FeatureCollection featureCollection = mapper.readValue(content.array(), FeatureCollection.class);
-            List<Location> locations = featureCollection.features().stream().map(feature -> {
+            for (Feature feature : featureCollection.features()) {
                 Location l = new Location();
 
                 l.setGeometry(feature.getGeometry());
-                l.setUserId(userId);
-                l.setImportId(importId);
+                l.setUserId(anImport.userId());
+                l.setImportId(anImport.id());
 
                 HashMap<String, Object> properties = feature.getProperties();
 
@@ -96,35 +117,40 @@ public class ImportService {
                     throw new BadRequestException(e.getMessage());
                 }
 
-                return l;
-            }).toList();
-
-            this.locationService.saveLocations(locations);
-        } catch (IOException e) {
-            try {
-                deleteImport(importId);
-            } catch (IOException ex) {
-                throw new RuntimeException(e);
+                locationService.saveLocation(l);
             }
 
-            throw new RuntimeException(e);
+            anImport = new Import(
+                    anImport.id(),
+                    anImport.userId(),
+                    anImport.source(),
+                    anImport.filename(),
+                    anImport.content(),
+                    anImport.checksum(),
+                    true,
+                    anImport.count(),
+                    anImport.created_at());
+
+            importRepository.updateImport(anImport);
+
+            transactionManager.commit(status);
+        } catch (Exception e) {
+            logger.error("Error importing {}: {}", anImport.id(), e.getMessage());
+            transactionManager.rollback(status);
+            throw e;
         }
+
+        logger.info("Completed import {}", anImport.id());
     }
 
-    @Async
-    public void doImport(int userId, String source, String filename, ByteBuffer content) throws IOException {
-        int importId = saveImport(userId, source, filename, content);
-
-        logger.info("starting import {}", importId);
+    public void importLocations(int userId, String source, String filename, InputStream content) {
+        saveImport(userId, source, filename, content);
 
         switch (source) {
             case "dawarich" ->
-                importFromDawarich(userId, importId, content);
+                BackgroundJob.enqueue(() -> importFromDawarich(userId, filename));
             default -> {
             }
         }
-
-        importRepository.updateImportStatus(importId, true);
-        logger.info("import {} done", importId);
     }
 }

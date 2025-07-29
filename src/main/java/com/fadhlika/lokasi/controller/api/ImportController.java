@@ -10,22 +10,19 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
 @RestController
 public class ImportController {
-    private final ImportService importService;
-
     @Autowired
-    public ImportController(ImportService importService) {
-        this.importService = importService;
-    }
+    private ImportService importService;
 
     @PostMapping("/api/v1/import")
-    public ResponseEntity<Void> importData(@RequestParam("source") String source, @RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<Void> importLocations(@RequestParam("source") String source,
+            @RequestParam("file") MultipartFile file) throws IOException {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        importService.doImport(user.getId(), source, file.getOriginalFilename(), ByteBuffer.wrap(file.getBytes()));
+        importService.importLocations(user.getId(), source, file.getOriginalFilename(),
+                file.getInputStream());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

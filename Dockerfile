@@ -6,4 +6,6 @@ WORKDIR /app
 
 COPY target/lokasi lokasi
 
+ENV DATA_DIR /data
+
 ENTRYPOINT ["/app/lokasi"]

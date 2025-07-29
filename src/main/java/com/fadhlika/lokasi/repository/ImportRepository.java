@@ -1,7 +1,13 @@
 package com.fadhlika.lokasi.repository;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.sql.ResultSet;
+import java.time.ZonedDateTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
@@ -17,24 +23,62 @@ public class ImportRepository {
         this.jdbcClient = JdbcClient.create(jdbcTemplate);
     }
 
-    public int saveImport(Import anImport) {
+    private final RowMapper<Import> importRowMapper = (ResultSet rs, int rowNum) -> new Import(
+            rs.getInt("id"),
+            rs.getInt("user_id"),
+            rs.getString("source"),
+            rs.getString("filename"),
+            rs.getBinaryStream("content"),
+            rs.getString("checksum"),
+            rs.getBoolean("done"),
+            rs.getInt("count"),
+            ZonedDateTime.parse(rs.getString("created_at")));
+
+    public void saveImport(Import anImport) throws IOException {
         jdbcClient.sql(
-                "INSERT INTO import(user_id, source, filename, path, content, checksum, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
+                "INSERT INTO import(user_id, source, filename, content, checksum, count, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
                 .param(anImport.userId())
                 .param(anImport.source())
                 .param(anImport.filename())
-                .param(anImport.path())
-                .param(anImport.content())
+                .param(new String(anImport.content().readAllBytes(), StandardCharsets.UTF_8))
+                .param(anImport.count())
                 .param(anImport.checksum())
+                .param(anImport.created_at())
                 .update();
-        return jdbcClient.sql("SELECT last_insert_rowid()").query(Integer.class).single();
+    }
+
+    public Import fetch(String filename) {
+        return jdbcClient
+                .sql("SELECT * FROM import WHERE filename = ? LIMIT 1")
+                .param(filename)
+                .query(importRowMapper)
+                .single();
+    }
+
+    public Import fetch(int id) {
+        return jdbcClient
+                .sql("SELECT * FROM import WHERE id = ? LIMIT 1")
+                .param(id)
+                .query(importRowMapper)
+                .single();
     }
 
     public void deleteImport(int importId) {
         jdbcClient.sql("DELETE FROM import WHERE id = ?").param(importId).update();
     }
 
-    public void updateImportStatus(int importId, boolean status) {
-        jdbcClient.sql("UPDATE import SET done = ? WHERE id = ?").param(status).param(importId).update();
+    public void updateImport(Import anImport) {
+        jdbcClient.sql("""
+                UPDATE
+                    import
+                SET
+                    count = ?,
+                    done = ?
+                WHERE
+                    id = ?""")
+                .param(anImport.count())
+                .param(anImport.done())
+                .param(anImport.id())
+                .update();
     }
 }

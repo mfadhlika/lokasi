@@ -12,9 +12,13 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 
+import com.fadhlika.lokasi.util.GeometryDeserializer;
+import com.fadhlika.lokasi.util.GeometrySerializer;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * @author fadhl
@@ -55,6 +59,8 @@ public class Location {
 
     private int userId;
     private String deviceId;
+    @JsonSerialize(using = GeometrySerializer.class)
+    @JsonDeserialize(using = GeometryDeserializer.class)
     private Geometry geometry;
     private ZonedDateTime timestamp;
     private int altitude;

@@ -1,0 +1,1 @@
+ALTER TABLE import ADD COLUMN count INTEGER;
