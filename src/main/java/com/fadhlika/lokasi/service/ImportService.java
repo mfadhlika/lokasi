@@ -131,7 +131,7 @@ public class ImportService {
                     anImport.content(),
                     anImport.checksum(),
                     true,
-                    anImport.count(),
+                    featureCollection.features().size(),
                     anImport.created_at());
 
             importRepository.updateImport(anImport);
