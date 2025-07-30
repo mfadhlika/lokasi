@@ -197,11 +197,13 @@ function IntegrationSettingsTab() {
     useEffect(() => {
         axiosInstance.get<Response<Integration>>("v1/integration").then(res => {
             setIntegration({ ...res.data.data });
-        }).catch(err => console.error(err));
+        }).catch(err => {
+            console.error(err);
+            toast.error("failed fetch integration settings", err);
+        });
     }, []);
 
     const doSubmit = (data: Integration) => {
-        console.info(data);
         axiosInstance.put("v1/integration", data)
             .then(res => {
                 setIntegration({ ...res.data });

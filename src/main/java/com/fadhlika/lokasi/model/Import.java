@@ -13,7 +13,7 @@ public record Import(
                 @JsonIgnore InputStream content,
                 String checksum,
                 boolean done, int count,
-                ZonedDateTime created_at) {
+                ZonedDateTime createdAt) {
         public Import(int userId,
                         String source,
                         String filename,

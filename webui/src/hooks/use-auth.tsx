@@ -2,6 +2,7 @@ import { createContext, useContext, useMemo, useState } from "react";
 import * as React from "react";
 import { jwtDecode } from "jwt-decode";
 import { axiosInstance } from "@/lib/request";
+import { toast } from "sonner";
 interface AuthContextType {
     userInfo: {
         username: string
@@ -36,7 +37,10 @@ export const AuthProvider = ({ children }: React.ComponentProps<"div">) => {
         localStorage.removeItem("accessToken");
         setAccessToken(null);
         callback();
-        axiosInstance.delete("v1/logout").catch(err => console.log(err));
+        axiosInstance.delete("v1/logout").catch(err => {
+            console.error(err);
+            toast.error("logging out failed", err);
+        });
     };
 
     const value = useMemo(() => {

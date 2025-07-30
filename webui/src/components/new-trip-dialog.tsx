@@ -45,7 +45,6 @@ export const NewTripDialog = ({ className }: React.ComponentProps<"div">) => {
     const [startAt, endAt] = watch(['startAt', 'endAt']);
 
     useEffect(() => {
-        console.debug(startAt, endAt);
         if (!startAt || !endAt) {
             return;
         }

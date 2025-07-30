@@ -1,19 +1,15 @@
 import * as React from "react"
-import { Database, Map, Plane, Settings } from "lucide-react"
+import { Database, Map, Plane, Settings, Upload } from "lucide-react"
 
 import { NavUser } from "@/components/nav-user"
 import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
-    SidebarGroup,
-    SidebarGroupContent,
     SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { Link, useLocation } from "react-router"
+import { useLocation } from "react-router"
+import { NavMain } from "./nav-main"
 
 // This is sample data
 const data = {
@@ -32,6 +28,13 @@ const data = {
             title: "Data",
             url: "/data",
             icon: Database,
+            items: [
+                {
+                    title: "Import",
+                    url: "/data/import",
+                    icon: Upload,
+                }
+            ]
         },
         {
             title: "Settings",
@@ -49,31 +52,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarHeader>
             </SidebarHeader>
             <SidebarContent>
-                <SidebarGroup>
-                    <SidebarGroupContent className="px-1.5 md:px-0">
-                        <SidebarMenu>
-                            {data.navMain.map((item) => (
-                                <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton
-                                        tooltip={{
-                                            children: item.title,
-                                            hidden: false,
-                                        }}
-                                        isActive={location.pathname == item.url}
-                                        className="px-2.5 md:px-2"
-                                        asChild
-                                    >
-                                        <Link to={item.url}>
-                                            <item.icon />
-                                            {item.title}
-                                        </Link>
-
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
+                <NavMain items={data.navMain} location={location} />
             </SidebarContent>
             <SidebarFooter>
                 <NavUser />

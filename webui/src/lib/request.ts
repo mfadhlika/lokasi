@@ -19,7 +19,10 @@ function logout() {
         .then(() => {
             localStorage.removeItem("accessToken");
             router.navigate("/login");
-        }).catch(err => console.error(err));
+        }).catch(err => {
+            console.error(err);
+            toast.error("logging out failed", err);
+        });
 };
 
 async function refreshToken(): Promise<string> {
@@ -67,9 +70,9 @@ axiosInstance.interceptors.response.use(
                 console.debug("retry request");
                 return axios(originalRequest);
             } catch {
-                console.debug("failed refreshing token");
-                logout();
+                console.error("failed refreshing token");
                 toast.error("Session expired. Please relogin");
+                logout();
             }
         }
 

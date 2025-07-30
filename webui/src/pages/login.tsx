@@ -9,7 +9,7 @@ export default function LoginPage() {
 
     useEffect(() => {
         if (userInfo) {
-            console.log("redirect if logged in");
+            console.info("redirect if logged in");
             navigate("/");
         }
     }, [navigate, userInfo])

@@ -5,6 +5,7 @@ import DataPage from "@/pages/data";
 import SettingsPage from "@/pages/settings";
 import LoginPage from "@/pages/login";
 import TripsPage from "@/pages/trips";
+import ImportPage from "@/pages/import";
 
 const router = createBrowserRouter([
     {
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
             {
                 path: "/data",
                 element: <DataPage />
+            },
+            {
+                path: "/data/import",
+                element: <ImportPage />,
             },
             {
                 path: "/settings",

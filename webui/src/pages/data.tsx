@@ -6,7 +6,6 @@ import { DataTable } from "@/components/data-table";
 import { DatePicker } from "@/components/date-picker";
 import { DeviceSelect } from "@/components/device-select";
 import { Button } from "@/components/ui/button";
-import { ImportDialog } from "@/components/import-dialog";
 import { Header } from "@/components/header";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
@@ -14,22 +13,7 @@ import RawDataSheet, { useRawDataDialogState } from "@/components/raw-data-sheet
 import { toast } from "sonner";
 import { useLocationFilter } from "@/hooks/use-location-filter";
 import type { Response } from "@/types/response";
-
-type Location = {
-    timestamp: string,
-    coordinates: Point,
-    device: string,
-    altitude: number,
-    speed: number,
-    accuracy: number,
-    motions: string[],
-    course: number,
-    courseAccuracy: number,
-    battery: number,
-    batteryState: string,
-    ssid: string,
-    rawData: string
-}
+import type { Location } from "@/types/location";
 
 
 export default function DataPage() {
@@ -156,7 +140,6 @@ export default function DataPage() {
                     date,
                 })} />
                 <DeviceSelect className="shadow-xs border-solid" selectedDevice={device} onSelectedDevice={(device) => setFilter({ ...filter, device })} />
-                <ImportDialog />
             </Header>
             <div className="flex flex-1 flex-col">
                 <div className="@container/main flex flex-1 flex-col gap-4 p-4">

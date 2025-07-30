@@ -132,7 +132,7 @@ public class ImportService {
                     anImport.checksum(),
                     true,
                     featureCollection.features().size(),
-                    anImport.created_at());
+                    anImport.createdAt());
 
             importRepository.updateImport(anImport);
 
