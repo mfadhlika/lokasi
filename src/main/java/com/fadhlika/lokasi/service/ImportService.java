@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.HashMap;
+import java.util.List;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
@@ -162,5 +163,9 @@ public class ImportService {
 
             }
         }
+    }
+
+    public List<Import> getImports(int userId) {
+        return importRepository.getImports(userId);
     }
 }

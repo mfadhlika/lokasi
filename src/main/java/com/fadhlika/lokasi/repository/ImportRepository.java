@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -81,5 +82,12 @@ public class ImportRepository {
                 .param(anImport.done())
                 .param(anImport.id())
                 .update();
+    }
+
+    public List<Import> getImports(int userId) {
+        return jdbcClient.sql("SELECT * FROM import WHERE user_id = ?")
+                .param(userId)
+                .query(importRowMapper)
+                .list();
     }
 }

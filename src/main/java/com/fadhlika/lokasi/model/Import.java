@@ -3,12 +3,14 @@ package com.fadhlika.lokasi.model;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public record Import(
                 int id,
-                int userId,
+                @JsonIgnore int userId,
                 String source,
                 String filename,
-                InputStream content,
+                @JsonIgnore InputStream content,
                 String checksum,
                 boolean done, int count,
                 ZonedDateTime created_at) {
