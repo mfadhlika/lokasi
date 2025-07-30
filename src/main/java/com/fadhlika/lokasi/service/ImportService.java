@@ -168,4 +168,8 @@ public class ImportService {
     public List<Import> getImports(int userId) {
         return importRepository.getImports(userId);
     }
+
+    public Import getImport(int importId) {
+        return importRepository.fetch(importId);
+    }
 }

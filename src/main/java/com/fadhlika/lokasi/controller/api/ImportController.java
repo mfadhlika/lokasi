@@ -4,8 +4,8 @@ import com.fadhlika.lokasi.dto.Response;
 import com.fadhlika.lokasi.model.Import;
 import com.fadhlika.lokasi.model.User;
 import com.fadhlika.lokasi.service.ImportService;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,5 +37,12 @@ public class ImportController {
         List<Import> imports = importService.getImports(user.getId());
 
         return new Response<>(imports);
+    }
+
+    @GetMapping("/{importId}/raw")
+    public @ResponseBody byte[] downloadImport(@PathVariable int importId) throws IOException {
+        Import anImport = importService.getImport(importId);
+
+        return anImport.content().readAllBytes();
     }
 }
