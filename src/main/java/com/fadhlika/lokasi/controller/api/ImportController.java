@@ -27,7 +27,7 @@ public class ImportController {
         importService.importLocations(user.getId(), source, file.getOriginalFilename(),
                 file.getInputStream());
 
-        return new Response<>();
+        return new Response<>("uploaded");
     }
 
     @GetMapping

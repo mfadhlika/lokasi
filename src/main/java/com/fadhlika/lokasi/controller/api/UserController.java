@@ -36,13 +36,14 @@ public class UserController {
 
         userService.updateUser(user.getId(), createUserRequest.username(), createUserRequest.password());
 
-        return new Response<>();
+        return new Response<>("user updated");
     }
 
     @GetMapping("/devices")
     public Response<List<String>> getUserDevices() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        return new Response<>(userService.getUserDevices(user.getId()), HttpStatus.OK);
+        List<String> devices = userService.getUserDevices(user.getId());
+        return new Response<>(devices);
     }
 }

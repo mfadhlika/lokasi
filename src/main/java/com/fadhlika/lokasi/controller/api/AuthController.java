@@ -2,7 +2,6 @@ package com.fadhlika.lokasi.controller.api;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -70,7 +69,7 @@ public class AuthController {
 
         response.addCookie(cookie);
 
-        return new Response<>();
+        return new Response<>("logged out");
     }
 
     @GetMapping("/api/v1/auth/refresh")

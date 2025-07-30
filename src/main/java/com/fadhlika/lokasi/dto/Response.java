@@ -1,41 +1,29 @@
 package com.fadhlika.lokasi.dto;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import java.util.List;
 
-public class Response<T> extends ResponseEntity<com.fadhlika.lokasi.dto.Response.Body<T>> {
-    static class Body<T> {
-        public final String message;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
-        public final T data;
+public class Response<T> {
+    public final String message;
 
-        public Body(String message, T data) {
-            this.message = message;
-            this.data = data;
-        }
-    }
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public final T data;
 
-    public Response() {
-        super(new Body<T>("", null), HttpStatus.OK);
-    }
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public final List<String> errors;
 
-    public Response(T data, String message, HttpStatus status) {
-        super(new Body<T>(message, data), status);
-    }
-
-    public Response(String message, HttpStatus status) {
-        super(new Body<T>(message, null), status);
-    }
-
-    public Response(T data, HttpStatus status) {
-        super(new Body<T>("", data), status);
-    }
-
-    public Response(HttpStatus status) {
-        super(new Body<T>("", null), status);
+    public Response(T data, String message, List<String> errors) {
+        this.data = data;
+        this.message = message;
+        this.errors = errors;
     }
 
     public Response(T data) {
-        super(new Body<T>("", data), HttpStatus.OK);
+        this(data, "", null);
+    }
+
+    public Response(String message) {
+        this(null, message, null);
     }
 }
