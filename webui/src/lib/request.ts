@@ -1,5 +1,6 @@
 import axios from "axios";
 import router from "./router";
+import { toast } from "sonner";
 
 let refreshTokenPromise: Promise<string> | null = null;
 
@@ -66,6 +67,7 @@ axiosInstance.interceptors.response.use(
             } catch {
                 console.debug("failed refreshing token");
                 logout();
+                toast.error("Session expired. Please relogin");
             }
         }
 
