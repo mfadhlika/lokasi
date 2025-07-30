@@ -13,6 +13,7 @@ import org.jobrunr.scheduling.BackgroundJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -21,6 +22,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import com.fadhlika.lokasi.dto.Feature;
 import com.fadhlika.lokasi.dto.FeatureCollection;
 import com.fadhlika.lokasi.exception.BadRequestException;
+import com.fadhlika.lokasi.exception.ConflictException;
 import com.fadhlika.lokasi.model.Import;
 import com.fadhlika.lokasi.model.Location;
 import com.fadhlika.lokasi.repository.ImportRepository;
@@ -66,7 +68,7 @@ public class ImportService {
 
     public void importFromDawarich(int userId, String filename)
             throws StreamReadException, DatabindException, IOException {
-        Import anImport = importRepository.fetch(filename);
+        Import anImport = importRepository.fetch(userId, filename);
 
         logger.info("Starting import {}", anImport.id());
 
@@ -144,12 +146,20 @@ public class ImportService {
     }
 
     public void importLocations(int userId, String source, String filename, InputStream content) {
+        try {
+            importRepository.fetch(userId, filename);
+            throw new ConflictException("import review already exist");
+        } catch (EmptyResultDataAccessException ex) {
+
+        }
+
         saveImport(userId, source, filename, content);
 
         switch (source) {
             case "dawarich" ->
                 BackgroundJob.enqueue(() -> importFromDawarich(userId, filename));
             default -> {
+
             }
         }
     }

@@ -47,9 +47,10 @@ public class ImportRepository {
                 .update();
     }
 
-    public Import fetch(String filename) {
+    public Import fetch(int userId, String filename) {
         return jdbcClient
-                .sql("SELECT * FROM import WHERE filename = ? LIMIT 1")
+                .sql("SELECT * FROM import WHERE user_id = ? AND filename = ? LIMIT 1")
+                .param(userId)
                 .param(filename)
                 .query(importRowMapper)
                 .single();
