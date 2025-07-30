@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.fadhlika.lokasi.model.User;
@@ -41,7 +42,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
         String jwt = null;
         String username = null;
@@ -52,10 +54,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if (jwt != null) {
             try {
-                if ((username = jwtAuthService.decodeAccessToken(jwt).getSubject()) != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                if ((username = jwtAuthService.decodeAccessToken(jwt).getSubject()) != null
+                        && SecurityContextHolder.getContext().getAuthentication() == null) {
                     User user = (User) this.userService.loadUserByUsername(username);
                     if (jwtAuthService.isAccessTokenValid(jwt, user.getUsername())) {
-                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(user,
+                                null, user.getAuthorities());
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     } else {
@@ -66,7 +70,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     return;
                 }
-            } catch (TokenExpiredException | SignatureVerificationException _) {
+            } catch (TokenExpiredException | SignatureVerificationException | JWTDecodeException _) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
@@ -77,6 +81,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return request.getServletPath().startsWith("/api/v1/login") || request.getServletPath().startsWith("/api/v1/logout") || request.getServletPath().startsWith("/api/v1/auth/refresh");
+        return request.getServletPath().startsWith("/api/v1/login")
+                || request.getServletPath().startsWith("/api/v1/logout")
+                || request.getServletPath().startsWith("/api/v1/auth/refresh");
     }
 }
