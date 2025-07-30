@@ -1,6 +1,8 @@
 import axios from "axios";
 import router from "./router";
 import { toast } from "sonner";
+import type { Login } from "@/types/login";
+import type { Response } from "@/types/response";
 
 let refreshTokenPromise: Promise<string> | null = null;
 
@@ -21,9 +23,9 @@ function logout() {
 };
 
 async function refreshToken(): Promise<string> {
-    const { accessToken } = await axiosInstance.get("v1/auth/refresh").then(res => res.data);
-    localStorage.setItem("accessToken", accessToken);
-    return accessToken;
+    const { data } = await axiosInstance.get<Response<Login>>("v1/auth/refresh");
+    localStorage.setItem("accessToken", data.data.accessToken);
+    return data.data.accessToken;
 };
 
 axiosInstance.interceptors.request.use(

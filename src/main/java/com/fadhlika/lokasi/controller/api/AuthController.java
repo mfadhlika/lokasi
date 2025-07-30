@@ -16,6 +16,8 @@ import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fadhlika.lokasi.dto.LoginRequest;
 import com.fadhlika.lokasi.dto.LoginResponse;
+import com.fadhlika.lokasi.dto.Response;
+import com.fadhlika.lokasi.exception.UnauthorizedException;
 import com.fadhlika.lokasi.service.JwtAuthService;
 
 import jakarta.servlet.http.Cookie;
@@ -32,7 +34,7 @@ public class AuthController {
     }
 
     @PostMapping("/api/v1/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+    public Response<LoginResponse> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         if (!jwtAuthService.validateCredentials(loginRequest.username(), loginRequest.password())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
@@ -51,11 +53,11 @@ public class AuthController {
 
         response.addCookie(cookie);
 
-        return new ResponseEntity<>(new LoginResponse(accessToken, refreshToken), HttpStatus.OK);
+        return new Response<>(new LoginResponse(accessToken, refreshToken));
     }
 
     @DeleteMapping("/api/v1/logout")
-    public ResponseEntity<Object> logout(HttpServletResponse response) {
+    public Response<Void> logout(HttpServletResponse response) {
 
         Cookie cookie = new Cookie("refreshToken", null) {
             {
@@ -68,23 +70,23 @@ public class AuthController {
 
         response.addCookie(cookie);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new Response<>();
     }
 
     @GetMapping("/api/v1/auth/refresh")
-    public ResponseEntity<LoginResponse> refresh(@CookieValue(name = "refreshToken") String refreshToken) {
+    public Response<LoginResponse> refresh(@CookieValue(name = "refreshToken") String refreshToken) {
         try {
             DecodedJWT decodedJWT = jwtAuthService.decodeRefreshToken(refreshToken);
 
-        if (!jwtAuthService.isRefreshTokenValid(refreshToken, decodedJWT.getSubject())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
-        }
+            if (!jwtAuthService.isRefreshTokenValid(refreshToken, decodedJWT.getSubject())) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+            }
 
-        String accessToken = jwtAuthService.generateAccessToken(decodedJWT.getSubject());
+            String accessToken = jwtAuthService.generateAccessToken(decodedJWT.getSubject());
 
-        return new ResponseEntity<>(new LoginResponse(accessToken, refreshToken), HttpStatus.OK);
-        } catch(TokenExpiredException | SignatureVerificationException ex) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return new Response<>(new LoginResponse(accessToken, refreshToken));
+        } catch (TokenExpiredException | SignatureVerificationException ex) {
+            throw new UnauthorizedException(ex.getMessage());
         }
     }
 }

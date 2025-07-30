@@ -10,6 +10,7 @@ import type { FeatureCollection, LineString } from "geojson";
 import { Header } from "@/components/header";
 import { toast } from "sonner";
 import { useLocationFilter } from "@/hooks/use-location-filter";
+import type { Response } from "@/types/response";
 
 export default function MapsPage() {
     const [locations, setLocations] = useState<FeatureCollection>({ type: 'FeatureCollection', features: [] } as FeatureCollection);
@@ -22,12 +23,11 @@ export default function MapsPage() {
         if (date?.to) params.set('end', date.to.toJSON());
         if (device && device != 'all') params.append('device', device);
 
-        axiosInstance.get(`v1/locations?${params.toString()}`)
-            .then((res) => {
-                const data = res.data as FeatureCollection & { message: string }
-                setLocations({ ...data as FeatureCollection });
-                if (!data || data.features.length == 0) return;
-                const last = data.features[data.features.length - 1].geometry as LineString;
+        axiosInstance.get<Response<FeatureCollection>>(`v1/locations?${params.toString()}`)
+            .then(({ data }) => {
+                setLocations({ ...data.data });
+                if (!data.data || data.data.features.length == 0) return;
+                const last = data.data.features[data.data.features.length - 1].geometry as LineString;
                 setPosition([last.coordinates[1][1], last.coordinates[1][0]]);
             })
             .catch(err => toast.error(`Failed to get user's locations: ${err}`));

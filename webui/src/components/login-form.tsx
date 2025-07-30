@@ -7,6 +7,9 @@ import { type FormEvent, useState } from "react";
 import { useAuth } from "@/hooks/use-auth.tsx";
 import { useNavigate } from "react-router";
 import { Card, CardContent } from "@/components/ui/card";
+import { axiosInstance } from "@/lib/request";
+import type { Response } from "@/types/response";
+import type { Login } from "@/types/login";
 
 export function LoginForm({
     className,
@@ -21,22 +24,14 @@ export function LoginForm({
     const onSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        fetch("/api/v1/login", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                username,
-                password
+        axiosInstance.post<Response<Login>>("v1/login", {
+            username,
+            password
+        }).then(({ data }) => {
+            login(data.data.accessToken, () => {
+                navigate("/");
             })
         })
-            .then(res => res.json())
-            .then(res => {
-                login(res.accessToken, () => {
-                    navigate("/");
-                })
-            })
             .catch(err => {
                 console.error(err);
             });

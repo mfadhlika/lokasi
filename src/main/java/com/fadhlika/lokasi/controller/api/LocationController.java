@@ -13,8 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +23,7 @@ import com.fadhlika.lokasi.dto.Feature;
 import com.fadhlika.lokasi.dto.FeatureCollection;
 import com.fadhlika.lokasi.dto.LineStringProperties;
 import com.fadhlika.lokasi.dto.PointProperties;
+import com.fadhlika.lokasi.dto.Response;
 import com.fadhlika.lokasi.model.Location;
 import com.fadhlika.lokasi.model.User;
 import com.fadhlika.lokasi.service.LocationService;
@@ -43,7 +42,7 @@ public class LocationController {
     }
 
     @GetMapping
-    public ResponseEntity<FeatureCollection> getLocations(
+    public Response<FeatureCollection> getLocations(
             @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atStartOfDay().atZone(ZoneOffset.UTC)}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime start,
             @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atTime(T(java.time.LocalTime).MAX).atZone(ZoneOffset.UTC)}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime end,
             @RequestParam Optional<String> device) {
@@ -85,11 +84,11 @@ public class LocationController {
             features.add(new Feature(ls, props));
         }
 
-        return new ResponseEntity<>(new FeatureCollection(features), HttpStatus.OK);
+        return new Response<>(new FeatureCollection(features));
     }
 
     @GetMapping("/raw")
-    public ResponseEntity<FeatureCollection> getRawLocations(
+    public Response<FeatureCollection> getRawLocations(
             @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atStartOfDay().atZone(ZoneOffset.UTC)}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime start,
             @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atTime(T(java.time.LocalTime).MAX).atZone(ZoneOffset.UTC)}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime end,
             @RequestParam Optional<String> device,
@@ -119,6 +118,6 @@ public class LocationController {
             features.add(new Feature(curr.getGeometry(), props));
         }
 
-        return new ResponseEntity<>(new FeatureCollection(features), HttpStatus.OK);
+        return new Response<>(new FeatureCollection(features));
     }
 }

@@ -1,12 +1,12 @@
 package com.fadhlika.lokasi.controller.api;
 
 import com.fadhlika.lokasi.dto.CreateUserRequest;
+import com.fadhlika.lokasi.dto.Response;
 import com.fadhlika.lokasi.model.User;
 import com.fadhlika.lokasi.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,20 +29,20 @@ public class UserController {
     }
 
     @PutMapping
-    public ResponseEntity<Void> updateUser(@RequestBody CreateUserRequest createUserRequest) {
+    public Response<Void> updateUser(@RequestBody CreateUserRequest createUserRequest) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         createUserRequest.validate();
 
         userService.updateUser(user.getId(), createUserRequest.username(), createUserRequest.password());
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new Response<>();
     }
 
     @GetMapping("/devices")
-    public ResponseEntity<List<String>> getUserDevices() {
+    public Response<List<String>> getUserDevices() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        return new ResponseEntity<>(userService.getUserDevices(user.getId()), HttpStatus.OK);
+        return new Response<>(userService.getUserDevices(user.getId()), HttpStatus.OK);
     }
 }

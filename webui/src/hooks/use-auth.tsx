@@ -26,6 +26,7 @@ export const AuthProvider = ({ children }: React.ComponentProps<"div">) => {
     const [accessToken, setAccessToken] = useState<string | null>(localStorage.getItem("accessToken"));
 
     const login = (accessToken: string, callback: () => void) => {
+        if (!accessToken) return;
         localStorage.setItem("accessToken", accessToken);
         setAccessToken(accessToken);
         callback();

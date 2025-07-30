@@ -13,6 +13,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { useNavigate } from "react-router";
 import { Header } from "@/components/header";
 import { toast } from "sonner";
+import type { Integration } from "@/types/integration";
+import type { Response } from "@/types/response";
 
 const accountFormSchema = z.object({
     username: z.string(),
@@ -32,12 +34,6 @@ const overlandFormSchema = z.object({
     apiKey: z.string(),
 });
 
-
-type Integration = {
-    owntracksUsername: string;
-    owntracksPassword: string;
-    overlandApiKey: string;
-}
 
 function AccountSettingsTab() {
     const { userInfo, logout } = useAuth();
@@ -199,8 +195,8 @@ function IntegrationSettingsTab() {
     });
 
     useEffect(() => {
-        axiosInstance.get("v1/integration").then(res => {
-            setIntegration({ ...res.data });
+        axiosInstance.get<Response<Integration>>("v1/integration").then(res => {
+            setIntegration({ ...res.data.data });
         }).catch(err => console.error(err));
     }, []);
 

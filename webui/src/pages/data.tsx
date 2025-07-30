@@ -13,6 +13,7 @@ import { MoreHorizontal } from "lucide-react";
 import RawDataSheet, { useRawDataDialogState } from "@/components/raw-data-sheet";
 import { toast } from "sonner";
 import { useLocationFilter } from "@/hooks/use-location-filter";
+import type { Response } from "@/types/response";
 
 type Location = {
     timestamp: string,
@@ -53,9 +54,9 @@ export default function DataPage() {
         if (device && device !== 'all') {
             params.set('device', device);
         }
-        axiosInstance.get(`v1/locations/raw?${params.toString()}`)
-            .then((res) => {
-                const newData = (res.data as FeatureCollection).features.map(feature => {
+        axiosInstance.get<Response<FeatureCollection>>(`v1/locations/raw?${params.toString()}`)
+            .then(({ data }) => {
+                const newData = data.data.features.map(feature => {
                     return {
                         ...feature.properties,
                         coordinates: feature.geometry,

@@ -4,6 +4,7 @@ import { NewTripDialog } from "@/components/new-trip-dialog";
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { axiosInstance } from "@/lib/request";
 import type { TripProperties } from "@/types/properties";
+import type { Response } from "@/types/response";
 import type { FeatureCollection } from "geojson";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -13,9 +14,9 @@ export default function TripsPage() {
 
     useEffect(() => {
         axiosInstance
-            .get("v1/trips")
+            .get<Response<FeatureCollection>>("v1/trips")
             .then(res => {
-                setTrips(res.data);
+                setTrips(res.data.data);
             })
             .catch(err => {
                 toast.error("faled to fetch trips", err);

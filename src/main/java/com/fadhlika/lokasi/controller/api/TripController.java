@@ -9,7 +9,6 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.MultiLineString;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fadhlika.lokasi.dto.Feature;
 import com.fadhlika.lokasi.dto.FeatureCollection;
+import com.fadhlika.lokasi.dto.Response;
 import com.fadhlika.lokasi.dto.TripProperties;
 import com.fadhlika.lokasi.model.Location;
 import com.fadhlika.lokasi.model.Trip;
@@ -45,7 +45,7 @@ public class TripController {
     }
 
     @GetMapping
-    public ResponseEntity<FeatureCollection> getTrips() {
+    public Response<FeatureCollection> getTrips() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         List<Trip> trips = tripService.getTrips(user.getId());
@@ -83,6 +83,6 @@ public class TripController {
             features.add(new Feature(geom, props));
         }
 
-        return ResponseEntity.ok(new FeatureCollection(features));
+        return new Response<>(new FeatureCollection(features));
     }
 }

@@ -4,6 +4,7 @@ import { axiosInstance } from "@/lib/request.ts";
 import { Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import type { Response } from "@/types/response";
 
 export interface DeviceSelectProps {
     className?: string,
@@ -15,8 +16,8 @@ export const DeviceSelect = ({ className, selectedDevice, onSelectedDevice }: De
     const [devices, setDevices] = useState<string[]>([]);
 
     useEffect(() => {
-        axiosInstance.get("v1/user/devices")
-            .then(res => setDevices(res.data))
+        axiosInstance.get<Response<string[]>>("v1/user/devices")
+            .then(({ data }) => setDevices(data.data))
             .catch(err => {
                 toast.error(`Failed to get user's devices: ${err}`);
             });
