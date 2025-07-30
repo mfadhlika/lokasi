@@ -24,6 +24,10 @@ export default function ImportPage() {
 
     const columns: ColumnDef<Import>[] = [
         {
+            accessorKey: "id",
+            header: "ID",
+        },
+        {
             accessorKey: "createdAt",
             header: "Created At",
             cell: ({ row }) => (<span>{(new Date(row.getValue('createdAt'))).toLocaleString()}</span>)
@@ -47,7 +51,7 @@ export default function ImportPage() {
         {
             id: "actions",
             enableHiding: false,
-            cell: () => (
+            cell: ({ row }) => (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
@@ -58,6 +62,21 @@ export default function ImportPage() {
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
                             <Button variant="ghost" onClick={() => {
+                                const importId = row.getValue("id") as number;
+                                const filename = row.getValue("filename") as number;
+                                const promise = axiosInstance.get(`v1/import/${importId}/raw`, {
+                                    responseType: 'blob'
+                                });
+                                toast.promise(promise, {
+                                    loading: `downloading import ${importId}`,
+                                    success: (res) => {
+                                        const href = URL.createObjectURL(res.data);
+                                        return <span>download completed, click <a className="underline" href={href} download={filename}>here</a> to save</span>;
+                                    },
+                                    error: (err) => `failed to download: ${err}`,
+                                    duration: Infinity,
+                                    closeButton: true
+                                });
 
                             }}>
                                 Download
