@@ -25,27 +25,29 @@ public class IntegrationService {
     }
 
     public void saveIntegration(Integration integration) {
+        String owntracksUsername = integration.owntracksUsername();
+        if (owntracksUsername.isBlank()) {
+            owntracksUsername = "owntracks";
+        }
+
         String owntracksPasswordHash = null;
-        if (integration.owntracksPassword() != null) {
+        if (!integration.owntracksPassword().isBlank()) {
             owntracksPasswordHash = this.passwordEncoder.encode(integration.owntracksPassword());
+        } else {
+            owntracksPasswordHash = this.passwordEncoder.encode("owntracks");
         }
 
         String overlandApiKey = integration.overlandApiKey();
 
-        if (!integration.overlandEnable() && !overlandApiKey.isBlank()) {
-            overlandApiKey = "";
-        } else if (overlandApiKey.isBlank()) {
+        if (overlandApiKey.isBlank()) {
             overlandApiKey = RandomStringGenerator.generate(16);
         }
 
         integration = new Integration(
                 integration.userId(),
-                integration.owntracksEnable(),
-                integration.owntracksUsername(),
+                owntracksUsername,
                 owntracksPasswordHash,
-                integration.overlandEnable(),
-                overlandApiKey
-        );
+                overlandApiKey);
 
         try {
             integrationRepository.save(integration);

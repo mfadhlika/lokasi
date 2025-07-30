@@ -46,10 +46,6 @@ public class UserRepository {
                 .param(user.getPassword())
                 .param(user.getCreatedAt())
                 .update();
-        jdbcClient.sql("INSERT INTO integration(user_id) VALUES((SELECT id FROM user WHERE username = ?))")
-                .param(user.getUsername())
-                .update();
-
     }
 
     public void updateUser(User user) {

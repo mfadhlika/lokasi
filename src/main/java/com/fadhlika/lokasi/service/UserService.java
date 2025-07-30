@@ -12,7 +12,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.fadhlika.lokasi.model.Integration;
 import com.fadhlika.lokasi.model.User;
 import com.fadhlika.lokasi.repository.UserRepository;
 
@@ -22,20 +24,26 @@ import com.fadhlika.lokasi.repository.UserRepository;
 @Service
 public class UserService implements UserDetailsService {
 
-    private final PasswordEncoder passwordEncoder;
-
-    private final UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private UserRepository userRepository;
 
+    @Autowired
+    private IntegrationService integrationService;
+
+    @Transactional
     public void createUser(String username, String password) {
         String hash = passwordEncoder.encode(password);
         User user = new User(username, hash);
+
         this.userRepository.createUser(user);
+
+        user = userRepository.getUser(username);
+
+        this.integrationService.saveIntegration(new Integration(
+                user.getId()));
     }
 
     public void updateUser(int userId, String username, String password) {

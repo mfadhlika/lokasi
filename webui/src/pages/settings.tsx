@@ -8,7 +8,6 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { useNavigate } from "react-router";
@@ -25,22 +24,18 @@ const accountFormSchema = z.object({
 });
 
 const owntracksFormSchema = z.object({
-    enable: z.boolean(),
     username: z.string(),
     password: z.string(),
 });
 
 const overlandFormSchema = z.object({
-    enable: z.boolean(),
     apiKey: z.string(),
 });
 
 
 type Integration = {
-    owntracksEnable: boolean;
     owntracksUsername: string;
     owntracksPassword: string;
-    overlandEnable: boolean;
     overlandApiKey: string;
 }
 
@@ -127,7 +122,6 @@ function OwntracksIntegrationItem({ integration, doSubmit }: { integration: Inte
     const owntracksForm = useForm<z.infer<typeof owntracksFormSchema>>({
         resolver: zodResolver(owntracksFormSchema),
         defaultValues: {
-            enable: integration?.owntracksEnable ?? false,
             username: integration?.owntracksUsername ?? "",
         }
     });
@@ -135,7 +129,6 @@ function OwntracksIntegrationItem({ integration, doSubmit }: { integration: Inte
     const onSubmit = (values: z.infer<typeof owntracksFormSchema>) => {
         doSubmit({
             ...integration,
-            owntracksEnable: values.enable,
             owntracksUsername: values.username,
             owntracksPassword: values.password,
         });
@@ -144,14 +137,6 @@ function OwntracksIntegrationItem({ integration, doSubmit }: { integration: Inte
     return (
         <Form {...owntracksForm}>
             <form onSubmit={owntracksForm.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-                <FormField control={owntracksForm.control} name="enable" render={({ field }) => (
-                    <FormItem className="flex">
-                        <FormControl>
-                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                        </FormControl>
-                        <FormLabel>Enable</FormLabel>
-                    </FormItem>
-                )} />
                 <FormField control={owntracksForm.control} name="username" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Username</FormLabel>
@@ -178,30 +163,20 @@ function OverlandIntegrationItem({ integration, doSubmit }: { integration: Integ
     const overlandForm = useForm<z.infer<typeof overlandFormSchema>>({
         resolver: zodResolver(overlandFormSchema),
         defaultValues: {
-            enable: integration?.overlandEnable ?? false,
             apiKey: integration?.overlandApiKey ?? "",
         }
     });
 
-    const onSubmit = (values: z.infer<typeof overlandFormSchema>) => {
+    const onSubmit = (_: z.infer<typeof overlandFormSchema>) => {
         doSubmit({
             ...integration,
-            overlandEnable: values.enable,
-            overlandApiKey: values.apiKey,
-        })
+            overlandApiKey: "",
+        });
     }
 
     return (
         <Form {...overlandForm}>
             <form onSubmit={overlandForm.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-                <FormField control={overlandForm.control} name="enable" render={({ field }) => (
-                    <FormItem className="flex">
-                        <FormControl>
-                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                        </FormControl>
-                        <FormLabel>Enable</FormLabel>
-                    </FormItem>
-                )} />
                 <FormField control={overlandForm.control} name="apiKey" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Api Key</FormLabel>
@@ -210,7 +185,7 @@ function OverlandIntegrationItem({ integration, doSubmit }: { integration: Integ
                         </FormControl>
                     </FormItem>
                 )} />
-                <Button type="submit" className="w-[100px] self-end" disabled={overlandForm.formState.isSubmitting}>Save</Button>
+                <Button type="submit" className="w-[100px] self-end" disabled={overlandForm.formState.isSubmitting}>Reset</Button>
             </form>
         </Form>
     );
@@ -218,10 +193,8 @@ function OverlandIntegrationItem({ integration, doSubmit }: { integration: Integ
 
 function IntegrationSettingsTab() {
     const [integration, setIntegration] = useState<Integration>({
-        owntracksEnable: false,
         owntracksUsername: "",
         owntracksPassword: "",
-        overlandEnable: false,
         overlandApiKey: ""
     });
 
@@ -232,6 +205,7 @@ function IntegrationSettingsTab() {
     }, []);
 
     const doSubmit = (data: Integration) => {
+        console.info(data);
         axiosInstance.put("v1/integration", data)
             .then(res => {
                 setIntegration({ ...res.data });

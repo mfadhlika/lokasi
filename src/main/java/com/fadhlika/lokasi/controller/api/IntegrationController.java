@@ -17,13 +17,8 @@ import com.fadhlika.lokasi.service.IntegrationService;
 @RestController
 @RequestMapping("/api/v1/integration")
 public class IntegrationController {
-
-    private final IntegrationService integrationService;
-
     @Autowired
-    public IntegrationController(IntegrationService integrationService) {
-        this.integrationService = integrationService;
-    }
+    private IntegrationService integrationService;
 
     @PutMapping
     public ResponseEntity<Integration> saveIntegration(@RequestBody SaveIntegrationRequest request) {
@@ -31,12 +26,9 @@ public class IntegrationController {
 
         Integration integration = new Integration(
                 user.getId(),
-                request.owntracksEnable(),
                 request.owntracksUsername(),
                 request.owntracksPassword(),
-                request.overlandEnable(),
-                request.overlandApiKey()
-        );
+                request.overlandApiKey());
         integrationService.saveIntegration(integration);
 
         Integration savedIntegration = integrationService.getIntegration(user.getId());
