@@ -3,6 +3,7 @@ import * as React from "react";
 import { jwtDecode } from "jwt-decode";
 import { axiosInstance } from "@/lib/request";
 import { toast } from "sonner";
+import type { Claim } from "@/types/claim";
 interface AuthContextType {
     userInfo: {
         username: string
@@ -45,12 +46,12 @@ export const AuthProvider = ({ children }: React.ComponentProps<"div">) => {
 
     const value = useMemo(() => {
         let decoded;
-        if (accessToken) decoded = jwtDecode(accessToken);
+        if (accessToken) decoded = jwtDecode<Claim>(accessToken);
 
         return {
             accessToken,
             userInfo: decoded && {
-                username: decoded['sub']!
+                username: decoded.username ?? ""
             },
             login,
             logout,

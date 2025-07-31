@@ -10,15 +10,20 @@ import java.util.UUID;
 
 import com.auth0.jwt.JWTCreator;
 import com.fadhlika.lokasi.repository.UserRepository;
+import com.fadhlika.lokasi.service.dto.Auth;
 import com.fadhlika.lokasi.util.RandomStringGenerator;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fadhlika.lokasi.exception.UnauthorizedException;
 import com.fadhlika.lokasi.model.User;
 
 /**
@@ -48,8 +53,40 @@ public class JwtAuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    public Auth login(String username, String password) {
+        try {
+            User user = userRepository.getUser(username);
+            if (!validateCredentials(user.getUsername(), password)) {
+                throw new UnauthorizedException("invalid username/password");
+            }
+
+            String accessToken = generateAccessToken(user);
+            String refreshToken = generateRefreshToken(user);
+
+            return new Auth(accessToken, refreshToken);
+        } catch (EmptyResultDataAccessException ex) {
+            throw new UnauthorizedException("invalid username/password");
+        }
+    }
+
+    public String refreshAccessToken(String refreshToken) {
+        try {
+            DecodedJWT decodedJWT = decodeRefreshToken(refreshToken);
+
+            User user = userRepository.getUser(Integer.parseInt(decodedJWT.getSubject()));
+
+            if (!isRefreshTokenValid(refreshToken, decodedJWT.getSubject())) {
+                throw new UnauthorizedException("refresh token is not valid");
+            }
+
+            return generateAccessToken(user);
+        } catch (EmptyResultDataAccessException | TokenExpiredException | SignatureVerificationException ex) {
+            throw new UnauthorizedException("refresh token is not valid");
+        }
+    }
+
     private String getJwtSecret() {
-        if(jwtSecret == null || jwtSecret.isBlank()) {
+        if (jwtSecret == null || jwtSecret.isBlank()) {
             jwtSecret = RandomStringGenerator.generate(16);
         }
 
@@ -57,16 +94,18 @@ public class JwtAuthService {
     }
 
     private String getJwtRefreshSecret() {
-        if(jwtRefreshSecret == null || jwtRefreshSecret.isBlank()) {
+        if (jwtRefreshSecret == null || jwtRefreshSecret.isBlank()) {
             jwtRefreshSecret = RandomStringGenerator.generate(16);
         }
         return jwtRefreshSecret;
     }
 
-    public String generateAccessToken(String username, Instant expiresAt, Boolean withId) {
+    public String generateAccessToken(User user, Instant expiresAt, Boolean withId) {
         Algorithm algorithm = Algorithm.HMAC256(getJwtSecret());
 
-        JWTCreator.Builder builder = JWT.create().withSubject(username);
+        JWTCreator.Builder builder = JWT.create()
+                .withSubject(String.format("%d", user.getId()))
+                .withClaim("username", user.getUsername());
         if (expiresAt != null) {
             builder = builder.withExpiresAt(expiresAt);
         }
@@ -76,14 +115,17 @@ public class JwtAuthService {
         return builder.sign(algorithm);
     }
 
-    public String generateAccessToken(String username) {
+    public String generateAccessToken(User user) {
         Date expiresAt = new Date();
-        return generateAccessToken(username, expiresAt.toInstant().plusSeconds(jwtExpiry), false);
+        return generateAccessToken(user, expiresAt.toInstant().plusSeconds(jwtExpiry), false);
     }
 
-    public String generateRefreshToken(String username) {
+    public String generateRefreshToken(User user) {
         Algorithm algorithm = Algorithm.HMAC256(getJwtRefreshSecret());
-        return JWT.create().withJWTId(UUID.randomUUID().toString()).withSubject(username).withExpiresAt(Instant.now().plusSeconds(jwtRefreshExpiry)).sign(algorithm);
+        return JWT.create().withJWTId(UUID.randomUUID().toString())
+                .withSubject(String.format("%d", user.getId()))
+                .withClaim("username", user.getUsername())
+                .withExpiresAt(Instant.now().plusSeconds(jwtRefreshExpiry)).sign(algorithm);
     }
 
     public DecodedJWT decodeAccessToken(String token) {
@@ -106,8 +148,8 @@ public class JwtAuthService {
         return isValid(decodedJWT, username);
     }
 
-    private Boolean isValid(DecodedJWT decodedJWT, String username) {
-        return decodedJWT.getSubject().equals(username) && decodedJWT.getExpiresAt().after(new Date());
+    private Boolean isValid(DecodedJWT decodedJWT, String subject) {
+        return decodedJWT.getSubject().equals(subject) && decodedJWT.getExpiresAt().after(new Date());
     }
 
     public Boolean validateCredentials(String username, String password) {

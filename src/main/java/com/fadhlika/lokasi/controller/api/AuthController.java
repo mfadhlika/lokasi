@@ -1,58 +1,47 @@
 package com.fadhlika.lokasi.controller.api;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
-import com.auth0.jwt.exceptions.SignatureVerificationException;
-import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fadhlika.lokasi.dto.LoginRequest;
 import com.fadhlika.lokasi.dto.LoginResponse;
 import com.fadhlika.lokasi.dto.Response;
-import com.fadhlika.lokasi.exception.UnauthorizedException;
 import com.fadhlika.lokasi.service.JwtAuthService;
+import com.fadhlika.lokasi.service.dto.Auth;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 public class AuthController {
-
-    private final JwtAuthService jwtAuthService;
+    @Value("${jwt.refresh-expiry}")
+    private Long jwtRefreshExpiry;
 
     @Autowired
-    public AuthController(JwtAuthService jwtAuthService) {
-        this.jwtAuthService = jwtAuthService;
-    }
+    private JwtAuthService jwtAuthService;
 
     @PostMapping("/api/v1/login")
     public Response<LoginResponse> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
-        if (!jwtAuthService.validateCredentials(loginRequest.username(), loginRequest.password())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
-        }
+        Auth auth = jwtAuthService.login(loginRequest.username(), loginRequest.password());
 
-        String accessToken = jwtAuthService.generateAccessToken(loginRequest.username());
-        String refreshToken = jwtAuthService.generateRefreshToken(loginRequest.username());
-
-        Cookie cookie = new Cookie("refreshToken", refreshToken) {
+        Cookie cookie = new Cookie("refreshToken", auth.refreshToken()) {
             {
                 setHttpOnly(true);
                 setSecure(true);
-                setMaxAge(86400);
+                setMaxAge(jwtRefreshExpiry.intValue());
                 setAttribute("SameSite", "None");
             }
         };
 
         response.addCookie(cookie);
 
-        return new Response<>(new LoginResponse(accessToken, refreshToken));
+        return new Response<>(new LoginResponse(auth.accessToken(), auth.refreshToken()));
     }
 
     @DeleteMapping("/api/v1/logout")
@@ -73,19 +62,9 @@ public class AuthController {
     }
 
     @GetMapping("/api/v1/auth/refresh")
-    public Response<LoginResponse> refresh(@CookieValue(name = "refreshToken") String refreshToken) {
-        try {
-            DecodedJWT decodedJWT = jwtAuthService.decodeRefreshToken(refreshToken);
+    public Response<LoginResponse> refresh(@CookieValue String refreshToken) {
+        String accessToken = jwtAuthService.refreshAccessToken(refreshToken);
 
-            if (!jwtAuthService.isRefreshTokenValid(refreshToken, decodedJWT.getSubject())) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
-            }
-
-            String accessToken = jwtAuthService.generateAccessToken(decodedJWT.getSubject());
-
-            return new Response<>(new LoginResponse(accessToken, refreshToken));
-        } catch (TokenExpiredException | SignatureVerificationException ex) {
-            throw new UnauthorizedException(ex.getMessage());
-        }
+        return new Response<>(new LoginResponse(accessToken, refreshToken));
     }
 }
