@@ -41,7 +41,8 @@ public class OwntracksController {
     }
 
     @PostMapping
-    public void pub(@RequestHeader("X-Limit-D") String deviceId, @RequestBody Message message) throws JsonProcessingException {
+    public void pub(@RequestHeader("X-Limit-D") String deviceId, @RequestBody Message message)
+            throws JsonProcessingException {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         if (message instanceof com.fadhlika.lokasi.dto.owntracks.Location location) {
@@ -56,6 +57,7 @@ public class OwntracksController {
             l.setAccuracy(location.acc());
             l.setVerticalAccuracy(location.vac());
             l.setSpeed(location.vel());
+            l.setMotions(location.motions());
             l.setSsid(location.ssid());
             l.setTimestamp(Instant.ofEpochSecond(location.tst()).atZone(ZoneOffset.UTC));
 
