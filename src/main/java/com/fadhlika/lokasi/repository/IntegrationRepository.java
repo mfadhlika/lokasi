@@ -28,7 +28,7 @@ public class IntegrationRepository {
                         INSERT INTO integration(user_id, owntracks_username, owntracks_password, overland_api_key) VALUES (?, ?, ?, ?)
                         ON CONFLICT(user_id) DO UPDATE SET
                             owntracks_username=excluded.owntracks_username,
-                            owntracks_username=IFNULL(excluded.owntracks_username, owntracks_username),
+                            owntracks_password=IFNULL(excluded.owntracks_password, owntracks_password),
                             overland_api_key=excluded.overland_api_key""")
                 .param(integration.userId())
                 .param(integration.owntracksUsername())
