@@ -22,5 +22,35 @@
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
+    },
+    {
+        "name": "com.fadhlika.lokasi.dto.owntracks.Status",
+        "allDeclaredConstructors": true,
+        "allDeclaredFields": true,
+        "allDeclaredMethods": true
+    },
+    {
+        "name": "com.fadhlika.lokasi.dto.owntracks.Lwt",
+        "allDeclaredConstructors": true,
+        "allDeclaredFields": true,
+        "allDeclaredMethods": true
+    },
+    {
+        "name": "com.fadhlika.lokasi.dto.owntracks.Location",
+        "allDeclaredConstructors": true,
+        "allDeclaredFields": true,
+        "allDeclaredMethods": true
+    },
+    {
+        "name": "com.fadhlika.lokasi.dto.owntracks.StatusIos",
+        "allDeclaredConstructors": true,
+        "allDeclaredFields": true,
+        "allDeclaredMethods": true
+    },
+    {
+        "name": "com.fadhlika.lokasi.dto.owntracks.StatusAndroid",
+        "allDeclaredConstructors": true,
+        "allDeclaredFields": true,
+        "allDeclaredMethods": true
     }
 ]
