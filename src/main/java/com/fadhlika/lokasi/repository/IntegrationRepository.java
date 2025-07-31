@@ -19,7 +19,7 @@ public class IntegrationRepository {
     private final RowMapper<Integration> rowMapper = (ResultSet rs, int rowNum) -> new Integration(
             rs.getInt("user_id"),
             rs.getString("owntracks_username"),
-            null,
+            rs.getString("owntracks_password"),
             rs.getString("overland_api_key"));
 
     public void save(Integration integration) throws SQLException {
@@ -39,7 +39,7 @@ public class IntegrationRepository {
 
     public Integration get(int userId) throws SQLException {
         return jdbcClient.sql(
-                "SELECT user_id, owntracks_username, overland_api_key FROM integration WHERE user_id = ?")
+                "SELECT * FROM integration WHERE user_id = ?")
                 .param(userId)
                 .query(rowMapper)
                 .single();

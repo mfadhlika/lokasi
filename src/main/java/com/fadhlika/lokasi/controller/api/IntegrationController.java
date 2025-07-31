@@ -42,6 +42,7 @@ public class IntegrationController {
 
         Integration integration = integrationService.getIntegration(user.getId());
 
-        return new Response<>(integration);
+        return new Response<>(new Integration(integration.userId(), integration.owntracksUsername(), null,
+                integration.overlandApiKey()));
     }
 }
