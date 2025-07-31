@@ -17,9 +17,9 @@ public class ApiExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(ApiExceptionHandler.class);
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Response<Void>> handleGenericException(RuntimeException ex) {
-        logger.error("Exception handled: {}", ex.getMessage());
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Response<Void>> handleException(Exception ex) {
+        logger.error("{} handled: {}", ex.getClass(), ex.getMessage());
         if (ex.getClass().isAnnotationPresent(ResponseStatus.class)) {
             ResponseStatus status = ex.getClass().getAnnotation(ResponseStatus.class);
             return new ResponseEntity<>(new Response<>(ex.getMessage()), status.value());
