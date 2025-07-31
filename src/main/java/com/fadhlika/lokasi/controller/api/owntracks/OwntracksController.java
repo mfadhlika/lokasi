@@ -22,6 +22,7 @@ import com.fadhlika.lokasi.model.Location;
 import com.fadhlika.lokasi.model.User;
 import com.fadhlika.lokasi.service.LocationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  *
@@ -45,25 +46,32 @@ public class OwntracksController {
             throws JsonProcessingException {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (message instanceof com.fadhlika.lokasi.dto.owntracks.Location location) {
-            Location l = new Location();
+        switch (message) {
+            case com.fadhlika.lokasi.dto.owntracks.Location location:
+                Location l = new Location();
 
-            l.setUserId(user.getId());
-            l.setDeviceId(deviceId);
-            l.setGeometry(location.lat(), location.lon());
-            l.setAltitude(location.alt());
-            l.setBatteryState(location.bs());
-            l.setCourse(location.cog());
-            l.setAccuracy(location.acc());
-            l.setVerticalAccuracy(location.vac());
-            l.setSpeed(location.vel());
-            l.setMotions(location.motions());
-            l.setSsid(location.ssid());
-            l.setTimestamp(Instant.ofEpochSecond(location.tst()).atZone(ZoneOffset.UTC));
+                l.setUserId(user.getId());
+                l.setDeviceId(deviceId);
+                l.setGeometry(location.lat(), location.lon());
+                l.setAltitude(location.alt());
+                l.setBatteryState(location.bs());
+                l.setCourse(location.cog());
+                l.setAccuracy(location.acc());
+                l.setVerticalAccuracy(location.vac());
+                l.setSpeed(location.vel());
+                l.setMotions(location.motions());
+                l.setSsid(location.ssid());
+                l.setTimestamp(Instant.ofEpochSecond(location.tst()).atZone(ZoneOffset.UTC));
 
-            l.setRawData(message);
+                l.setRawData(message);
 
-            this.locationService.saveLocation(l);
+                this.locationService.saveLocation(l);
+                break;
+            case com.fadhlika.lokasi.dto.owntracks.Status status:
+                ObjectMapper mapper = new ObjectMapper();
+                logger.info(mapper.writeValueAsString(status));
+            default:
+                break;
         }
     }
 }
