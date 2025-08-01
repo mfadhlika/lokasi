@@ -89,7 +89,7 @@ public class LocationRepository {
     public void createLocation(Location location) throws DataAccessException, JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         jdbcClient.sql(
-                "INSERT INTO location("
+                "INSERT OR REPLACE INTO location("
                         + "user_id, "
                         + "device_id, "
                         + "geometry, "
