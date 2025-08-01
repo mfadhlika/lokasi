@@ -52,7 +52,7 @@ public class OwntracksController {
 
                 l.setUserId(user.getId());
                 l.setDeviceId(deviceId);
-                l.setGeometry(location.lat(), location.lon());
+                l.setGeometry(location.lon(), location.lat());
                 l.setAltitude(location.alt());
                 l.setBatteryState(location.bs());
                 l.setCourse(location.cog());
