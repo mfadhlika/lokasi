@@ -54,8 +54,8 @@ export function Maps({ locations, position, zoom, className }: React.ComponentPr
                     if ((feature.properties as LineStringProperties).distance) {
                         const props = feature.properties as LineStringProperties;
                         let content = "<div>";
-                        content += `<strong>Distance</strong>: ${props.distance.toFixed(2)} ${props.distanceUnit}<br/>`;
-                        content += `<strong>Speed</strong>: ${props.speed.toFixed(2)} ${props.speedUnit}<br/>`;
+                        content += `<strong>Distance</strong>: ${props.distance?.toFixed(2) ?? 0} ${props.distanceUnit}<br/>`;
+                        content += `<strong>Speed</strong>: ${props.speed?.toFixed(2) ?? 0} ${props.speedUnit}<br/>`;
                         content += `<strong>Start at</strong>: ${(new Date(props.startAt)).toLocaleString()}<br/>`;
                         content += `<strong>End at</strong>: ${(new Date(props.endAt)).toLocaleString()}<br/>`;
                         if (props.motions) content += `<strong>Motions</strong>: ${props.motions.join(",")}<br/>`;

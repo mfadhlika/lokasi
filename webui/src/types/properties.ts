@@ -15,9 +15,9 @@ type PointProperties = {
 };
 
 type LineStringProperties = {
-    distance: number,
+    distance?: number,
     distanceUnit: string,
-    speed: number,
+    speed?: number,
     speedUnit: string,
     startAt: string,
     endAt: string,
