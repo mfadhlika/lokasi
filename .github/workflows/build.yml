@@ -4,6 +4,9 @@ on:
   push:
     branches: ["main"]
     tags: ["v*.*.*"]
+    paths-ignore:
+      - "Readme.md"
+      - ".github/screenshots/**"
 
 env:
   REGISTRY: ghcr.io
