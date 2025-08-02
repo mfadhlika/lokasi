@@ -2,4 +2,6 @@
 
 Self-hosted location tracking history
 
+## Screenshots
+
 ![Maps](.github/screenshots/maps.png)
