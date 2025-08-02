@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fadhlika.lokasi.dto.Feature;
 import com.fadhlika.lokasi.dto.FeatureCollection;
-import com.fadhlika.lokasi.dto.LineStringProperties;
 import com.fadhlika.lokasi.dto.PointProperties;
 import com.fadhlika.lokasi.dto.Response;
 import com.fadhlika.lokasi.model.Location;
@@ -42,52 +41,6 @@ public class LocationController {
     }
 
     @GetMapping
-    public Response<FeatureCollection> getLocations(
-            @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atStartOfDay().atZone(ZoneOffset.UTC)}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime start,
-            @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atTime(T(java.time.LocalTime).MAX).atZone(ZoneOffset.UTC)}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime end,
-            @RequestParam Optional<String> device) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        List<Feature> features = new ArrayList<>();
-        List<Location> locations = this.locationService.findLocations(user.getId(), start, end, device);
-        for (int i = 1; i < locations.size(); i++) {
-            Location curr = locations.get(i);
-
-            Location prev = locations.get(i - 1);
-
-            Duration duration = Duration.between(prev.getTimestamp(), curr.getTimestamp());
-
-            if (duration.getSeconds() > 15 * 60) {
-                continue;
-            }
-
-            Coordinate[] twoPoints = {
-                    prev.getGeometry().getCoordinate(),
-                    curr.getGeometry().getCoordinate()
-            };
-
-            GeometryFactory gf = new GeometryFactory();
-            LineString ls = gf.createLineString(twoPoints);
-
-            Double distance = curr.getDistanceInMeters(prev);
-            Double speed = (distance / 1000.0) / (duration.getSeconds() / 3600.0);
-
-            LineStringProperties props = new LineStringProperties(
-                    distance,
-                    "km",
-                    speed,
-                    "kmph",
-                    curr.getTimestamp(),
-                    prev.getTimestamp(),
-                    curr.getMotions());
-
-            features.add(new Feature(ls, props));
-        }
-
-        return new Response<>(new FeatureCollection(features));
-    }
-
-    @GetMapping("/raw")
     public Response<FeatureCollection> getRawLocations(
             @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atStartOfDay().atZone(ZoneOffset.UTC)}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime start,
             @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atTime(T(java.time.LocalTime).MAX).atZone(ZoneOffset.UTC)}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime end,

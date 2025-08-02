@@ -38,7 +38,7 @@ export default function DataPage() {
         if (device && device !== 'all') {
             params.set('device', device);
         }
-        axiosInstance.get<Response<FeatureCollection>>(`v1/locations/raw?${params.toString()}`)
+        axiosInstance.get<Response<FeatureCollection>>(`v1/locations?${params.toString()}`)
             .then(({ data }) => {
                 const newData = data.data.features.map(feature => {
                     return {

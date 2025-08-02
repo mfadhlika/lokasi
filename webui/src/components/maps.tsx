@@ -1,5 +1,5 @@
 import type { Feature, FeatureCollection } from "geojson";
-import L, { LatLngBounds, type LatLngTuple } from "leaflet";
+import L, { type LatLngTuple } from "leaflet";
 import { MapContainer, ZoomControl, TileLayer, GeoJSON } from "react-leaflet";
 import 'leaflet/dist/leaflet.css';
 import React from "react";
@@ -15,18 +15,8 @@ export function Maps({ locations, position, zoom, className }: React.ComponentPr
     const mapRef = React.useRef<L.Map | null>(null);
 
     React.useEffect(() => {
-        if (locations.bbox) {
-            const bbox: LatLngBounds = new LatLngBounds(
-                [locations.bbox[0], locations.bbox[1]],
-                [locations.bbox[2], locations.bbox[3]]
-            );
-            mapRef.current?.fitBounds(bbox, {
-
-            });
-        } else {
-            const pos = position ?? [-6.175, 106.8275];
-            mapRef.current?.setView(pos);
-        }
+        const pos = position ?? [-6.175, 106.8275];
+        mapRef.current?.setView(pos);
     }, [position, locations]);
 
     return (
