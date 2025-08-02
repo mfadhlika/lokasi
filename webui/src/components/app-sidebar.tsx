@@ -58,7 +58,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         <SidebarMenuButton size="lg" asChild>
                             <div>
                                 <div className="text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                                    <img className="size-4" src="/lokasi.png" />
+                                    <img className="size-4" src="/lokasi.svg" />
                                 </div>
                                 <span className="font-medium">Lokasi</span>
                             </div>
