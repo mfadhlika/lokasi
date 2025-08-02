@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Database, Map, Plane, Settings, Upload } from "lucide-react"
+import { Database, Download, Map, Plane, Settings, Upload } from "lucide-react"
 
 import { NavUser } from "@/components/nav-user"
 import {
@@ -36,6 +36,11 @@ const data = {
                     title: "Import",
                     url: "/data/import",
                     icon: Upload,
+                },
+                {
+                    title: "Export",
+                    url: "/data/export",
+                    icon: Download,
                 }
             ]
         },
