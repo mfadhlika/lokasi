@@ -45,8 +45,8 @@ public class LocationController {
             @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atStartOfDay().atZone(ZoneOffset.UTC)}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime start,
             @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atTime(T(java.time.LocalTime).MAX).atZone(ZoneOffset.UTC)}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime end,
             @RequestParam Optional<String> device,
-            @RequestParam(defaultValue = "0") Optional<Integer> offset,
-            @RequestParam(defaultValue = "25") Optional<Integer> limit) {
+            @RequestParam Optional<Integer> offset,
+            @RequestParam Optional<Integer> limit) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         List<Feature> features = new ArrayList<>();
