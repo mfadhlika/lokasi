@@ -6,6 +6,7 @@ import SettingsPage from "@/pages/settings";
 import LoginPage from "@/pages/login";
 import TripsPage from "@/pages/trips";
 import ImportPage from "@/pages/import";
+import ExportPage from "@/pages/export";
 
 const router = createBrowserRouter([
     {
@@ -31,6 +32,10 @@ const router = createBrowserRouter([
             {
                 path: "/data/import",
                 element: <ImportPage />,
+            },
+            {
+                path: "/data/export",
+                element: <ExportPage />,
             },
             {
                 path: "/settings",

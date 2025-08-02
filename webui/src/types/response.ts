@@ -1,4 +1,4 @@
-type Response<T> = {
+type Response<T = never> = {
     message: string,
     data: T,
 }
