@@ -21,6 +21,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.jdbc.core.simple.JdbcClient.MappedQuerySpec;
 import org.springframework.jdbc.core.simple.JdbcClient.StatementSpec;
 import org.springframework.stereotype.Repository;
 
@@ -127,22 +128,41 @@ public class LocationRepository {
                 .update();
     }
 
-    public List<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end, Optional<String> device,
+    public List<Location> findLocations(int userId, Optional<ZonedDateTime> start, Optional<ZonedDateTime> end,
+            Optional<String> device,
+            Optional<Integer> offset, Optional<Integer> limit) throws SQLException {
+        return findLocationsStatementSpecBuilder(userId, start, end, device, offset, limit).list();
+    }
+
+    public Location findLocation(int userId, Optional<ZonedDateTime> start, Optional<ZonedDateTime> end,
+            Optional<String> device) throws SQLException {
+        return findLocationsStatementSpecBuilder(userId, start, end, device, Optional.empty(), Optional.of(1)).single();
+    }
+
+    public MappedQuerySpec<Location> findLocationsStatementSpecBuilder(int userId, Optional<ZonedDateTime> start,
+            Optional<ZonedDateTime> end,
+            Optional<String> device,
             Optional<Integer> offset, Optional<Integer> limit) throws SQLException {
         List<String> where = new ArrayList<>() {
             {
                 add("user_id = ?");
-                add("timestamp BETWEEN ? AND ?");
             }
         };
 
         List<Object> args = new ArrayList<Object>() {
             {
                 add(userId);
-                add(start);
-                add(end);
             }
         };
+
+        if (start.isPresent() && end.isPresent()) {
+            where.add("timestamp BETWEEN ? AND ?");
+            args.add(start.get());
+            args.add(end.get());
+        } else if (start.isPresent()) {
+            where.add("timestamp < ?");
+            args.add(start.get());
+        }
 
         device.ifPresent((d) -> {
             where.add("device_id = ?");
@@ -185,6 +205,6 @@ public class LocationRepository {
         for (Object arg : args) {
             stmt = stmt.param(arg);
         }
-        return stmt.query(locationRowMapper).list();
+        return stmt.query(locationRowMapper);
     }
 }

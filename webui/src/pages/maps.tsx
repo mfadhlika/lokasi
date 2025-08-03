@@ -5,7 +5,7 @@ import type { DateRange } from "react-day-picker";
 import { DatePicker } from "@/components/date-picker.tsx";
 import { DeviceSelect } from "@/components/device-select.tsx";
 import { Maps } from "@/components/maps";
-import type { FeatureCollection, Point } from "geojson";
+import type { Feature, FeatureCollection, Point } from "geojson";
 import { Header } from "@/components/header";
 import { toast } from "sonner";
 import { useLocationFilter } from "@/hooks/use-location-filter";
@@ -17,9 +17,11 @@ import type { PointProperties } from "@/types/properties";
 
 export default function MapsPage() {
     const [locations, setLocations] = useState<FeatureCollection<Point, PointProperties>>(turf.featureCollection([]));
+    const [lastKnownLocation, setLastKnownLocation] = useState<Feature<Point, PointProperties> | undefined>();
     const [{ date, device }, setFilter] = useLocationFilter();
     const [showLines, setShowLines] = useState<Checked>(true);
     const [showPoints, setShowPoints] = useState<Checked>(true);
+    const [showLastKnown, setShowLastKnown] = useState<Checked>(true);
 
     useEffect(() => {
         const params = new URLSearchParams();
@@ -32,7 +34,13 @@ export default function MapsPage() {
                 setLocations(data.data);
             })
             .catch(err => toast.error(`Failed to get user's locations: ${err}`));
-    }, [date, device]);
+
+        if (showLastKnown) axiosInstance.get<Response<Feature<Point, PointProperties>>>(`v1/locations/last?${params.toString()}`)
+            .then(({ data }) => {
+                setLastKnownLocation(data.data);
+            })
+            .catch(err => toast.error(`Failed to get user's lsat known locations: ${err}`));
+    }, [date, device, showLastKnown]);
 
 
     const handleDate = (newDate: DateRange | undefined) => {
@@ -54,10 +62,10 @@ export default function MapsPage() {
             <Header>
                 <DatePicker variant="outline" date={date} setDate={handleDate} />
                 <DeviceSelect className="" selectedDevice={device || "all"} onSelectedDevice={handleDevice} />
-                <LayerCheckbox showLines={showLines} setShowLines={setShowLines} showPoints={showPoints} setShowPoints={setShowPoints} />
+                <LayerCheckbox showLines={showLines} setShowLines={setShowLines} showPoints={showPoints} setShowPoints={setShowPoints} showLastKnown={showLastKnown} setShowLastKnown={setShowLastKnown} />
             </Header>
             <div className="flex flex-1 flex-col gap-4">
-                <Maps locations={locations} showLines={showLines} showPoints={showPoints} />
+                <Maps locations={locations} lastKnowLocation={lastKnownLocation} showLines={showLines} showPoints={showPoints} showLastKnown={showLastKnown} />
             </div>
         </>
     )

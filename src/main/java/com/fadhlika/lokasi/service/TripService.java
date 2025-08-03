@@ -31,8 +31,8 @@ public class TripService {
         return trips.stream().map(
                 (trip) -> {
                     try {
-                        List<Location> locations = locationRepository.findLocations(userId, trip.startAt(),
-                                trip.endAt(),
+                        List<Location> locations = locationRepository.findLocations(userId, Optional.of(trip.startAt()),
+                                Optional.of(trip.endAt()),
                                 Optional.empty(), Optional.empty(), Optional.empty());
 
                         return new Trip(trip.userId(), trip.title(), trip.startAt(), trip.endAt(), trip.createdAt(),

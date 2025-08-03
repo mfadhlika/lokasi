@@ -41,7 +41,7 @@ public class LocationController {
     }
 
     @GetMapping
-    public Response<FeatureCollection> getRawLocations(
+    public Response<FeatureCollection> getLocations(
             @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atStartOfDay().atZone(ZoneOffset.UTC)}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime start,
             @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atTime(T(java.time.LocalTime).MAX).atZone(ZoneOffset.UTC)}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime end,
             @RequestParam Optional<String> device,
@@ -50,7 +50,8 @@ public class LocationController {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         List<Feature> features = new ArrayList<>();
-        List<Location> locations = this.locationService.findLocations(user.getId(), start, end, device, offset, limit);
+        List<Location> locations = this.locationService.findLocations(user.getId(), Optional.of(start),
+                Optional.of(end), device, offset, limit);
         for (int i = 1; i < locations.size(); i++) {
             Location curr = locations.get(i);
 
@@ -72,5 +73,31 @@ public class LocationController {
         }
 
         return new Response<>(new FeatureCollection(features));
+    }
+
+    @GetMapping("/last")
+    public Response<Feature> getLastLocation(
+            @RequestParam Optional<String> device) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Location location = this.locationService.findLocation(user.getId(), Optional.empty(),
+                Optional.empty(), device);
+
+        PointProperties props = new PointProperties(
+                location.getTimestamp(),
+                location.getAltitude(),
+                location.getSpeed(),
+                location.getCourse(),
+                location.getCourseAccuracy(),
+                location.getAccuracy(),
+                location.getVerticalAccuracy(),
+                location.getMotions(),
+                location.getBatteryState().toString(),
+                location.getBattery(),
+                location.getDeviceId(),
+                location.getSsid(),
+                location.getRawData());
+
+        return new Response<Feature>(new Feature(location.getGeometry(), props));
     }
 }

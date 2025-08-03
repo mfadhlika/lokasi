@@ -11,12 +11,14 @@ import L, { type LatLngTuple } from "leaflet";
 
 export type MapsProps = React.ComponentProps<"div"> & {
     locations: FeatureCollection<Point, PointProperties>,
+    lastKnowLocation?: Feature<Point, PointProperties>,
     zoom?: number,
     showPoints?: Checked,
-    showLines?: Checked
+    showLines?: Checked,
+    showLastKnown?: Checked
 }
 
-function InnerMaps({ locations, showLines, showPoints }: MapsProps) {
+function InnerMaps({ locations, lastKnowLocation, showLines, showPoints, showLastKnown }: MapsProps) {
     // const map = useMap();
     // map.setView([-6.175, 106.8275]);
 
@@ -114,10 +116,27 @@ function InnerMaps({ locations, showLines, showPoints }: MapsProps) {
                 </FeatureGroup>
             );
         })}
+        {showLastKnown && lastKnowLocation && <GeoJSON data={lastKnowLocation} onEachFeature={(feature, layer) => {
+            const props = feature.properties as PointProperties;
+            const content = <div>
+                <strong>Timestamp</strong>: {(new Date(props.timestamp)).toLocaleString()}<br />
+                <strong>Speed</strong>: {props.speed}<br />
+                <strong>Altitude</strong>: {props.altitude}<br />
+                <strong>Vertical accuracy</strong>: {props.verticalAccuracy}<br />
+                <strong>Course</strong>: {props.course}<br />
+                <strong>Course accuracy</strong>: {props.courseAccuracy}<br />
+                <strong>Battery level</strong>: {props.batteryLevel}<br />
+                <strong>Battery state</strong>: {props.batteryState}<br />
+                <strong>Device</strong>: {props.deviceId}<br />
+                <strong>SSID</strong>: {props.ssid}<br />
+                {props.motions && <><strong>Motions</strong>: {props.motions.join(",")}<br /></>}
+            </div>;
+            layer.bindTooltip(renderToStaticMarkup(content))
+        }} />}
     </>);
 }
 
-export function Maps({ locations, zoom, className, showLines, showPoints }: MapsProps) {
+export function Maps({ locations, lastKnowLocation, zoom, className, showLines, showPoints, showLastKnown }: MapsProps) {
     let center = [-6.175, 106.8275];
     if (locations.features.length > 0) {
         const coords = turf.center(locations).geometry.coordinates;
@@ -137,7 +156,7 @@ export function Maps({ locations, zoom, className, showLines, showPoints }: Maps
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            <InnerMaps locations={locations} showLines={showLines} showPoints={showPoints} />
+            <InnerMaps locations={locations} lastKnowLocation={lastKnowLocation} showLines={showLines} showPoints={showPoints} showLastKnown={showLastKnown} />
         </MapContainer>
     );
 }

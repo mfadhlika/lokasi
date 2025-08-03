@@ -9,10 +9,12 @@ export type LayerCheckboxProps = {
     setShowLines: (value: Checked) => void,
     showPoints: Checked,
     setShowPoints: (value: Checked) => void,
+    showLastKnown: Checked,
+    setShowLastKnown: (value: Checked) => void,
 }
 
 
-export const LayerCheckbox = ({ showLines, setShowLines, showPoints, setShowPoints }: LayerCheckboxProps) => {
+export const LayerCheckbox = ({ showLines, setShowLines, showPoints, setShowPoints, showLastKnown, setShowLastKnown }: LayerCheckboxProps) => {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -22,6 +24,12 @@ export const LayerCheckbox = ({ showLines, setShowLines, showPoints, setShowPoin
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
+                <DropdownMenuCheckboxItem
+                    checked={showLastKnown}
+                    onCheckedChange={setShowLastKnown}
+                >
+                    Last known location
+                </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
                     checked={showLines}
                     onCheckedChange={setShowLines}

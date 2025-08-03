@@ -61,17 +61,28 @@ public class LocationService {
     }
 
     public List<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end) {
-        return findLocations(userId, start, end, Optional.empty(), Optional.empty(), Optional.empty());
+        return findLocations(userId, Optional.of(start), Optional.of(end), Optional.empty(), Optional.empty(),
+                Optional.empty());
     }
 
     public List<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end, Optional<String> device) {
-        return findLocations(userId, start, end, device, Optional.empty(), Optional.empty());
+        return findLocations(userId, Optional.of(start), Optional.of(end), device, Optional.empty(), Optional.empty());
     }
 
-    public List<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end, Optional<String> device,
+    public List<Location> findLocations(int userId, Optional<ZonedDateTime> start, Optional<ZonedDateTime> end,
+            Optional<String> device,
             Optional<Integer> offset, Optional<Integer> limit) {
         try {
             return locationRepository.findLocations(userId, start, end, device, offset, limit);
+        } catch (SQLException ex) {
+            throw new InternalErrorException(ex.getMessage());
+        }
+    }
+
+    public Location findLocation(int userId, Optional<ZonedDateTime> start, Optional<ZonedDateTime> end,
+            Optional<String> device) {
+        try {
+            return locationRepository.findLocation(userId, start, end, device);
         } catch (SQLException ex) {
             throw new InternalErrorException(ex.getMessage());
         }
