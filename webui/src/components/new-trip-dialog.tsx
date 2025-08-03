@@ -17,9 +17,11 @@ import { axiosInstance } from "@/lib/request.ts";
 import { useEffect, useState } from "react";
 import { cn, toISOLocal } from "@/lib/utils";
 import { toast } from "sonner";
-import { Maps } from "./maps";
-import type { FeatureCollection, LineString } from "geojson";
-import type { LatLngTuple } from "leaflet";
+import type { Feature, FeatureCollection, MultiLineString, Point } from "geojson";
+import type { PointProperties } from "@/types/properties";
+import type { Response } from "@/types/response";
+import { PreviewMaps } from "./preview-maps";
+import * as turf from "@turf/turf";
 
 const formSchema = z.object({
     title: z.string(),
@@ -32,8 +34,7 @@ const formSchema = z.object({
 
 export const NewTripDialog = ({ className }: React.ComponentProps<"div">) => {
     const [open, setOpen] = useState(false);
-    const [locations, setLocations] = useState<FeatureCollection>({ type: "FeatureCollection", features: [] });
-    const [position, setPosition] = useState<LatLngTuple>([-6.175, 106.8275]);
+    const [locations, setLocations] = useState<Feature<MultiLineString>>(turf.multiLineString([]));
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -53,13 +54,10 @@ export const NewTripDialog = ({ className }: React.ComponentProps<"div">) => {
         params.set("start", (new Date(startAt)).toISOString());
         params.set("end", (new Date(endAt)).toISOString());
 
-        axiosInstance.get(`v1/locations?${params.toString()}`)
-            .then(res => {
-                const data = res.data as FeatureCollection & { message: string }
-                setLocations({ ...data as FeatureCollection });
-                if (!data || data.features.length == 0) return;
-                const last = data.features[data.features.length - 1].geometry as LineString;
-                setPosition([last.coordinates[1][1], last.coordinates[1][0]]);
+        axiosInstance.get<Response<FeatureCollection<Point, PointProperties>>>(`v1/locations?${params.toString()}`)
+            .then(({ data }) => {
+                const coordinates = data.data.features.map(feature => feature.geometry.coordinates);
+                setLocations(turf.multiLineString([coordinates]));
             });
     }, [startAt, endAt]);
 
@@ -78,8 +76,6 @@ export const NewTripDialog = ({ className }: React.ComponentProps<"div">) => {
             });
     }
 
-
-
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
@@ -96,7 +92,7 @@ export const NewTripDialog = ({ className }: React.ComponentProps<"div">) => {
                     </DialogDescription>
                 </DialogHeader>
                 <div className="flex gap-4 flex-col md:flex-row">
-                    <Maps className="rounded-md min-h-[200px] flex-1" locations={locations} position={position} />
+                    <PreviewMaps className="rounded-md min-h-[200px] flex-1" locations={locations} />
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 space-y-8">
                             <FormField control={form.control} name="title" render={({ field }) => (

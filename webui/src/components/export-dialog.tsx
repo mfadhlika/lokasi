@@ -17,10 +17,12 @@ import { axiosInstance } from "@/lib/request.ts";
 import { useEffect, useState } from "react";
 import { cn, toISOLocal } from "@/lib/utils";
 import { toast } from "sonner";
-import type { FeatureCollection, LineString } from "geojson";
-import type { LatLngTuple } from "leaflet";
+import type { Feature, FeatureCollection, MultiLineString, Point } from "geojson";
 import type { Response } from "@/types/response";
-import { Maps } from "./maps";
+import { PreviewMaps } from "./preview-maps";
+import * as turf from "@turf/turf";
+import type { PointProperties } from "@/types/properties";
+
 
 const formSchema = z.object({
     startAt: z.coerce.date<Date>(),
@@ -32,9 +34,7 @@ const formSchema = z.object({
 
 export const ExportDialog = ({ className }: React.ComponentProps<"div">) => {
     const [open, setOpen] = useState(false);
-    const [locations, setLocations] = useState<FeatureCollection>({ type: "FeatureCollection", features: [] });
-    const [position, setPosition] = useState<LatLngTuple>([-6.175, 106.8275]);
-
+    const [locations, setLocations] = useState<Feature<MultiLineString>>(turf.multiLineString([]));
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -56,12 +56,10 @@ export const ExportDialog = ({ className }: React.ComponentProps<"div">) => {
         params.set("start", (new Date(startAt)).toISOString());
         params.set("end", (new Date(endAt)).toISOString());
 
-        axiosInstance.get<Response<FeatureCollection>>(`v1/locations?${params.toString()}`)
+        axiosInstance.get<Response<FeatureCollection<Point, PointProperties>>>(`v1/locations?${params.toString()}`)
             .then(({ data }) => {
-                setLocations(data.data);
-                if (!data.data || data.data.features.length == 0) return;
-                const last = data.data.features[data.data.features.length - 1].geometry as LineString;
-                setPosition([last.coordinates[1][1], last.coordinates[1][0]]);
+                const coordinates = data.data.features.map(feature => feature.geometry.coordinates);
+                setLocations(turf.multiLineString([coordinates]));
             });
     }, [startAt, endAt]);
 
@@ -95,7 +93,7 @@ export const ExportDialog = ({ className }: React.ComponentProps<"div">) => {
                     </DialogDescription>
                 </DialogHeader>
                 <div className="flex gap-4 flex-col md:flex-row">
-                    <Maps className="rounded-md min-h-[200px] flex-1" locations={locations} position={position} />
+                    <PreviewMaps className="rounded-md min-h-[200px] flex-1" locations={locations} />
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 space-y-8">
                             <FormField control={form.control} name="startAt"

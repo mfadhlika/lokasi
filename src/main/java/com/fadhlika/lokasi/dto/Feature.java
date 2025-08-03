@@ -3,7 +3,6 @@ package com.fadhlika.lokasi.dto;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -36,8 +35,8 @@ public class Feature {
     public Feature(Geometry geometry, HashMap<String, Object> properties) {
         this.geometry = geometry;
         for (Coordinate coordinate : geometry.getBoundary().getCoordinates()) {
-            this.bbox.add(coordinate.y);
             this.bbox.add(coordinate.x);
+            this.bbox.add(coordinate.y);
         }
         this.properties = properties;
     }
@@ -45,8 +44,8 @@ public class Feature {
     public <T> Feature(Geometry geometry, T properties) {
         this.geometry = geometry;
         for (Coordinate coordinate : geometry.getBoundary().getCoordinates()) {
-            this.bbox.add(coordinate.y);
             this.bbox.add(coordinate.x);
+            this.bbox.add(coordinate.y);
         }
         ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
         this.properties = mapper.convertValue(properties, new TypeReference<>() {
