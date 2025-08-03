@@ -1,12 +1,15 @@
 import { Header } from "@/components/header";
 import { NewTripDialog } from "@/components/new-trip-dialog";
 import { PreviewMaps } from "@/components/preview-maps";
+import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { axiosInstance } from "@/lib/request";
 import type { TripProperties } from "@/types/properties";
 import type { Response } from "@/types/response";
 import type { FeatureCollection, Point } from "geojson";
+import { Map } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Link } from "react-router";
 import { toast } from "sonner";
 
 export default function TripsPage() {
@@ -46,13 +49,18 @@ export default function TripsPage() {
                                     <PreviewMaps className="min-h-[200px]" locations={feature} />
                                 </CardContent>
                                 <CardFooter className="flex-col gap-2">
-
+                                    <Button className="w-full" variant="outline" asChild>
+                                        <Link to={encodeURI(`/?date_from=${(new Date(props.startAt).toJSON())}&date_to=${(new Date(props.endAt).toJSON())}`)}>
+                                            <Map />
+                                            Maps
+                                        </Link>
+                                    </Button>
                                 </CardFooter>
                             </Card>
                         );
                     })
                 }
-            </div>
+            </div >
         </>
     );
 }
