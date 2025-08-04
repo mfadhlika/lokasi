@@ -14,15 +14,15 @@ const axiosInstance = axios.create({
     }
 });
 
-function logout() {
-    axiosInstance.delete("v1/logout")
-        .then(() => {
-            localStorage.removeItem("accessToken");
-            router.navigate("/login");
-        }).catch(err => {
-            console.error(err);
-            toast.error("logging out failed", err);
-        });
+async function logout() {
+    try {
+        await axiosInstance.delete("v1/logout");
+        localStorage.removeItem("accessToken");
+        await router.navigate("/login");
+    } catch (err) {
+        console.error(err);
+        toast.error(`logging out failed: ${err}`);
+    }
 };
 
 async function refreshToken(): Promise<string> {
@@ -52,27 +52,26 @@ axiosInstance.interceptors.response.use(
             !originalRequest._retry) {
             originalRequest._retry = true;
 
+            if (!refreshTokenPromise) {
+                console.debug("refreshing token");
+                refreshTokenPromise = refreshToken()
+                    .then((token) => {
+                        refreshTokenPromise = null;
+                        return token;
+                    });
+            }
+
             try {
-                if (!refreshTokenPromise) {
-                    console.debug("refreshing token");
-                    refreshTokenPromise = refreshToken()
-                        .then((token) => {
-                            refreshTokenPromise = null;
-                            return token;
-                        });
-
-                }
-
                 const accessToken = await refreshTokenPromise;
 
                 if (accessToken) originalRequest.headers.Authorization = "Bearer " + accessToken;
 
                 console.debug("retry request");
                 return axios(originalRequest);
-            } catch {
-                console.error("failed refreshing token");
+            } catch (err) {
+                console.error("failed refreshing token", err);
                 toast.error("Session expired. Please relogin");
-                logout();
+                await logout();
             }
         }
 
