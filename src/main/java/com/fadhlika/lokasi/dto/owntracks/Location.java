@@ -17,19 +17,19 @@ import com.fasterxml.jackson.core.JsonProcessingException;
  */
 @JsonTypeName("location")
 public record Location(
-        int acc,
-        int alt,
-        int bs,
-        int cog,
+        Integer acc,
+        Integer alt,
+        Integer bs,
+        Integer cog,
         double lat,
         double lon,
-        int rad,
+        Integer rad,
         String t,
         String tid,
         int tst,
-        int vac,
-        int vel,
-        double p,
+        Integer vac,
+        Integer vel,
+        Double p,
         String poi,
         String image,
         @JsonProperty("imagename") String imageName,
@@ -42,7 +42,7 @@ public record Location(
         @JsonProperty("SSID") String ssid,
         @JsonProperty("BSSID") String bssid,
         @JsonProperty("created_at") int createdAt,
-        int m,
+        Integer m,
         @JsonProperty("_id") String id) implements Message {
 
     public com.fadhlika.lokasi.model.Location toLocation(int userId, String deviceId) throws JsonProcessingException {

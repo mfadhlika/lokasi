@@ -1,16 +1,16 @@
 type PointProperties = {
     timestamp: string,
-    altitude: number,
-    speed: number,
-    course: number,
-    courseAccuracy: number,
-    accuracy: number,
-    verticalAccuracy: number,
+    altitude?: number,
+    speed?: number,
+    course?: number,
+    courseAccuracy?: number,
+    accuracy?: number,
+    verticalAccuracy?: number,
     motions: string[],
-    batteryState: string,
-    batteryLevel: number,
+    batteryState?: string,
+    batteryLevel?: number,
     deviceId: string,
-    ssid: string,
+    ssid?: string,
     rawData: string
 };
 
