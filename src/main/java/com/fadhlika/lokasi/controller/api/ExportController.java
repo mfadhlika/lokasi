@@ -18,6 +18,7 @@ import com.fadhlika.lokasi.service.ExportService;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -54,4 +55,10 @@ public class ExportController {
         return export.content().readAllBytes();
     }
 
+    @DeleteMapping("/{exportId}")
+    public Response<Void> deleteExport(@PathVariable int exportId) {
+        exportService.deleteExport(exportId);
+
+        return new Response<>(String.format("export {} deleted", exportId));
+    }
 }

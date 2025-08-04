@@ -69,14 +69,19 @@ export default function ExportPage() {
                                     duration: Infinity,
                                     closeButton: true
                                 });
-
                             }}>
                                 Download
                             </Button>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                             <Button variant="ghost" onClick={() => {
-
+                                const exportId = row.getValue("id") as number;
+                                const promise = axiosInstance.delete(`v1/export/${exportId}`);
+                                toast.promise(promise, {
+                                    loading: `deleting export ${exportId}`,
+                                    success: `export ${exportId} deleted`,
+                                    error: (err) => `failed to delete export ${exportId}: ${err}`
+                                });
                             }}>
                                 Delete
                             </Button>

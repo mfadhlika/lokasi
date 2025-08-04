@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fadhlika.lokasi.dto.Feature;
 import com.fadhlika.lokasi.dto.FeatureCollection;
@@ -31,6 +32,7 @@ public class ExportService {
     @Autowired
     private ExportRepository exportRepository;
 
+    @Transactional
     public void exportLocations(Export export) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");
         String filename = String.format("export_%s_to_%s.json", export.startAt().format(formatter),
@@ -54,6 +56,10 @@ public class ExportService {
 
     public Export getExport(int id) {
         return exportRepository.get(id);
+    }
+
+    public void deleteExport(int id) {
+        exportRepository.delete(id);
     }
 
     public void processExport(int exportId) throws IOException {

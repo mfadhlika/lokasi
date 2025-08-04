@@ -72,4 +72,10 @@ public class ExportRepository {
                 .query(rowMapper)
                 .single();
     }
+
+    public void delete(int id) {
+        jdbcClient.sql(" DELETE FROM export WHERE id = ?")
+                .param(id)
+                .update();
+    }
 }
