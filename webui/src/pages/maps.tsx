@@ -21,7 +21,7 @@ export default function MapsPage() {
     const [{ date, device }, setFilter] = useLocationFilter();
     const [showLines, setShowLines] = useState<Checked>(true);
     const [showPoints, setShowPoints] = useState<Checked>(true);
-    const [showLastKnown, setShowLastKnown] = useState<Checked>(true);
+    const [showLastKnown, setShowLastKnown] = useState<Checked>(false);
 
     useEffect(() => {
         const params = new URLSearchParams();
