@@ -34,12 +34,12 @@ const data = {
             items: [
                 {
                     title: "Import",
-                    url: "/data/import",
+                    url: "/import",
                     icon: Upload,
                 },
                 {
                     title: "Export",
-                    url: "/data/export",
+                    url: "/export",
                     icon: Download,
                 }
             ]

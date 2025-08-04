@@ -30,11 +30,11 @@ const router = createBrowserRouter([
                 element: <DataPage />
             },
             {
-                path: "/data/import",
+                path: "/import",
                 element: <ImportPage />,
             },
             {
-                path: "/data/export",
+                path: "/export",
                 element: <ExportPage />,
             },
             {
