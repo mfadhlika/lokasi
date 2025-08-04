@@ -59,39 +59,44 @@ public class ExportService {
     public void processExport(int exportId) throws IOException {
         logger.info("start exporting {}", exportId);
 
-        Export export = exportRepository.get(exportId);
-        List<Location> locations = locationService.findLocations(export.userId(), export.startAt(), export.endAt());
+        try {
+            Export export = exportRepository.get(exportId);
+            List<Location> locations = locationService.findLocations(export.userId(), export.startAt(), export.endAt());
 
-        List<Feature> features = locations.stream().map((location) -> {
-            PointProperties props = new PointProperties(
-                    location.getTimestamp(),
-                    location.getAltitude(),
-                    location.getSpeed(),
-                    location.getCourse(),
-                    location.getCourseAccuracy(),
-                    location.getAccuracy(),
-                    location.getVerticalAccuracy(),
-                    location.getMotions(),
-                    location.getBatteryState().toString(),
-                    location.getBattery(),
-                    location.getDeviceId(),
-                    location.getSsid(),
-                    location.getRawData());
+            List<Feature> features = locations.stream().map((location) -> {
+                PointProperties props = new PointProperties(
+                        location.getTimestamp(),
+                        location.getAltitude(),
+                        location.getSpeed(),
+                        location.getCourse(),
+                        location.getCourseAccuracy(),
+                        location.getAccuracy(),
+                        location.getVerticalAccuracy(),
+                        location.getMotions(),
+                        location.getBatteryState().toString(),
+                        location.getBattery(),
+                        location.getDeviceId(),
+                        location.getSsid(),
+                        location.getRawData());
 
-            return new Feature(location.getGeometry(), props);
-        }).toList();
+                return new Feature(location.getGeometry(), props);
+            }).toList();
 
-        FeatureCollection featureCollection = new FeatureCollection(features);
+            FeatureCollection featureCollection = new FeatureCollection(features);
 
-        ObjectMapper mapper = new ObjectMapper();
-        PipedInputStream is = new PipedInputStream();
-        PipedOutputStream os = new PipedOutputStream(is);
-        mapper.writeValue(os, featureCollection);
+            ObjectMapper mapper = new ObjectMapper();
+            PipedInputStream is = new PipedInputStream();
+            PipedOutputStream os = new PipedOutputStream(is);
+            mapper.writeValue(os, featureCollection);
 
-        export = new Export(export.id(), export.userId(), export.filename(), export.startAt(), export.endAt(),
-                is, true,
-                export.createdAt());
-        exportRepository.save(export);
+            export = new Export(export.id(), export.userId(), export.filename(), export.startAt(), export.endAt(),
+                    is, true,
+                    export.createdAt());
+            exportRepository.save(export);
+        } catch (Exception e) {
+            logger.error("Error running processExport", e);
+            throw e;
+        }
 
         logger.info("export {} completed", exportId);
     }
