@@ -70,5 +70,29 @@
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
+    },
+    {
+        "name": "com.fadhlika.lokasi.service.ExportJobRequestHandler",
+        "allDeclaredConstructors": true,
+        "allDeclaredFields": true,
+        "allDeclaredMethods": true
+    },
+    {
+        "name": "com.fadhlika.lokasi.service.dto.ExportLocationJobRequest",
+        "allDeclaredConstructors": true,
+        "allDeclaredFields": true,
+        "allDeclaredMethods": true
+    },
+    {
+        "name": "com.fadhlika.lokasi.service.ImportJobRequestHandler",
+        "allDeclaredConstructors": true,
+        "allDeclaredFields": true,
+        "allDeclaredMethods": true
+    },
+    {
+        "name": "com.fadhlika.lokasi.service.dto.ImportLocationJobRequest",
+        "allDeclaredConstructors": true,
+        "allDeclaredFields": true,
+        "allDeclaredMethods": true
     }
 ]
