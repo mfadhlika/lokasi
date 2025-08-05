@@ -46,8 +46,8 @@ public class ExportService {
         }
 
         Export createdExport = exportRepository.get(export.userId(), export.filename());
-
-        BackgroundJob.enqueue(() -> processExport(createdExport.id()));
+        int exportId = createdExport.id();
+        BackgroundJob.enqueue(() -> processExport(exportId));
     }
 
     public List<Export> getExports(int userId) {
