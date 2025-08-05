@@ -19,11 +19,12 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Response<Void>> handleException(Exception ex) {
-        logger.error("{} handled: {}", ex.getClass(), ex.getMessage());
         if (ex.getClass().isAnnotationPresent(ResponseStatus.class)) {
             ResponseStatus status = ex.getClass().getAnnotation(ResponseStatus.class);
             return new ResponseEntity<>(new Response<>(ex.getMessage()), status.value());
         }
+
+        ex.printStackTrace();
         return new ResponseEntity<>(new Response<>(ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

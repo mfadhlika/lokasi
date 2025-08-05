@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fadhlika.lokasi.dto.owntracks.Message;
-import com.fadhlika.lokasi.model.Location;
 import com.fadhlika.lokasi.model.User;
 import com.fadhlika.lokasi.service.LocationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -48,24 +47,7 @@ public class OwntracksController {
 
         switch (message) {
             case com.fadhlika.lokasi.dto.owntracks.Location location:
-                Location l = new Location();
-
-                l.setUserId(user.getId());
-                l.setDeviceId(deviceId);
-                l.setGeometry(location.lon(), location.lat());
-                l.setAltitude(location.alt());
-                l.setBatteryState(location.bs());
-                l.setCourse(location.cog());
-                l.setAccuracy(location.acc());
-                l.setVerticalAccuracy(location.vac());
-                l.setSpeed(location.vel());
-                l.setMotions(location.motions());
-                l.setSsid(location.ssid());
-                l.setTimestamp(Instant.ofEpochSecond(location.tst()).atZone(ZoneOffset.UTC));
-
-                l.setRawData(message);
-
-                this.locationService.saveLocation(l);
+                this.locationService.saveLocation(location.toLocation(user.getId(), deviceId));
                 break;
             case com.fadhlika.lokasi.dto.owntracks.Status status:
                 ObjectMapper mapper = new ObjectMapper();

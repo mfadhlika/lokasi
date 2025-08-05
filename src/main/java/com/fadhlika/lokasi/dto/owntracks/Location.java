@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 public record Location(
         Integer acc,
         Integer alt,
+        Integer batt,
         Integer bs,
         Integer cog,
         double lat,
@@ -49,15 +50,25 @@ public record Location(
         com.fadhlika.lokasi.model.Location l = new com.fadhlika.lokasi.model.Location();
 
         l.setUserId(userId);
-        l.setDeviceId(deviceId);
-        l.setGeometry(this.lat(), this.lon());
-        l.setAltitude(this.alt());
-        l.setBatteryState(this.bs());
-        l.setCourse(this.cog());
-        l.setAccuracy(this.acc());
-        l.setVerticalAccuracy(this.vac());
-        l.setSpeed(this.vel());
-        l.setSsid(this.ssid());
+        if (deviceId != null)
+            l.setDeviceId(deviceId);
+        l.setGeometry(this.lon(), this.lat());
+        if (this.alt() != null)
+            l.setAltitude(this.alt());
+        if (this.bs() != null)
+            l.setBatteryState(this.bs());
+        if (this.batt() != null)
+            l.setBattery(this.batt());
+        if (this.cog() != null)
+            l.setCourse(this.cog());
+        if (this.acc() != null)
+            l.setAccuracy(this.acc());
+        if (this.vac() != null)
+            l.setVerticalAccuracy(this.vac());
+        if (this.vel() != null)
+            l.setSpeed(this.vel());
+        if (this.ssid() != null)
+            l.setSsid(this.ssid());
         l.setTimestamp(Instant.ofEpochSecond(this.tst()).atZone(ZoneOffset.UTC));
 
         l.setRawData(this);
