@@ -40,8 +40,7 @@ public class ExportService {
 
         Export createdExport = exportRepository.get(export.userId(), export.filename());
         int exportId = createdExport.id();
-        BackgroundJobRequest.schedule(Instant.now().plus(1, ChronoUnit.MINUTES),
-                new ExportLocationJobRequest(exportId));
+        BackgroundJobRequest.enqueue(new ExportLocationJobRequest(exportId));
     }
 
     public List<Export> getExports(int userId) {

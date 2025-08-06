@@ -3,8 +3,6 @@ package com.fadhlika.lokasi.service;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
@@ -15,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fadhlika.lokasi.dto.jobs.ImportLocationJobRequest;
 import com.fadhlika.lokasi.exception.ConflictException;
@@ -50,6 +49,7 @@ public class ImportService {
         this.importRepository.deleteImport(importId);
     }
 
+    @Transactional
     public void importLocations(int userId, String source, String filename, InputStream content) {
         try {
             importRepository.fetch(userId, filename);

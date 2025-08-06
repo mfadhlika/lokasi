@@ -1,5 +1,6 @@
 package com.fadhlika.lokasi.service;
 
+import java.io.ByteArrayInputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.List;
@@ -8,6 +9,7 @@ import org.jobrunr.jobs.lambdas.JobRequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.fadhlika.lokasi.dto.Feature;
 import com.fadhlika.lokasi.dto.FeatureCollection;
@@ -17,6 +19,7 @@ import com.fadhlika.lokasi.model.Export;
 import com.fadhlika.lokasi.repository.ExportRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+@Component
 public class ExportJobRequestHandler implements JobRequestHandler<ExportLocationJobRequest> {
     private static final Logger logger = LoggerFactory.getLogger(ExportJobRequestHandler.class);
 
@@ -56,9 +59,7 @@ public class ExportJobRequestHandler implements JobRequestHandler<ExportLocation
             FeatureCollection featureCollection = new FeatureCollection(features);
 
             ObjectMapper mapper = new ObjectMapper();
-            PipedInputStream is = new PipedInputStream();
-            PipedOutputStream os = new PipedOutputStream(is);
-            mapper.writeValue(os, featureCollection);
+            ByteArrayInputStream is = new ByteArrayInputStream(mapper.writeValueAsBytes(featureCollection));
 
             export = new Export(export.id(), export.userId(), export.filename(), export.startAt(), export.endAt(),
                     is, true,

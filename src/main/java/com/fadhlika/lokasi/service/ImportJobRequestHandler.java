@@ -9,6 +9,7 @@ import org.jobrunr.jobs.lambdas.JobRequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fadhlika.lokasi.dto.Feature;
@@ -23,6 +24,7 @@ import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+@Component
 public class ImportJobRequestHandler implements JobRequestHandler<ImportLocationJobRequest> {
     private static final Logger logger = LoggerFactory.getLogger(ImportJobRequestHandler.class);
 
@@ -34,8 +36,10 @@ public class ImportJobRequestHandler implements JobRequestHandler<ImportLocation
 
     @Override
     public void run(ImportLocationJobRequest args) throws Exception {
+        Import anImport = importRepository.fetch(args.importId());
+
+        logger.info("Starting import {}", anImport.id());
         try {
-            Import anImport = importRepository.fetch(args.importId());
 
             switch (anImport.source()) {
                 case "dawarich" ->
@@ -48,13 +52,12 @@ public class ImportJobRequestHandler implements JobRequestHandler<ImportLocation
             e.printStackTrace();
             throw e;
         }
+        logger.info("Completed import {}", anImport.id());
     }
 
     @Transactional
     public void importFromDawarich(Import anImport)
             throws StreamReadException, DatabindException, IOException {
-
-        logger.info("Starting import {}", anImport.id());
 
         ObjectMapper mapper = new ObjectMapper();
         FeatureCollection featureCollection = mapper.readValue(anImport.content(), FeatureCollection.class);
@@ -115,8 +118,5 @@ public class ImportJobRequestHandler implements JobRequestHandler<ImportLocation
                 anImport.createdAt());
 
         importRepository.updateImport(anImport);
-
-        logger.info("Completed import {}", anImport.id());
     }
-
 }
