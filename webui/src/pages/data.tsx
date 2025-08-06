@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useLocationFilter } from "@/hooks/use-location-filter";
 import type { Response } from "@/types/response";
 import type { Location } from "@/types/location";
+import type { PointProperties } from "@/types/properties";
 
 
 export default function DataPage() {
@@ -38,7 +39,7 @@ export default function DataPage() {
         if (device && device !== 'all') {
             params.set('device', device);
         }
-        axiosInstance.get<Response<FeatureCollection>>(`v1/locations?${params.toString()}`)
+        axiosInstance.get<Response<FeatureCollection<Point, PointProperties>>>(`v1/locations?${params.toString()}`)
             .then(({ data }) => {
                 const newData = data.data.features.map(feature => {
                     return {
@@ -95,8 +96,8 @@ export default function DataPage() {
             header: "Course Accuracy"
         },
         {
-            accessorKey: "battery",
-            header: "Battery"
+            accessorKey: "batteryLevel",
+            header: "Battery level"
         },
         {
             accessorKey: "batteryState",

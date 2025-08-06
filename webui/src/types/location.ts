@@ -1,19 +1,8 @@
 import type { Point } from "geojson";
+import type { PointProperties } from "./properties";
 
-type Location = {
-    timestamp: string,
+type Location = PointProperties & {
     coordinates: Point,
-    device: string,
-    altitude: number,
-    speed: number,
-    accuracy: number,
-    motions: string[],
-    course: number,
-    courseAccuracy: number,
-    battery: number,
-    batteryState: string,
-    ssid: string,
-    rawData: string
 }
 
 export type { Location };
