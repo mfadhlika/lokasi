@@ -62,8 +62,7 @@ public class ImportService {
 
         Import anImport = importRepository.fetch(userId, filename);
 
-        BackgroundJobRequest.schedule(Instant.now().plus(1, ChronoUnit.MINUTES),
-                new ImportLocationJobRequest(anImport.id()));
+        BackgroundJobRequest.enqueue(new ImportLocationJobRequest(anImport.id()));
     }
 
     public List<Import> getImports(int userId) {

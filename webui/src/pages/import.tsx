@@ -84,7 +84,13 @@ export default function ImportPage() {
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                             <Button variant="ghost" onClick={() => {
-
+                                const importId = row.getValue("id") as number;
+                                const promise = axiosInstance.delete(`v1/import/${importId}`);
+                                toast.promise(promise, {
+                                    loading: `deleting import ${importId}`,
+                                    success: `import ${importId} deleted`,
+                                    error: (err) => `failed to delete import ${importId}: ${err}`
+                                });
                             }}>
                                 Delete
                             </Button>

@@ -45,4 +45,11 @@ public class ImportController {
 
         return anImport.content().readAllBytes();
     }
+
+    @DeleteMapping("/{importId}")
+    public Response<Void> deleteImport(@PathVariable int importId) throws IOException {
+        importService.deleteImport(importId);
+
+        return new Response<>("success");
+    }
 }
