@@ -108,7 +108,7 @@ public class LocationRepository {
                         + "timestamp, "
                         + "raw_data, "
                         + "created_at, "
-                        + "import_id) VALUES(?, ?, ST_GeomFromText(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+                        + "import_id) VALUES(?, ?, ST_GeomFromText(?), ?, ?, ?, ?, ?, ?, jsonb(?), ?, ?, ?, ?, jsonb(?), ?, ?)")
                 .param(location.getUserId())
                 .param(location.getDeviceId())
                 .param(location.getGeometry())
@@ -180,11 +180,11 @@ public class LocationRepository {
                 + "speed, "
                 + "accuracy, "
                 + "vertical_accuracy, "
-                + "motions, "
+                + "json(motions) AS motions, "
                 + "battery_state, "
                 + "battery, "
                 + "ssid, "
-                + "raw_data, "
+                + "json(raw_data) AS raw_data, "
                 + "timestamp, "
                 + "created_at, "
                 + "import_id, "
