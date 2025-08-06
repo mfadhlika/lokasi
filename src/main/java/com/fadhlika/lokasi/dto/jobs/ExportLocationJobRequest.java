@@ -2,13 +2,13 @@ package com.fadhlika.lokasi.dto.jobs;
 
 import org.jobrunr.jobs.lambdas.JobRequest;
 
-import com.fadhlika.lokasi.service.ExportJobRequestHandler;
+import com.fadhlika.lokasi.service.ExportJobHandler;
 
 public record ExportLocationJobRequest(int exportId) implements JobRequest {
 
     @Override
-    public Class<ExportJobRequestHandler> getJobRequestHandler() {
-        return ExportJobRequestHandler.class;
+    public Class<ExportJobHandler> getJobRequestHandler() {
+        return ExportJobHandler.class;
     }
 
 }

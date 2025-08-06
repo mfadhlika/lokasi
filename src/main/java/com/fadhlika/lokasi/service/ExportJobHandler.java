@@ -20,8 +20,8 @@ import com.fadhlika.lokasi.repository.ExportRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
-public class ExportJobRequestHandler implements JobRequestHandler<ExportLocationJobRequest> {
-    private static final Logger logger = LoggerFactory.getLogger(ExportJobRequestHandler.class);
+public class ExportJobHandler implements JobRequestHandler<ExportLocationJobRequest> {
+    private static final Logger logger = LoggerFactory.getLogger(ExportJobHandler.class);
 
     @Autowired
     private LocationService locationService;

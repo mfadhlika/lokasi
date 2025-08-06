@@ -25,8 +25,8 @@ import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
-public class ImportJobRequestHandler implements JobRequestHandler<ImportLocationJobRequest> {
-    private static final Logger logger = LoggerFactory.getLogger(ImportJobRequestHandler.class);
+public class ImportJobHandler implements JobRequestHandler<ImportLocationJobRequest> {
+    private static final Logger logger = LoggerFactory.getLogger(ImportJobHandler.class);
 
     @Autowired
     private ImportRepository importRepository;

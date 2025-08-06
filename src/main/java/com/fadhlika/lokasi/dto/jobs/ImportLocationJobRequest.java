@@ -2,13 +2,13 @@ package com.fadhlika.lokasi.dto.jobs;
 
 import org.jobrunr.jobs.lambdas.JobRequest;
 
-import com.fadhlika.lokasi.service.ImportJobRequestHandler;
+import com.fadhlika.lokasi.service.ImportJobHandler;
 
 public record ImportLocationJobRequest(int importId) implements JobRequest {
 
     @Override
-    public Class<ImportJobRequestHandler> getJobRequestHandler() {
-        return ImportJobRequestHandler.class;
+    public Class<ImportJobHandler> getJobRequestHandler() {
+        return ImportJobHandler.class;
     }
 
 }
