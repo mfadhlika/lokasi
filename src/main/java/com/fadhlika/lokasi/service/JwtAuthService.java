@@ -10,7 +10,6 @@ import java.util.UUID;
 
 import com.auth0.jwt.JWTCreator;
 import com.fadhlika.lokasi.repository.UserRepository;
-import com.fadhlika.lokasi.service.dto.Auth;
 import com.fadhlika.lokasi.util.RandomStringGenerator;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +22,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fadhlika.lokasi.dto.Auth;
 import com.fadhlika.lokasi.exception.UnauthorizedException;
 import com.fadhlika.lokasi.model.User;
 

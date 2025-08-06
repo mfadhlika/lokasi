@@ -1,4 +1,4 @@
-package com.fadhlika.lokasi.service.dto;
+package com.fadhlika.lokasi.dto.jobs;
 
 import org.jobrunr.jobs.lambdas.JobRequest;
 

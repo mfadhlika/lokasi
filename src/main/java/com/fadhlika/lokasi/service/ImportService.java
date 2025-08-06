@@ -16,10 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
+import com.fadhlika.lokasi.dto.jobs.ImportLocationJobRequest;
 import com.fadhlika.lokasi.exception.ConflictException;
 import com.fadhlika.lokasi.model.Import;
 import com.fadhlika.lokasi.repository.ImportRepository;
-import com.fadhlika.lokasi.service.dto.ImportLocationJobRequest;
 
 @Service
 public class ImportService {

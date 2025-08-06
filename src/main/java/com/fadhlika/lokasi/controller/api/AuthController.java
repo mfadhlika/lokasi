@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fadhlika.lokasi.dto.Auth;
 import com.fadhlika.lokasi.dto.LoginRequest;
 import com.fadhlika.lokasi.dto.LoginResponse;
 import com.fadhlika.lokasi.dto.Response;
 import com.fadhlika.lokasi.service.JwtAuthService;
-import com.fadhlika.lokasi.service.dto.Auth;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;

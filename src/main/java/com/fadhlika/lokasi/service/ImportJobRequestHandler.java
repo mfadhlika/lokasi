@@ -13,11 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fadhlika.lokasi.dto.Feature;
 import com.fadhlika.lokasi.dto.FeatureCollection;
+import com.fadhlika.lokasi.dto.jobs.ImportLocationJobRequest;
 import com.fadhlika.lokasi.exception.BadRequestException;
 import com.fadhlika.lokasi.model.Import;
 import com.fadhlika.lokasi.model.Location;
 import com.fadhlika.lokasi.repository.ImportRepository;
-import com.fadhlika.lokasi.service.dto.ImportLocationJobRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;

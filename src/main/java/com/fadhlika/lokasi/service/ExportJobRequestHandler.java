@@ -12,9 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.fadhlika.lokasi.dto.Feature;
 import com.fadhlika.lokasi.dto.FeatureCollection;
 import com.fadhlika.lokasi.dto.PointProperties;
+import com.fadhlika.lokasi.dto.jobs.ExportLocationJobRequest;
 import com.fadhlika.lokasi.model.Export;
 import com.fadhlika.lokasi.repository.ExportRepository;
-import com.fadhlika.lokasi.service.dto.ExportLocationJobRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ExportJobRequestHandler implements JobRequestHandler<ExportLocationJobRequest> {

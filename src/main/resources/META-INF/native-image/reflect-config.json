@@ -78,7 +78,7 @@
         "allDeclaredMethods": true
     },
     {
-        "name": "com.fadhlika.lokasi.service.dto.ExportLocationJobRequest",
+        "name": "com.fadhlika.lokasi.dto.jobs.ExportLocationJobRequest",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
@@ -90,7 +90,7 @@
         "allDeclaredMethods": true
     },
     {
-        "name": "com.fadhlika.lokasi.service.dto.ImportLocationJobRequest",
+        "name": "com.fadhlika.lokasi.dto.jobs.ImportLocationJobRequest",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true

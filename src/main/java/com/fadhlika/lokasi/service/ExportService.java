@@ -13,10 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fadhlika.lokasi.dto.jobs.ExportLocationJobRequest;
 import com.fadhlika.lokasi.exception.InternalErrorException;
 import com.fadhlika.lokasi.model.Export;
 import com.fadhlika.lokasi.repository.ExportRepository;
-import com.fadhlika.lokasi.service.dto.ExportLocationJobRequest;
 
 @Service
 public class ExportService {
