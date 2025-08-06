@@ -1,14 +1,9 @@
 package com.fadhlika.lokasi.controller.api;
 
-import java.time.Duration;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LineString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,28 +44,24 @@ public class LocationController {
             @RequestParam Optional<Integer> limit) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        List<Feature> features = new ArrayList<>();
-        List<Location> locations = this.locationService.findLocations(user.getId(), Optional.of(start),
-                Optional.of(end), device, offset, limit);
-        for (int i = 1; i < locations.size(); i++) {
-            Location curr = locations.get(i);
-
-            PointProperties props = new PointProperties(
-                    curr.getTimestamp(),
-                    curr.getAltitude(),
-                    curr.getSpeed(),
-                    curr.getCourse(),
-                    curr.getCourseAccuracy(),
-                    curr.getAccuracy(),
-                    curr.getVerticalAccuracy(),
-                    curr.getMotions(),
-                    curr.getBatteryState().toString(),
-                    curr.getBattery(),
-                    curr.getDeviceId(),
-                    curr.getSsid(),
-                    curr.getRawData());
-            features.add(new Feature(curr.getGeometry(), props));
-        }
+        List<Feature> features = this.locationService.findLocations(user.getId(), Optional.of(start),
+                Optional.of(end), device, offset, limit).map(curr -> {
+                    PointProperties props = new PointProperties(
+                            curr.getTimestamp(),
+                            curr.getAltitude(),
+                            curr.getSpeed(),
+                            curr.getCourse(),
+                            curr.getCourseAccuracy(),
+                            curr.getAccuracy(),
+                            curr.getVerticalAccuracy(),
+                            curr.getMotions(),
+                            curr.getBatteryState().toString(),
+                            curr.getBattery(),
+                            curr.getDeviceId(),
+                            curr.getSsid(),
+                            curr.getRawData());
+                    return new Feature(curr.getGeometry(), props);
+                }).toList();
 
         return new Response<>(new FeatureCollection(features));
     }

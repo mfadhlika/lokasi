@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,16 +61,16 @@ public class LocationService {
         });
     }
 
-    public List<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end) {
+    public Stream<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end) {
         return findLocations(userId, Optional.of(start), Optional.of(end), Optional.empty(), Optional.empty(),
                 Optional.empty());
     }
 
-    public List<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end, Optional<String> device) {
+    public Stream<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end, Optional<String> device) {
         return findLocations(userId, Optional.of(start), Optional.of(end), device, Optional.empty(), Optional.empty());
     }
 
-    public List<Location> findLocations(int userId, Optional<ZonedDateTime> start, Optional<ZonedDateTime> end,
+    public Stream<Location> findLocations(int userId, Optional<ZonedDateTime> start, Optional<ZonedDateTime> end,
             Optional<String> device,
             Optional<Integer> offset, Optional<Integer> limit) {
         try {

@@ -13,7 +13,6 @@ import com.fadhlika.lokasi.dto.Feature;
 import com.fadhlika.lokasi.dto.FeatureCollection;
 import com.fadhlika.lokasi.dto.PointProperties;
 import com.fadhlika.lokasi.model.Export;
-import com.fadhlika.lokasi.model.Location;
 import com.fadhlika.lokasi.repository.ExportRepository;
 import com.fadhlika.lokasi.service.dto.ExportLocationJobRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,26 +32,26 @@ public class ExportJobRequestHandler implements JobRequestHandler<ExportLocation
 
         try {
             Export export = exportRepository.get(args.exportId());
-            List<Location> locations = locationService.findLocations(export.userId(), export.startAt(), export.endAt());
 
-            List<Feature> features = locations.stream().map((location) -> {
-                PointProperties props = new PointProperties(
-                        location.getTimestamp(),
-                        location.getAltitude(),
-                        location.getSpeed(),
-                        location.getCourse(),
-                        location.getCourseAccuracy(),
-                        location.getAccuracy(),
-                        location.getVerticalAccuracy(),
-                        location.getMotions(),
-                        location.getBatteryState().toString(),
-                        location.getBattery(),
-                        location.getDeviceId(),
-                        location.getSsid(),
-                        location.getRawData());
+            List<Feature> features = locationService.findLocations(export.userId(), export.startAt(), export.endAt())
+                    .map((location) -> {
+                        PointProperties props = new PointProperties(
+                                location.getTimestamp(),
+                                location.getAltitude(),
+                                location.getSpeed(),
+                                location.getCourse(),
+                                location.getCourseAccuracy(),
+                                location.getAccuracy(),
+                                location.getVerticalAccuracy(),
+                                location.getMotions(),
+                                location.getBatteryState().toString(),
+                                location.getBattery(),
+                                location.getDeviceId(),
+                                location.getSsid(),
+                                location.getRawData());
 
-                return new Feature(location.getGeometry(), props);
-            }).toList();
+                        return new Feature(location.getGeometry(), props);
+                    }).toList();
 
             FeatureCollection featureCollection = new FeatureCollection(features);
 

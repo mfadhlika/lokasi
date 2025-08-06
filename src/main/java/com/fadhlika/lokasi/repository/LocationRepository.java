@@ -9,6 +9,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import com.fadhlika.lokasi.model.Location;
 
@@ -128,10 +129,10 @@ public class LocationRepository {
                 .update();
     }
 
-    public List<Location> findLocations(int userId, Optional<ZonedDateTime> start, Optional<ZonedDateTime> end,
+    public Stream<Location> findLocations(int userId, Optional<ZonedDateTime> start, Optional<ZonedDateTime> end,
             Optional<String> device,
             Optional<Integer> offset, Optional<Integer> limit) throws SQLException {
-        return findLocationsStatementSpecBuilder(userId, start, end, device, offset, limit).list();
+        return findLocationsStatementSpecBuilder(userId, start, end, device, offset, limit).stream();
     }
 
     public Location findLocation(int userId, Optional<ZonedDateTime> start, Optional<ZonedDateTime> end,
