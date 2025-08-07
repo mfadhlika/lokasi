@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +22,7 @@ import com.fadhlika.lokasi.dto.Response;
 import com.fadhlika.lokasi.model.Location;
 import com.fadhlika.lokasi.model.User;
 import com.fadhlika.lokasi.service.LocationService;
+import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequestMapping("/api/v1/locations")
@@ -28,12 +30,8 @@ public class LocationController {
 
     private static final Logger logger = LoggerFactory.getLogger(LocationController.class);
 
-    private final LocationService locationService;
-
     @Autowired
-    public LocationController(LocationService locationService) {
-        this.locationService = locationService;
-    }
+    private LocationService locationService;
 
     @GetMapping
     public Response<FeatureCollection> getLocations(
@@ -59,6 +57,7 @@ public class LocationController {
                             curr.getBattery(),
                             curr.getDeviceId(),
                             curr.getSsid(),
+                            curr.getGeocode(),
                             curr.getRawData());
                     return new Feature(curr.getGeometry(), props);
                 }).toList();
@@ -87,8 +86,33 @@ public class LocationController {
                 location.getBattery(),
                 location.getDeviceId(),
                 location.getSsid(),
+                location.getGeocode(),
                 location.getRawData());
 
         return new Response<Feature>(new Feature(location.getGeometry(), props));
     }
+
+    @PutMapping("/{importId}/reverseGeocode")
+    public Response<Feature> reverseGeocode(@PathVariable int importId) {
+        Location location = locationService.reverseGeocode(importId);
+
+        PointProperties props = new PointProperties(
+                location.getTimestamp(),
+                location.getAltitude(),
+                location.getSpeed(),
+                location.getCourse(),
+                location.getCourseAccuracy(),
+                location.getAccuracy(),
+                location.getVerticalAccuracy(),
+                location.getMotions(),
+                location.getBatteryState().toString(),
+                location.getBattery(),
+                location.getDeviceId(),
+                location.getSsid(),
+                location.getGeocode(),
+                location.getRawData());
+
+        return new Response<Feature>(new Feature(location.getGeometry(), props));
+    }
+
 }

@@ -4,22 +4,26 @@
  */
 package com.fadhlika.lokasi.service;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.locationtech.jts.geom.Coordinate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.fadhlika.lokasi.dto.FeatureCollection;
 import com.fadhlika.lokasi.exception.InternalErrorException;
 import com.fadhlika.lokasi.model.Location;
 import com.fadhlika.lokasi.repository.LocationRepository;
+import com.fadhlika.lokasi.repository.PhotonRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
@@ -31,15 +35,11 @@ public class LocationService {
 
     private static final Logger logger = LoggerFactory.getLogger(LocationService.class);
 
-    private final LocationRepository locationRepository;
-
-    private final TransactionTemplate transactionTemplate;
+    @Autowired
+    private LocationRepository locationRepository;
 
     @Autowired
-    public LocationService(LocationRepository locationRepository, TransactionTemplate transactionTemplate) {
-        this.locationRepository = locationRepository;
-        this.transactionTemplate = transactionTemplate;
-    }
+    private PhotonRepository photonRepository;
 
     public void saveLocation(Location location) {
         try {
@@ -47,18 +47,18 @@ public class LocationService {
         } catch (DataAccessException | JsonProcessingException ex) {
             throw new InternalErrorException(ex.getMessage());
         }
+
     }
 
+    @Transactional
     public void saveLocations(List<Location> locations) {
-        transactionTemplate.executeWithoutResult(_ -> {
-            for (Location location : locations) {
-                try {
-                    locationRepository.createLocation(location);
-                } catch (DataAccessException | JsonProcessingException e) {
-                    throw new InternalErrorException(e.getMessage());
-                }
+        for (Location location : locations) {
+            try {
+                locationRepository.createLocation(location);
+            } catch (DataAccessException | JsonProcessingException e) {
+                throw new InternalErrorException(e.getMessage());
             }
-        });
+        }
     }
 
     public Stream<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end) {
@@ -86,6 +86,31 @@ public class LocationService {
             return locationRepository.findLocation(userId, start, end, device);
         } catch (SQLException ex) {
             throw new InternalErrorException(ex.getMessage());
+        }
+    }
+
+    public Location findLocation(int id) {
+        try {
+            return locationRepository.findLocation(id);
+        } catch (SQLException ex) {
+            throw new InternalErrorException(ex.getMessage());
+        }
+    }
+
+    public Location reverseGeocode(int id) {
+        try {
+            Location location = locationRepository.findLocation(id);
+
+            Coordinate coord = location.getGeometry().getCoordinate();
+            FeatureCollection featureCollection = photonRepository.reverseGeocode(coord.y, coord.x);
+
+            location.setGeocode(featureCollection);
+
+            locationRepository.createLocation(location);
+
+            return location;
+        } catch (SQLException | IOException | InterruptedException e) {
+            throw new InternalErrorException(e.getMessage());
         }
     }
 }

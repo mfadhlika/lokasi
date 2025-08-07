@@ -12,6 +12,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 
+import com.fadhlika.lokasi.dto.FeatureCollection;
 import com.fadhlika.lokasi.util.GeometryDeserializer;
 import com.fadhlika.lokasi.util.GeometrySerializer;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -57,6 +58,7 @@ public class Location {
         }
     }
 
+    private int id;
     private int userId;
     private String deviceId;
     @JsonSerialize(using = GeometrySerializer.class)
@@ -76,9 +78,18 @@ public class Location {
     private int importId;
     private String rawData;
     private ZonedDateTime createdAt;
+    private FeatureCollection geocode;
 
     public Location() {
         this.createdAt = ZonedDateTime.now(ZoneOffset.UTC);
+    }
+
+    public int id() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public int getUserId() {
@@ -262,5 +273,13 @@ public class Location {
         Double distance = Math.abs(this.geometry.distance(location.geometry));
 
         return distance * Math.PI / 180 * R;
+    }
+
+    public FeatureCollection getGeocode() {
+        return geocode;
+    }
+
+    public void setGeocode(FeatureCollection featureCollection) {
+        this.geocode = featureCollection;
     }
 }

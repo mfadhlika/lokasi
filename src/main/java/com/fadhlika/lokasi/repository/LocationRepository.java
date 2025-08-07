@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import com.fadhlika.lokasi.dto.FeatureCollection;
 import com.fadhlika.lokasi.model.Location;
 
 import org.locationtech.jts.io.ParseException;
@@ -42,16 +43,20 @@ public class LocationRepository {
 
     private final WKTReader wktReader;
 
+    private ObjectMapper mapper;
+
     @Autowired
     public LocationRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcClient = JdbcClient.create(jdbcTemplate);
         this.wktReader = new WKTReader();
+        this.mapper = new ObjectMapper();
     }
 
     private final RowMapper<Location> locationRowMapper = new RowMapper<Location>() {
         @Override
         public Location mapRow(ResultSet rs, int rowNum) throws SQLException {
             Location location = new Location();
+            location.setId(rs.getInt("id"));
             location.setDeviceId(rs.getString("device_id"));
             location.setAltitude(rs.getInt("altitude"));
             location.setCourse(rs.getInt("course"));
@@ -77,7 +82,6 @@ public class LocationRepository {
             String motions = rs.getString("motions");
             if (motions != null) {
                 try {
-                    ObjectMapper mapper = new ObjectMapper();
                     location.setMotions(mapper.readValue(motions, new TypeReference<List<String>>() {
                     }));
                 } catch (JsonProcessingException e) {
@@ -89,27 +93,37 @@ public class LocationRepository {
     };
 
     public void createLocation(Location location) throws DataAccessException, JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        jdbcClient.sql(
-                "INSERT OR REPLACE INTO location("
-                        + "user_id, "
-                        + "device_id, "
-                        + "geometry, "
-                        + "altitude, "
-                        + "course, "
-                        + "course_accuracy, "
-                        + "speed, "
-                        + "accuracy, "
-                        + "vertical_accuracy, "
-                        + "motions, "
-                        + "battery_state, "
-                        + "battery, "
-                        + "ssid, "
-                        + "timestamp, "
-                        + "raw_data, "
-                        + "created_at, "
-                        + "import_id) VALUES(?, ?, ST_GeomFromText(?), ?, ?, ?, ?, ?, ?, jsonb(?), ?, ?, ?, ?, jsonb(?), ?, ?)")
-                .param(location.getUserId())
+        StringBuilder sqlBuilder = new StringBuilder("INSERT OR REPLACE INTO location(");
+        if (location.id() != 0) {
+            sqlBuilder.append("id, ");
+        }
+        sqlBuilder.append("user_id, ");
+        sqlBuilder.append("device_id, ");
+        sqlBuilder.append("geometry, ");
+        sqlBuilder.append("altitude, ");
+        sqlBuilder.append("course, ");
+        sqlBuilder.append("course_accuracy, ");
+        sqlBuilder.append("speed, ");
+        sqlBuilder.append("accuracy, ");
+        sqlBuilder.append("vertical_accuracy, ");
+        sqlBuilder.append("motions, ");
+        sqlBuilder.append("battery_state, ");
+        sqlBuilder.append("battery, ");
+        sqlBuilder.append("ssid, ");
+        sqlBuilder.append("timestamp, ");
+        sqlBuilder.append("raw_data, ");
+        sqlBuilder.append("created_at, ");
+        sqlBuilder.append("import_id) VALUES(");
+        if (location.id() != 0) {
+            sqlBuilder.append("?, ");
+        }
+        sqlBuilder.append("?, ?, ST_GeomFromText(?), ?, ?, ?, ?, ?, ?, jsonb(?), ?, ?, ?, ?, jsonb(?), ?, ?)");
+
+        StatementSpec stmt = jdbcClient.sql(sqlBuilder.toString());
+        if (location.id() != 0) {
+            stmt = stmt.param(location.id());
+        }
+        stmt.param(location.getUserId())
                 .param(location.getDeviceId())
                 .param(location.getGeometry())
                 .param(location.getAltitude())
@@ -132,29 +146,39 @@ public class LocationRepository {
     public Stream<Location> findLocations(int userId, Optional<ZonedDateTime> start, Optional<ZonedDateTime> end,
             Optional<String> device,
             Optional<Integer> offset, Optional<Integer> limit) throws SQLException {
-        return findLocationsStatementSpecBuilder(userId, start, end, device, offset, limit).stream();
+        return findLocationsStatementSpecBuilder(Optional.of(userId), start, end, device, offset, limit,
+                Optional.empty()).stream();
     }
 
     public Location findLocation(int userId, Optional<ZonedDateTime> start, Optional<ZonedDateTime> end,
             Optional<String> device) throws SQLException {
-        return findLocationsStatementSpecBuilder(userId, start, end, device, Optional.empty(), Optional.of(1)).single();
+        return findLocationsStatementSpecBuilder(Optional.of(userId), start, end, device, Optional.empty(),
+                Optional.of(1), Optional.empty()).single();
     }
 
-    public MappedQuerySpec<Location> findLocationsStatementSpecBuilder(int userId, Optional<ZonedDateTime> start,
+    public Location findLocation(int id) throws SQLException {
+        return findLocationsStatementSpecBuilder(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+                Optional.empty(), Optional.of(1), Optional.of(id)).single();
+    }
+
+    public MappedQuerySpec<Location> findLocationsStatementSpecBuilder(Optional<Integer> userId,
+            Optional<ZonedDateTime> start,
             Optional<ZonedDateTime> end,
             Optional<String> device,
-            Optional<Integer> offset, Optional<Integer> limit) throws SQLException {
-        List<String> where = new ArrayList<>() {
-            {
-                add("user_id = ?");
-            }
-        };
+            Optional<Integer> offset, Optional<Integer> limit, Optional<Integer> id) throws SQLException {
+        List<String> where = new ArrayList<>();
 
-        List<Object> args = new ArrayList<Object>() {
-            {
-                add(userId);
-            }
-        };
+        List<Object> args = new ArrayList<Object>();
+
+        id.ifPresent((v) -> {
+            where.add("id = ?");
+            args.add(v);
+        });
+
+        userId.ifPresent((v) -> {
+            where.add("user_id = ?");
+            args.add(v);
+        });
 
         if (start.isPresent() && end.isPresent()) {
             where.add("timestamp BETWEEN ? AND ?");
@@ -202,10 +226,11 @@ public class LocationRepository {
             args.add(o);
         });
 
-        StatementSpec stmt = jdbcClient.sql(sqlBuilder.toString());
-        for (Object arg : args) {
-            stmt = stmt.param(arg);
-        }
-        return stmt.query(locationRowMapper);
+        return jdbcClient.sql(sqlBuilder.toString()).params(args).query(locationRowMapper);
+    }
+
+    public void updateLocationGeocode(int id, FeatureCollection featureCollection) throws JsonProcessingException {
+        jdbcClient.sql("UPDATE location SET geocode = jsonb(?) WHERE id = ?")
+                .param(mapper.writeValueAsString(featureCollection)).param(id).update();
     }
 }

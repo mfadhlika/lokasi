@@ -51,6 +51,7 @@ public class ExportJobHandler implements JobRequestHandler<ExportLocationJobRequ
                                 location.getBattery(),
                                 location.getDeviceId(),
                                 location.getSsid(),
+                                location.getGeocode(),
                                 location.getRawData());
 
                         return new Feature(location.getGeometry(), props);
