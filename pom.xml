@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.5</version>
+		<version>3.4.8</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.fadhlika</groupId>
@@ -50,6 +50,7 @@
 		<dependency>
 			<groupId>org.xerial</groupId>
 			<artifactId>sqlite-jdbc</artifactId>
+			<version>3.50.3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.zaxxer</groupId>
@@ -97,13 +98,26 @@
 			<plugin>
 				<groupId>org.graalvm.buildtools</groupId>
 				<artifactId>native-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>build-native</id>
+						<goals>
+							<goal>compile-no-fork</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<imageName>lokasi</imageName>
+					<mainClass>com.fadhlika.lokasi.LokasiApplication</mainClass>
+					<buildArgs>
+						<buildArg>-Dorg.sqlite.lib.exportPath=${project.build.directory}</buildArg>
+					</buildArgs>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<jvmArguments>--enable-native-access=ALL-UNNAMED</jvmArguments>
-				</configuration>
 			</plugin>
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
