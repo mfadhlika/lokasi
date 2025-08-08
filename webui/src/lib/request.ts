@@ -5,6 +5,7 @@ import type { Login } from "@/types/login";
 import type { Response } from "@/types/response";
 
 let refreshTokenPromise: Promise<string> | null = null;
+let logoutPromise: Promise<void> | null = null;
 
 const axiosInstance = axios.create({
     baseURL: "/api",
@@ -69,6 +70,9 @@ axiosInstance.interceptors.response.use(
                 console.debug("retry request");
                 return axios(originalRequest);
             } catch (err) {
+                if (!logoutPromise)
+                    logoutPromise = logout();
+
                 console.error("failed refreshing token", err);
                 toast.error("Session expired. Please relogin");
                 await logout();
