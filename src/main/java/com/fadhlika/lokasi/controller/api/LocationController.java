@@ -2,6 +2,7 @@ package com.fadhlika.lokasi.controller.api;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -9,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -71,30 +74,36 @@ public class LocationController {
         }
 
         @GetMapping("/last")
-        public Response<Feature> getLastLocation(
+        public ResponseEntity<Response<Feature>> getLastLocation(
                         @RequestParam Optional<String> device) {
                 User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-                Location location = this.locationService.findLocation(user.getId(), Optional.empty(),
-                                Optional.empty(), device);
+                try {
+                        Location location = this.locationService.findLocation(user.getId(), Optional.empty(),
+                                        Optional.empty(), device).orElseThrow();
 
-                PointProperties props = new PointProperties(
-                                location.getTimestamp(),
-                                location.getAltitude(),
-                                location.getSpeed(),
-                                location.getCourse(),
-                                location.getCourseAccuracy(),
-                                location.getAccuracy(),
-                                location.getVerticalAccuracy(),
-                                location.getMotions(),
-                                location.getBatteryState().toString(),
-                                location.getBattery(),
-                                location.getDeviceId(),
-                                location.getSsid(),
-                                location.getGeocode(),
-                                location.getRawData());
+                        PointProperties props = new PointProperties(
+                                        location.getTimestamp(),
+                                        location.getAltitude(),
+                                        location.getSpeed(),
+                                        location.getCourse(),
+                                        location.getCourseAccuracy(),
+                                        location.getAccuracy(),
+                                        location.getVerticalAccuracy(),
+                                        location.getMotions(),
+                                        location.getBatteryState().toString(),
+                                        location.getBattery(),
+                                        location.getDeviceId(),
+                                        location.getSsid(),
+                                        location.getGeocode(),
+                                        location.getRawData());
 
-                return new Response<Feature>(new Feature(location.getGeometry(), props));
+                        Feature feature = new Feature(location.getGeometry(), props);
+                        return ResponseEntity.ok().body(new Response<>(feature, "success"));
+                } catch (NoSuchElementException _) {
+                        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                                        .body(new Response<>("last location doesn't exist"));
+                }
         }
 
         @PutMapping("/{importId}/reverseGeocode")

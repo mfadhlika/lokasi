@@ -1,3 +1,5 @@
+import type { FeatureCollection } from "geojson";
+
 type PointProperties = {
     timestamp: string,
     altitude?: number,
@@ -11,7 +13,8 @@ type PointProperties = {
     batteryLevel?: number,
     deviceId: string,
     ssid?: string,
-    rawData: string
+    rawData: string,
+    geocode?: FeatureCollection
 };
 
 type LineStringProperties = {

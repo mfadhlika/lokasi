@@ -15,6 +15,7 @@ import { useLocationFilter } from "@/hooks/use-location-filter";
 import type { Response } from "@/types/response";
 import type { Location } from "@/types/location";
 import type { PointProperties } from "@/types/properties";
+import VisitSheet, { useVisitDialogState } from "@/components/visit-sheet";
 
 
 export default function DataPage() {
@@ -51,7 +52,8 @@ export default function DataPage() {
             }).catch(err => toast.error(`Failed to get user's location data: ${err}`));
     }, [date, device, limit, offset]);
 
-    const { isOpen, toggleModal, data: rawData, setData: setRawData } = useRawDataDialogState();
+    const { isOpen: isOpenRawData, toggleModal: toggleModalRawData, data: rawData, setData: setRawData } = useRawDataDialogState();
+    const { isOpen: isOpenVisit, toggleModal: toggleModalVisit, data: visitData, setData: setVisit } = useVisitDialogState();
 
     const columns: ColumnDef<Location>[] = [
         {
@@ -122,9 +124,17 @@ export default function DataPage() {
                         <DropdownMenuItem asChild>
                             <Button variant="ghost" onClick={() => {
                                 setRawData(JSON.stringify(JSON.parse(row.original.rawData), null, 2));
-                                toggleModal();
+                                toggleModalRawData();
                             }}>
                                 View raw data
+                            </Button>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Button variant="ghost" onClick={() => {
+                                if (row.original.geocode) setVisit(row.original.geocode);
+                                toggleModalVisit();
+                            }} disabled={!row.original.geocode}>
+                                View visit
                             </Button>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -172,7 +182,8 @@ export default function DataPage() {
                     </div>
                 </div>
             </div>
-            <RawDataSheet isOpen={isOpen} toggleModal={toggleModal} data={rawData} />
+            <RawDataSheet isOpen={isOpenRawData} toggleModal={toggleModalRawData} data={rawData} />
+            <VisitSheet isOpen={isOpenVisit} toggleModal={toggleModalVisit} data={visitData} />
         </>
     );
 }

@@ -26,4 +26,8 @@ public class Response<T> {
     public Response(String message) {
         this(null, message, null);
     }
+
+    public Response(T data, String message) {
+        this(data, message, null);
+    }
 }

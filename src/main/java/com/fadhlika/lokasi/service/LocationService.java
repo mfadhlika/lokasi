@@ -80,10 +80,10 @@ public class LocationService {
         }
     }
 
-    public Location findLocation(int userId, Optional<ZonedDateTime> start, Optional<ZonedDateTime> end,
+    public Optional<Location> findLocation(int userId, Optional<ZonedDateTime> start, Optional<ZonedDateTime> end,
             Optional<String> device) {
         try {
-            return locationRepository.findLocation(userId, start, end, device);
+            return locationRepository.findLocation(Optional.of(userId), start, end, device, Optional.empty());
         } catch (SQLException ex) {
             throw new InternalErrorException(ex.getMessage());
         }

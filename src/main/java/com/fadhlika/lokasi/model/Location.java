@@ -84,7 +84,7 @@ public class Location {
         this.createdAt = ZonedDateTime.now(ZoneOffset.UTC);
     }
 
-    public int id() {
+    public int getId() {
         return id;
     }
 
