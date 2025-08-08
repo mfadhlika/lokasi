@@ -69,6 +69,8 @@ public record Location(
             l.setSpeed(this.vel());
         if (this.ssid() != null)
             l.setSsid(this.ssid());
+        if (this.motions() != null)
+            l.setMotions(this.motions());
         l.setTimestamp(Instant.ofEpochSecond(this.tst()).atZone(ZoneOffset.UTC));
 
         l.setRawData(this);
