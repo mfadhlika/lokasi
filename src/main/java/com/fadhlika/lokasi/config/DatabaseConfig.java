@@ -65,6 +65,13 @@ public class DatabaseConfig {
         sqliteDataSource.setUrl(String.format("jdbc:sqlite:%s/jobrunr.db", dataDir));
         sqliteDataSource.setJournalMode("WAL");
 
-        return sqliteDataSource;
+        HikariDataSource ds = new HikariDataSource();
+        ds.setDataSource(sqliteDataSource);
+        ds.setMinimumIdle(2);
+        ds.setMaximumPoolSize(10);
+        ds.setIdleTimeout(120000);
+        ds.setLeakDetectionThreshold(300000);
+
+        return ds;
     }
 }
