@@ -13,7 +13,7 @@
 	<artifactId>lokasi</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>lokasi</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Self-hosted location tracker </description>
 	<url />
 	<licenses>
 		<license />
