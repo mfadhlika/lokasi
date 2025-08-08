@@ -3,6 +3,7 @@ package com.fadhlika.lokasi.controller.api;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,91 +29,95 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RequestMapping("/api/v1/locations")
 public class LocationController {
 
-    private static final Logger logger = LoggerFactory.getLogger(LocationController.class);
+        private static final Logger logger = LoggerFactory.getLogger(LocationController.class);
 
-    @Autowired
-    private LocationService locationService;
+        @Autowired
+        private LocationService locationService;
 
-    @GetMapping
-    public Response<FeatureCollection> getLocations(
-            @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atStartOfDay().atZone(ZoneOffset.UTC)}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime start,
-            @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atTime(T(java.time.LocalTime).MAX).atZone(ZoneOffset.UTC)}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime end,
-            @RequestParam Optional<String> device,
-            @RequestParam Optional<Integer> offset,
-            @RequestParam Optional<Integer> limit) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        @GetMapping
+        public Response<FeatureCollection> getLocations(
+                        @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atStartOfDay().atZone(ZoneOffset.UTC)}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime start,
+                        @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atTime(T(java.time.LocalTime).MAX).atZone(ZoneOffset.UTC)}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime end,
+                        @RequestParam Optional<String> device,
+                        @RequestParam Optional<Integer> offset,
+                        @RequestParam Optional<Integer> limit) {
+                User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        List<Feature> features = this.locationService.findLocations(user.getId(), Optional.of(start),
-                Optional.of(end), device, offset, limit).map(curr -> {
-                    PointProperties props = new PointProperties(
-                            curr.getTimestamp(),
-                            curr.getAltitude(),
-                            curr.getSpeed(),
-                            curr.getCourse(),
-                            curr.getCourseAccuracy(),
-                            curr.getAccuracy(),
-                            curr.getVerticalAccuracy(),
-                            curr.getMotions(),
-                            curr.getBatteryState().toString(),
-                            curr.getBattery(),
-                            curr.getDeviceId(),
-                            curr.getSsid(),
-                            curr.getGeocode(),
-                            curr.getRawData());
-                    return new Feature(curr.getGeometry(), props);
-                }).toList();
+                try (Stream<Location> stream = this.locationService.findLocations(user.getId(), Optional.of(start),
+                                Optional.of(end), device, offset, limit)) {
+                        List<Feature> features = stream.map(curr -> {
+                                PointProperties props = new PointProperties(
+                                                curr.getTimestamp(),
+                                                curr.getAltitude(),
+                                                curr.getSpeed(),
+                                                curr.getCourse(),
+                                                curr.getCourseAccuracy(),
+                                                curr.getAccuracy(),
+                                                curr.getVerticalAccuracy(),
+                                                curr.getMotions(),
+                                                curr.getBatteryState().toString(),
+                                                curr.getBattery(),
+                                                curr.getDeviceId(),
+                                                curr.getSsid(),
+                                                curr.getGeocode(),
+                                                curr.getRawData());
+                                return new Feature(curr.getGeometry(), props);
+                        }).toList();
 
-        return new Response<>(new FeatureCollection(features));
-    }
+                        return new Response<>(new FeatureCollection(features));
+                } catch (Exception ex) {
+                        throw ex;
+                }
+        }
 
-    @GetMapping("/last")
-    public Response<Feature> getLastLocation(
-            @RequestParam Optional<String> device) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        @GetMapping("/last")
+        public Response<Feature> getLastLocation(
+                        @RequestParam Optional<String> device) {
+                User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        Location location = this.locationService.findLocation(user.getId(), Optional.empty(),
-                Optional.empty(), device);
+                Location location = this.locationService.findLocation(user.getId(), Optional.empty(),
+                                Optional.empty(), device);
 
-        PointProperties props = new PointProperties(
-                location.getTimestamp(),
-                location.getAltitude(),
-                location.getSpeed(),
-                location.getCourse(),
-                location.getCourseAccuracy(),
-                location.getAccuracy(),
-                location.getVerticalAccuracy(),
-                location.getMotions(),
-                location.getBatteryState().toString(),
-                location.getBattery(),
-                location.getDeviceId(),
-                location.getSsid(),
-                location.getGeocode(),
-                location.getRawData());
+                PointProperties props = new PointProperties(
+                                location.getTimestamp(),
+                                location.getAltitude(),
+                                location.getSpeed(),
+                                location.getCourse(),
+                                location.getCourseAccuracy(),
+                                location.getAccuracy(),
+                                location.getVerticalAccuracy(),
+                                location.getMotions(),
+                                location.getBatteryState().toString(),
+                                location.getBattery(),
+                                location.getDeviceId(),
+                                location.getSsid(),
+                                location.getGeocode(),
+                                location.getRawData());
 
-        return new Response<Feature>(new Feature(location.getGeometry(), props));
-    }
+                return new Response<Feature>(new Feature(location.getGeometry(), props));
+        }
 
-    @PutMapping("/{importId}/reverseGeocode")
-    public Response<Feature> reverseGeocode(@PathVariable int importId) {
-        Location location = locationService.reverseGeocode(importId);
+        @PutMapping("/{importId}/reverseGeocode")
+        public Response<Feature> reverseGeocode(@PathVariable int importId) {
+                Location location = locationService.reverseGeocode(importId);
 
-        PointProperties props = new PointProperties(
-                location.getTimestamp(),
-                location.getAltitude(),
-                location.getSpeed(),
-                location.getCourse(),
-                location.getCourseAccuracy(),
-                location.getAccuracy(),
-                location.getVerticalAccuracy(),
-                location.getMotions(),
-                location.getBatteryState().toString(),
-                location.getBattery(),
-                location.getDeviceId(),
-                location.getSsid(),
-                location.getGeocode(),
-                location.getRawData());
+                PointProperties props = new PointProperties(
+                                location.getTimestamp(),
+                                location.getAltitude(),
+                                location.getSpeed(),
+                                location.getCourse(),
+                                location.getCourseAccuracy(),
+                                location.getAccuracy(),
+                                location.getVerticalAccuracy(),
+                                location.getMotions(),
+                                location.getBatteryState().toString(),
+                                location.getBattery(),
+                                location.getDeviceId(),
+                                location.getSsid(),
+                                location.getGeocode(),
+                                location.getRawData());
 
-        return new Response<Feature>(new Feature(location.getGeometry(), props));
-    }
+                return new Response<Feature>(new Feature(location.getGeometry(), props));
+        }
 
 }
