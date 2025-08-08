@@ -1,4 +1,4 @@
-package com.fadhlika.lokasi.service;
+package com.fadhlika.lokasi.jobs;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -19,6 +19,7 @@ import com.fadhlika.lokasi.exception.BadRequestException;
 import com.fadhlika.lokasi.model.Import;
 import com.fadhlika.lokasi.model.Location;
 import com.fadhlika.lokasi.repository.ImportRepository;
+import com.fadhlika.lokasi.service.LocationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
