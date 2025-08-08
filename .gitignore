@@ -33,6 +33,6 @@ build/
 .vscode/
 
 *.dll
-*.db
+*.db*
 
 .env

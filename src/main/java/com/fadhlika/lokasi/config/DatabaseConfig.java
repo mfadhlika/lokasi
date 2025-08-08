@@ -27,20 +27,24 @@ public class DatabaseConfig {
         SQLiteDataSource sqliteDataSource = new SQLiteDataSource();
         sqliteDataSource.setUrl(String.format("jdbc:sqlite:%s/lokasi.db", dataDir));
         sqliteDataSource.setLoadExtension(true);
+        sqliteDataSource.setJournalMode("WAL");
 
-        try {
-            Connection conn = sqliteDataSource.getConnection();
-            PreparedStatement stmt = conn
-                    .prepareStatement("SELECT load_extension('mod_spatialite');SELECT InitSpatialMetadata(1)");
+        HikariDataSource ds = new HikariDataSource();
+        ds.setDataSource(sqliteDataSource);
+        ds.setConnectionInitSql("SELECT load_extension('mod_spatialite')");
+        ds.setMinimumIdle(2);
+        ds.setMaximumPoolSize(10);
+        ds.setIdleTimeout(120000);
+        ds.setLeakDetectionThreshold(300000);
+
+        try (Connection conn = ds.getConnection();
+                final PreparedStatement stmt = conn
+                        .prepareStatement("SELECT InitSpatialMetadata(1)")) {
             stmt.executeQuery();
         } catch (SQLException ex) {
             ex.printStackTrace();
             throw ex;
         }
-
-        HikariDataSource ds = new HikariDataSource();
-        ds.setDataSource(sqliteDataSource);
-        ds.setConnectionInitSql("SELECT load_extension('mod_spatialite');");
 
         Flyway flyway = Flyway.configure()
                 .dataSource(ds)
@@ -59,6 +63,7 @@ public class DatabaseConfig {
     public DataSource jobrunrDataSource() {
         SQLiteDataSource sqliteDataSource = new SQLiteDataSource();
         sqliteDataSource.setUrl(String.format("jdbc:sqlite:%s/jobrunr.db", dataDir));
+        sqliteDataSource.setJournalMode("WAL");
 
         return sqliteDataSource;
     }
