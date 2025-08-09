@@ -7,16 +7,11 @@ import { DatePicker } from "@/components/date-picker";
 import { DeviceSelect } from "@/components/device-select";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/header";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
-import RawDataSheet, { useRawDataDialogState } from "@/components/raw-data-sheet";
 import { toast } from "sonner";
 import { useLocationFilter } from "@/hooks/use-location-filter";
 import type { Response } from "@/types/response";
 import type { Location } from "@/types/location";
 import type { PointProperties } from "@/types/properties";
-import VisitSheet, { useVisitDialogState } from "@/components/visit-sheet";
-
 
 export default function DataPage() {
     const [data, setData] = useState<Location[]>([]);
@@ -51,9 +46,6 @@ export default function DataPage() {
                 setData(newData);
             }).catch(err => toast.error(`Failed to get user's location data: ${err}`));
     }, [date, device, limit, offset]);
-
-    const { isOpen: isOpenRawData, toggleModal: toggleModalRawData, data: rawData, setData: setRawData } = useRawDataDialogState();
-    const { isOpen: isOpenVisit, toggleModal: toggleModalVisit, data: visitData, setData: setVisit } = useVisitDialogState();
 
     const columns: ColumnDef<Location>[] = [
         {
@@ -108,38 +100,6 @@ export default function DataPage() {
         {
             accessorKey: "ssid",
             header: "SSID"
-        },
-        {
-            id: "actions",
-            enableHiding: false,
-            cell: ({ row }) => (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                            <Button variant="ghost" onClick={() => {
-                                setRawData(JSON.stringify(JSON.parse(row.original.rawData), null, 2));
-                                toggleModalRawData();
-                            }}>
-                                View raw data
-                            </Button>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                            <Button variant="ghost" onClick={() => {
-                                if (row.original.geocode) setVisit(row.original.geocode);
-                                toggleModalVisit();
-                            }} disabled={!row.original.geocode}>
-                                View visit
-                            </Button>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            )
         }
     ];
 
@@ -182,8 +142,6 @@ export default function DataPage() {
                     </div>
                 </div>
             </div>
-            <RawDataSheet isOpen={isOpenRawData} toggleModal={toggleModalRawData} data={rawData} />
-            <VisitSheet isOpen={isOpenVisit} toggleModal={toggleModalVisit} data={visitData} />
         </>
     );
 }
