@@ -34,13 +34,17 @@ export default function MapsPage() {
                 setLocations(data.data);
             })
             .catch(err => toast.error(`Failed to get user's locations: ${err}`));
+    }, [date, device, showLastKnown]);
 
-        if (showLastKnown) axiosInstance.get<Response<Feature<Point, PointProperties>>>(`v1/locations/last?${params.toString()}`)
+    useEffect(() => {
+        if (!showLastKnown) return
+
+        axiosInstance.get<Response<Feature<Point, PointProperties>>>('v1/locations/last')
             .then(({ data }) => {
                 setLastKnownLocation(data.data);
             })
             .catch(err => toast.error(`Failed to get user's lsat known locations: ${err}`));
-    }, [date, device, showLastKnown]);
+    }, [showLastKnown]);
 
 
     const handleDate = (newDate: DateRange | undefined) => {
