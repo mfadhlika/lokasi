@@ -26,7 +26,7 @@ public class ReverseGeocodeRecurringJob {
     private PhotonRepository photonRepository;
 
     @Recurring(id = "reverse-geocode-job", interval = "PT1M")
-    @Job(name = "Reverse geocode job")
+    @Job(name = "Reverse geocode job", retries = 0)
     public void execute() throws Exception {
         try {
             logger.debug("start running reverse geocode job");
