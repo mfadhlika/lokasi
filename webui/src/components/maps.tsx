@@ -2,10 +2,12 @@ import type { Feature, FeatureCollection, LineString, Point } from "geojson";
 import { MapContainer, ZoomControl, TileLayer, FeatureGroup, CircleMarker, Popup, Polyline, Tooltip, useMap, Marker, } from "react-leaflet";
 import 'leaflet/dist/leaflet.css';
 import type { LineStringProperties, PointProperties } from "@/types/properties";
-import { cn } from "@/lib/utils";
+import { calculateTimediff, cn } from "@/lib/utils";
 import * as turf from "@turf/turf";
 import type { Checked } from "@/types/checked";
 import L from "leaflet";
+import { renderToStaticMarkup } from "react-dom/server";
+import { useAuth } from "@/hooks/use-auth";
 
 export type MapsProps = React.ComponentProps<"div"> & {
     locations: FeatureCollection<Point, PointProperties>,
@@ -18,6 +20,7 @@ export type MapsProps = React.ComponentProps<"div"> & {
 
 function Markers({ locations, showLines, showPoints, showLastKnown, lastKnowLocation }: MapsProps) {
     const map = useMap();
+    const { userInfo } = useAuth();
 
     if (locations.features.length > 0) {
         const coords = turf.center(locations).geometry.coordinates;
@@ -125,7 +128,14 @@ function Markers({ locations, showLines, showPoints, showLastKnown, lastKnowLoca
         )}
         {showLastKnown &&
             lastKnowLocation &&
-            <Marker position={L.GeoJSON.coordsToLatLng(turf.getCoord(lastKnowLocation as Feature<Point>) as [number, number])}>
+            <Marker icon={L.divIcon({
+                className: "bg-transparent",
+                html: renderToStaticMarkup(
+                    <div className="size-8 py-1 rounded-full bg-cyan-500 border-3 border-[#3388ff] text-center">
+                        <span className="decoration-white">{userInfo?.username?.substring(0, 2).toUpperCase()}</span>
+                    </div>),
+                iconAnchor: [10, 10]
+            })} position={L.GeoJSON.coordsToLatLng(turf.getCoord(lastKnowLocation as Feature<Point>) as [number, number])}>
                 <Popup>
                     <div>
                         <strong>Timestamp</strong>: {(new Date(lastKnowLocation.properties.timestamp)).toLocaleString()}<br />
@@ -141,6 +151,7 @@ function Markers({ locations, showLines, showPoints, showLastKnown, lastKnowLoca
                         {lastKnowLocation.properties.motions && <><strong>Motions</strong>: {lastKnowLocation.properties.motions.join(",")}<br /></>}
                     </div>
                 </Popup>
+                <Tooltip>{calculateTimediff(new Date(lastKnowLocation.properties.timestamp))}</Tooltip>
             </Marker>}
     </>);
 }
