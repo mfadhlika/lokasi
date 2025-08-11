@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fadhlika.lokasi.dto.Auth;
 import com.fadhlika.lokasi.dto.LoginRequest;
-import com.fadhlika.lokasi.dto.LoginResponse;
 import com.fadhlika.lokasi.dto.Response;
 import com.fadhlika.lokasi.service.JwtAuthService;
 
@@ -27,7 +26,7 @@ public class AuthController {
     private JwtAuthService jwtAuthService;
 
     @PostMapping("/api/v1/login")
-    public Response<LoginResponse> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+    public Response<Auth> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         Auth auth = jwtAuthService.login(loginRequest.username(), loginRequest.password());
 
         Cookie cookie = new Cookie("refreshToken", auth.refreshToken()) {
@@ -41,7 +40,7 @@ public class AuthController {
 
         response.addCookie(cookie);
 
-        return new Response<>(new LoginResponse(auth.accessToken(), auth.refreshToken()));
+        return new Response<>(new Auth(auth.accessToken(), auth.refreshToken()));
     }
 
     @DeleteMapping("/api/v1/logout")
@@ -62,9 +61,9 @@ public class AuthController {
     }
 
     @GetMapping("/api/v1/auth/refresh")
-    public Response<LoginResponse> refresh(@CookieValue String refreshToken) {
+    public Response<Auth> refresh(@CookieValue String refreshToken) {
         String accessToken = jwtAuthService.refreshAccessToken(refreshToken);
 
-        return new Response<>(new LoginResponse(accessToken, refreshToken));
+        return new Response<>(new Auth(accessToken, refreshToken));
     }
 }
