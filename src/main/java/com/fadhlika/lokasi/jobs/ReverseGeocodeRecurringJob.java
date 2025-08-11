@@ -28,21 +28,26 @@ public class ReverseGeocodeRecurringJob {
     @Recurring(id = "reverse-geocode-job", interval = "PT1M")
     @Job(name = "Reverse geocode job")
     public void execute() throws Exception {
-        Optional<Location> location = locationRepository.findLocation(
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.of(false));
+        try {
+            logger.debug("start running reverse geocode job");
+            Optional<Location> location = locationRepository.findLocation(
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.of(false));
 
-        if (location.isPresent()) {
-            Location l = location.get();
-            logger.debug("reverse geocode location {}", l.getId());
-            Coordinate coord = l.getGeometry().getCoordinate();
-            FeatureCollection geocode = photonRepository.reverseGeocode(coord.y, coord.x);
+            if (location.isPresent()) {
+                Location l = location.get();
+                Coordinate coord = l.getGeometry().getCoordinate();
+                FeatureCollection geocode = photonRepository.reverseGeocode(coord.y, coord.x);
 
-            locationRepository.updateLocationGeocode(l.getId(), geocode);
+                locationRepository.updateLocationGeocode(l.getId(), geocode);
+                logger.info("reverse geocode location {}", l.getId());
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw ex;
         }
     }
-
 }

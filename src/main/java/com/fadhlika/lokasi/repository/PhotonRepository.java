@@ -41,6 +41,9 @@ public class PhotonRepository {
         URI uri = URI
                 .create(String.format("%s/reverse?lat=%s&lon=%s", baseUrl, Double.toString(lat), Double.toString(lon)));
         HttpRequest req = HttpRequest.newBuilder(uri).GET().build();
+
+        logger.info("requesting {}", uri.toString());
+
         HttpResponse<InputStream> res = client.send(req, BodyHandlers.ofInputStream());
 
         if (res.statusCode() != HttpStatus.OK.value()) {
