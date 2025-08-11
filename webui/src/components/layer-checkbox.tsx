@@ -2,19 +2,24 @@ import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMe
 import { Button } from "@/components/ui/button";
 import { Layers } from "lucide-react";
 import type { Checked } from "@/types/checked";
+import { create } from 'zustand';
 
-
-export type LayerCheckboxProps = {
+export type LayerState = {
     showLines: Checked,
-    setShowLines: (value: Checked) => void,
     showPoints: Checked,
-    setShowPoints: (value: Checked) => void,
     showLastKnown: Checked,
-    setShowLastKnown: (value: Checked) => void,
 }
 
+export const useLayerState = create<LayerState>()(() => ({
+    showLines: true,
+    showPoints: true,
+    showLastKnown: true,
+}));
 
-export const LayerCheckbox = ({ showLines, setShowLines, showPoints, setShowPoints, showLastKnown, setShowLastKnown }: LayerCheckboxProps) => {
+export const LayerCheckbox = ({ showLines, showPoints, showLastKnown, }: LayerState) => {
+    const setShowPoints = (value: Checked) => useLayerState.setState((state) => ({ ...state, showPoints: value }));
+    const setShowLines = (value: Checked) => useLayerState.setState((state) => ({ ...state, showLines: value }));
+    const setShowLastKnown = (value: Checked) => useLayerState.setState((state) => ({ ...state, showLastKnown: value }));
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>

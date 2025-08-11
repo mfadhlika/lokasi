@@ -10,8 +10,7 @@ import { Header } from "@/components/header";
 import { toast } from "sonner";
 import { useLocationFilter } from "@/hooks/use-location-filter";
 import type { Response } from "@/types/response";
-import { LayerCheckbox } from "@/components/layer-checkbox";
-import type { Checked } from "@/types/checked";
+import { LayerCheckbox, useLayerState } from "@/components/layer-checkbox";
 import * as turf from "@turf/turf";
 import type { PointProperties } from "@/types/properties";
 
@@ -19,9 +18,7 @@ export default function MapsPage() {
     const [locations, setLocations] = useState<FeatureCollection<Point, PointProperties>>(turf.featureCollection([]));
     const [lastKnownLocation, setLastKnownLocation] = useState<Feature<Point, PointProperties> | undefined>();
     const [{ date, device }, setFilter] = useLocationFilter();
-    const [showLines, setShowLines] = useState<Checked>(true);
-    const [showPoints, setShowPoints] = useState<Checked>(true);
-    const [showLastKnown, setShowLastKnown] = useState<Checked>(false);
+    const { showLines, showPoints, showLastKnown } = useLayerState();
 
     useEffect(() => {
         const params = new URLSearchParams();
@@ -65,8 +62,8 @@ export default function MapsPage() {
         <>
             <Header>
                 <DatePicker variant="outline" date={date} setDate={handleDate} />
-                <DeviceSelect className="" selectedDevice={device || "all"} onSelectedDevice={handleDevice} />
-                <LayerCheckbox showLines={showLines} setShowLines={setShowLines} showPoints={showPoints} setShowPoints={setShowPoints} showLastKnown={showLastKnown} setShowLastKnown={setShowLastKnown} />
+                <DeviceSelect className='' selectedDevice={device || "all"} onSelectedDevice={handleDevice} />
+                <LayerCheckbox showLines={showLines} showPoints={showPoints} showLastKnown={showLastKnown} />
             </Header>
             <div className="flex flex-1 flex-col gap-4">
                 <Maps locations={locations} lastKnowLocation={lastKnownLocation} showLines={showLines} showPoints={showPoints} showLastKnown={showLastKnown} />
