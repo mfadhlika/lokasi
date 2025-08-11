@@ -17,10 +17,10 @@ public class AdminGenerator implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminGenerator.class);
 
-    @Value("${admin.username:admin}")
+    @Value("${admin.username}")
     private String adminUsername;
 
-    @Value("${admin.password:}")
+    @Value("${admin.password}")
     private String adminPassword;
 
     @Autowired
