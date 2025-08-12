@@ -1,15 +1,15 @@
 import type { Feature, FeatureCollection, LineString, Point } from "geojson";
-import { MapContainer, ZoomControl, TileLayer, FeatureGroup, CircleMarker, Popup, Polyline, Tooltip, useMap, Marker, } from "react-leaflet";
+import { FeatureGroup, CircleMarker, Popup, Polyline, Tooltip, useMap, Marker, } from "react-leaflet";
 import 'leaflet/dist/leaflet.css';
 import type { LineStringProperties, PointProperties } from "@/types/properties";
-import { calculateTimediff, cn } from "@/lib/utils";
+import { calculateTimediff } from "@/lib/utils";
 import * as turf from "@turf/turf";
 import type { Checked } from "@/types/checked";
 import L from "leaflet";
 import { renderToStaticMarkup } from "react-dom/server";
 import { useAuth } from "@/hooks/use-auth";
 
-export type MapsProps = React.ComponentProps<"div"> & {
+export type MarkersProps = React.ComponentProps<"div"> & {
     locations: FeatureCollection<Point, PointProperties>,
     lastKnowLocation?: Feature<Point, PointProperties>,
     zoom?: number,
@@ -18,7 +18,7 @@ export type MapsProps = React.ComponentProps<"div"> & {
     showLastKnown?: Checked
 }
 
-function Markers({ locations, showLines, showPoints, showLastKnown, lastKnowLocation }: MapsProps) {
+export function Markers({ locations, showLines, showPoints, showLastKnown, lastKnowLocation }: MarkersProps) {
     const map = useMap();
     const { userInfo } = useAuth();
 
@@ -154,22 +154,4 @@ function Markers({ locations, showLines, showPoints, showLastKnown, lastKnowLoca
                 <Tooltip>{calculateTimediff(new Date(lastKnowLocation.properties.timestamp))}</Tooltip>
             </Marker>}
     </>);
-}
-
-export function Maps(props: MapsProps) {
-    return (
-        <MapContainer
-            className={cn("size-full", props.className)}
-            center={[-6.175, 106.8275]}
-            zoom={props.zoom ?? 13}
-            scrollWheelZoom={true}
-            zoomControl={false}>
-            <ZoomControl position="bottomright" />
-            <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <Markers {...props} />
-        </MapContainer>
-    );
 }
