@@ -76,6 +76,7 @@ axiosInstance.interceptors.response.use(
                 console.error("failed refreshing token", err);
                 toast.error("Session expired. Please relogin");
                 await logout();
+                return Promise.resolve();
             }
         }
 
