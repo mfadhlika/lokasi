@@ -14,42 +14,10 @@ import * as turf from "@turf/turf";
 import type { PointProperties } from "@/types/properties";
 import { MapContainer } from 'react-leaflet/MapContainer';
 import { ZoomControl } from 'react-leaflet/ZoomControl';
-import { TileLayer, useMap } from 'react-leaflet';
-import { Control, DomEvent, DomUtil, type ControlPosition } from 'leaflet';
-import { createPortal } from 'react-dom';
+import { TileLayer } from 'react-leaflet';
 import { Header } from '@/components/header';
+import { MapControl } from '@/components/map-control';
 
-type MapControlProps = React.ComponentProps<"div"> & {
-    position?: ControlPosition,
-    disableClickProgation?: boolean
-}
-
-function MapControl({ children, position, disableClickProgation }: MapControlProps) {
-    const [container, setContainer] = useState<HTMLElement | null>(null);
-    const map = useMap();
-
-    useEffect(() => {
-        const mapControl = new Control({ position });
-
-        mapControl.onAdd = () => {
-            const section = DomUtil.create('section');
-            if (disableClickProgation) {
-                DomEvent.disableClickPropagation(section);
-            }
-            return section;
-        };
-
-        map.addControl(mapControl);
-
-        setContainer(mapControl.getContainer() ?? null);
-
-        return () => {
-            map.removeControl(mapControl);
-        };
-    }, [map, position, disableClickProgation]);
-
-    return container ? createPortal(children, container) : null;
-}
 
 export default function MapsPage() {
     const [locations, setLocations] = useState<FeatureCollection<Point, PointProperties>>(turf.featureCollection([]));
@@ -104,7 +72,7 @@ export default function MapsPage() {
                     zoom={13}
                     scrollWheelZoom={true}
                     zoomControl={false}>
-                    <ZoomControl position="bottomright" />
+                    <ZoomControl position="bottomleft" />
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
