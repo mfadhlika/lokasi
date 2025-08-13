@@ -8,7 +8,7 @@ import type { Checked } from "@/types/checked";
 import L from "leaflet";
 import { renderToStaticMarkup } from "react-dom/server";
 import { useAuth } from "@/hooks/use-auth";
-import { Battery, BatteryCharging, BatteryFull, BatteryLow, Car, Clock, Compass, Diff, Gauge, TrendingUp, Wifi, Route, Smartphone, PlaneTakeoff, PlaneLanding } from "lucide-react";
+import { Battery, BatteryCharging, BatteryFull, BatteryLow, Car, Clock, Compass, Gauge, TrendingUp, Wifi, Route, Smartphone, PlaneTakeoff, PlaneLanding } from "lucide-react";
 import { useMemo } from "react";
 
 export type MarkersProps = React.ComponentProps<"div"> & {
@@ -35,8 +35,8 @@ function MarkerPopup(props: PointProperties) {
             <div className="flex flex-col gap-2">
                 <div className="inline-flex gap-2 items-center"><Clock className="size-4" /> {(new Date(props.timestamp)).toLocaleString()}</div>
                 <div className="inline-flex gap-2 items-center"><Gauge className="size-4" /> {props.speed} km/h</div>
-                <div className="inline-flex gap-2 items-center"><TrendingUp className="size-4" /> {props.altitude}m <Diff className="size-4" /> {props.verticalAccuracy}m</div>
-                <div className="inline-flex gap-2 items-center"><Compass className="size-4" /> {props.course}° <Diff className="size-4" /> {props.courseAccuracy}°</div>
+                <div className="inline-flex gap-2 items-center"><TrendingUp className="size-4" /> {props.altitude}m ± {props.verticalAccuracy}m</div>
+                <div className="inline-flex gap-2 items-center"><Compass className="size-4" /> {props.course}° ± {props.courseAccuracy}°</div>
                 <div className="inline-flex gap-2 items-center">{batteryIcon(props.batteryLevel, props.batteryState)} {props.batteryLevel}%</div>
                 <div className="inline-flex gap-2 items-center"><Smartphone className="size-4" /> {props.deviceId}</div>
                 <div className="inline-flex gap-2 items-center"><Wifi className="size-4" /> {props.ssid}</div>
