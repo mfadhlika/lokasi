@@ -64,38 +64,35 @@ export function Markers({ locations, showLines, showPoints, showMovingPoints, sh
     const { userInfo } = useAuth();
 
     const groupped = useMemo(() => {
-        const groupped: Feature[][] = [[]];
-        for (let i = 1; i < locations.features.length; i++) {
-            const fromFeature = locations.features[i - 1];
-            const toFeature = locations.features[i];
+        return locations.features.reduce<Feature[][]>((groupped, cur, i, features) => {
+            if (i == 0) return groupped;
 
-            groupped[groupped.length - 1].push(fromFeature);
+            const prev = features[i - 1]
 
-            const startAt = Date.parse(fromFeature.properties.timestamp);
-            const endAt = Date.parse(toFeature.properties.timestamp);
+            groupped[groupped.length - 1].push(prev);
+
+            const startAt = Date.parse(prev.properties.timestamp);
+            const endAt = Date.parse(cur.properties.timestamp);
 
             const duration = (startAt - endAt) / 1000;
             if (duration > 60 * 15) {
-                groupped[groupped.length - 1].push(toFeature);
+                groupped[groupped.length - 1].push(cur);
                 groupped.push([]);
-                continue;
+                return groupped;
             };
 
-            const from = turf.point((fromFeature.geometry as Point).coordinates);
-            const to = turf.point((toFeature.geometry as Point).coordinates);
+            const from = turf.point((prev.geometry as Point).coordinates);
+            const to = turf.point((cur.geometry as Point).coordinates);
             const distance = turf.distance(from, to, { units: "kilometers" });
             const speed = distance / duration / 3600;
 
             groupped[groupped.length - 1].push(turf.lineString([
-                fromFeature.geometry.coordinates,
-                toFeature.geometry.coordinates,
+                (prev.geometry as Point).coordinates,
+                cur.geometry.coordinates,
             ], { distance, distanceUnit: "km", speed, speedUnit: "km/h", startAt, endAt }));
 
-            if (i === locations.features.length - 1)
-                groupped[groupped.length - 1].push(toFeature);
-        }
-
-        return groupped;
+            return groupped;
+        }, [[]]);
     }, [locations]);
 
     return (<>
