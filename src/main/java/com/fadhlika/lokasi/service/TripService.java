@@ -32,7 +32,7 @@ public class TripService {
                 (trip) -> {
                     try {
                         List<Location> locations = locationRepository.findLocations(userId, Optional.of(trip.startAt()),
-                                Optional.of(trip.endAt()),
+                                Optional.of(trip.endAt()), Optional.empty(), Optional.empty(),
                                 Optional.empty(), Optional.empty(), Optional.empty()).toList();
 
                         return new Trip(trip.userId(), trip.title(), trip.startAt(), trip.endAt(), trip.createdAt(),

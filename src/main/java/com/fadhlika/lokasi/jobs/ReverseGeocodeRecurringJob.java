@@ -35,6 +35,8 @@ public class ReverseGeocodeRecurringJob {
                     Optional.empty(),
                     Optional.empty(),
                     Optional.empty(),
+                    Optional.empty(),
+                    Optional.empty(),
                     Optional.of(false));
 
             if (location.isPresent()) {

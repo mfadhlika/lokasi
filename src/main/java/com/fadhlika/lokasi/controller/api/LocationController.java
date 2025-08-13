@@ -42,12 +42,14 @@ public class LocationController {
                         @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atStartOfDay().atZone(ZoneOffset.UTC)}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime start,
                         @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atTime(T(java.time.LocalTime).MAX).atZone(ZoneOffset.UTC)}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime end,
                         @RequestParam Optional<String> device,
+                        @RequestParam Optional<String> order,
+                        @RequestParam Optional<Boolean> desc,
                         @RequestParam Optional<Integer> offset,
                         @RequestParam Optional<Integer> limit) {
                 User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
                 try (Stream<Location> stream = this.locationService.findLocations(user.getId(), Optional.of(start),
-                                Optional.of(end), device, offset, limit)) {
+                                Optional.of(end), device, order, desc, offset, limit)) {
                         List<Feature> features = stream.map(curr -> {
                                 PointProperties props = new PointProperties(
                                                 curr.getTimestamp(),
@@ -80,7 +82,7 @@ public class LocationController {
 
                 try {
                         Location location = this.locationService.findLocation(user.getId(), Optional.empty(),
-                                        Optional.empty(), device).orElseThrow();
+                                        Optional.empty(), device, Optional.empty(), Optional.of(true)).orElseThrow();
 
                         PointProperties props = new PointProperties(
                                         location.getTimestamp(),
