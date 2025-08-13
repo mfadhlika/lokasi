@@ -10,7 +10,7 @@ function toISOLocal(date: Date) {
   return date.toISOString().split(/:\d{2}\..*/)[0];
 }
 
-function calculateTimediff(d1: Date, d2: Date = new Date()) {
+function relativeTime(d1: Date, d2: Date = new Date()) {
   const rtf = new Intl.RelativeTimeFormat("en", { style: "long" });
   let diff = (d1.getTime() - d2.getTime()) / 1000;
   if (Math.abs(diff) < 60) {
@@ -22,11 +22,12 @@ function calculateTimediff(d1: Date, d2: Date = new Date()) {
     return rtf.format(Math.round(diff), "minutes");
   }
 
-  diff /= 60 / 24
-  if (Math.abs(diff) < 1) {
+  diff /= 60;
+  if (Math.abs(diff) < 24) {
     return rtf.format(Math.round(diff), "hours");
   }
 
+  diff /= 24;
   if (Math.abs(diff) < 7) {
     return rtf.format(Math.round(diff), "days");
   }
@@ -42,5 +43,5 @@ function calculateTimediff(d1: Date, d2: Date = new Date()) {
   return rtf.format(Math.round(diff / 365), "years");
 }
 
-export { cn, toISOLocal, calculateTimediff };
+export { cn, toISOLocal, relativeTime };
 

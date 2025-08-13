@@ -2,7 +2,7 @@ import type { Feature, FeatureCollection, LineString, Point } from "geojson";
 import { FeatureGroup, CircleMarker, Popup, Polyline, Tooltip, useMap, Marker, } from "react-leaflet";
 import 'leaflet/dist/leaflet.css';
 import type { LineStringProperties, PointProperties } from "@/types/properties";
-import { calculateTimediff } from "@/lib/utils";
+import { relativeTime } from "@/lib/utils";
 import * as turf from "@turf/turf";
 import type { Checked } from "@/types/checked";
 import L from "leaflet";
@@ -154,7 +154,7 @@ export function Markers({ locations, showLines, showPoints, showLastKnown, lastK
                         {lastKnowLocation.properties.motions && <div className="inline-flex gap-2 items-center"><Car className="size-4" /> {lastKnowLocation.properties.motions.join(",")}</div>}
                     </div>
                 </Popup>
-                <Tooltip>{calculateTimediff(new Date(lastKnowLocation.properties.timestamp))}</Tooltip>
+                <Tooltip>{relativeTime(new Date(lastKnowLocation.properties.timestamp))}</Tooltip>
             </Marker>}
     </>);
 }
