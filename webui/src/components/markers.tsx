@@ -1,5 +1,5 @@
 import type { Feature, FeatureCollection, LineString, Point } from "geojson";
-import { FeatureGroup, CircleMarker, Popup, Polyline, Tooltip, useMap, Marker, } from "react-leaflet";
+import { FeatureGroup, CircleMarker, Popup, Polyline, Tooltip, Marker, } from "react-leaflet";
 import 'leaflet/dist/leaflet.css';
 import type { LineStringProperties, PointProperties } from "@/types/properties";
 import { relativeTime } from "@/lib/utils";
@@ -9,6 +9,7 @@ import L from "leaflet";
 import { renderToStaticMarkup } from "react-dom/server";
 import { useAuth } from "@/hooks/use-auth";
 import { Battery, BatteryCharging, BatteryFull, BatteryLow, Car, Clock, Compass, Diff, Gauge, TrendingUp, Wifi, Route, Smartphone, PlaneTakeoff, PlaneLanding } from "lucide-react";
+import { useMemo } from "react";
 
 export type MarkersProps = React.ComponentProps<"div"> & {
     locations: FeatureCollection<Point, PointProperties>,
@@ -60,46 +61,42 @@ function MarkerTooltip(props: LineStringProperties) {
 }
 
 export function Markers({ locations, showLines, showPoints, showMovingPoints, showLastKnown, lastKnowLocation }: MarkersProps) {
-    const map = useMap();
     const { userInfo } = useAuth();
 
-    if (locations.features.length > 0) {
-        const coords = turf.center(locations).geometry.coordinates;
-        map.setView([coords[1], coords[0]]);
-    };
+    const groupped = useMemo(() => {
+        const groupped: Feature[][] = [[]];
+        for (let i = 1; i < locations.features.length; i++) {
+            const fromFeature = locations.features[i - 1];
+            const toFeature = locations.features[i];
 
-    const groupped: Feature[][] = [[]];
-    for (let i = 1; i < locations.features.length; i++) {
-        const fromFeature = locations.features[i - 1];
-        const toFeature = locations.features[i];
+            groupped[groupped.length - 1].push(fromFeature);
 
-        groupped[groupped.length - 1].push(fromFeature);
+            const startAt = Date.parse(fromFeature.properties.timestamp);
+            const endAt = Date.parse(toFeature.properties.timestamp);
 
-        const startAt = Date.parse(fromFeature.properties.timestamp);
-        const endAt = Date.parse(toFeature.properties.timestamp);
+            const duration = (startAt - endAt) / 1000;
+            if (duration > 60 * 15) {
+                groupped[groupped.length - 1].push(toFeature);
+                groupped.push([]);
+                continue;
+            };
 
-        const duration = (startAt - endAt) / 1000;
-        if (duration > 60 * 15) {
-            groupped[groupped.length - 1].push(toFeature);
-            groupped.push([]);
-            continue;
-        };
+            const from = turf.point((fromFeature.geometry as Point).coordinates);
+            const to = turf.point((toFeature.geometry as Point).coordinates);
+            const distance = turf.distance(from, to, { units: "kilometers" });
+            const speed = distance / duration / 3600;
 
-        const from = turf.point((fromFeature.geometry as Point).coordinates);
-        const to = turf.point((toFeature.geometry as Point).coordinates);
-        const distance = turf.distance(from, to, { units: "kilometers" });
-        const speed = distance / duration / 3600;
+            groupped[groupped.length - 1].push(turf.lineString([
+                fromFeature.geometry.coordinates,
+                toFeature.geometry.coordinates,
+            ], { distance, distanceUnit: "km", speed, speedUnit: "km/h", startAt, endAt }));
 
-        groupped[groupped.length - 1].push(turf.lineString([
-            fromFeature.geometry.coordinates,
-            toFeature.geometry.coordinates,
-        ], { distance, distanceUnit: "km", speed, speedUnit: "km/h", startAt, endAt }));
+            if (i === locations.features.length - 1)
+                groupped[groupped.length - 1].push(toFeature);
+        }
 
-        if (i === locations.features.length - 1)
-            groupped[groupped.length - 1].push(toFeature);
-    }
-
-
+        return groupped;
+    }, [locations]);
 
     return (<>
         {groupped.map((group, groupIndex) =>
