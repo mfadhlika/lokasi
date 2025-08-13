@@ -6,7 +6,6 @@ import { DatePicker } from "@/components/date-picker.tsx";
 import { DeviceSelect } from "@/components/device-select.tsx";
 import { Markers } from "@/components/markers";
 import type { Feature, FeatureCollection, Point } from "geojson";
-import { Header } from "@/components/header";
 import { toast } from "sonner";
 import { useLocationFilter } from "@/hooks/use-location-filter";
 import type { Response } from "@/types/response";
@@ -15,8 +14,42 @@ import * as turf from "@turf/turf";
 import type { PointProperties } from "@/types/properties";
 import { MapContainer } from 'react-leaflet/MapContainer';
 import { ZoomControl } from 'react-leaflet/ZoomControl';
-import { TileLayer } from 'react-leaflet';
+import { TileLayer, useMap } from 'react-leaflet';
+import { Control, DomEvent, DomUtil, type ControlPosition } from 'leaflet';
+import { createPortal } from 'react-dom';
+import { Header } from '@/components/header';
 
+type MapControlProps = React.ComponentProps<"div"> & {
+    position?: ControlPosition,
+    disableClickProgation?: boolean
+}
+
+function MapControl({ children, position, disableClickProgation }: MapControlProps) {
+    const [container, setContainer] = useState<HTMLElement | null>(null);
+    const map = useMap();
+
+    useEffect(() => {
+        const mapControl = new Control({ position });
+
+        mapControl.onAdd = () => {
+            const section = DomUtil.create('section');
+            if (disableClickProgation) {
+                DomEvent.disableClickPropagation(section);
+            }
+            return section;
+        };
+
+        map.addControl(mapControl);
+
+        setContainer(mapControl.getContainer() ?? null);
+
+        return () => {
+            map.removeControl(mapControl);
+        };
+    }, [map, position, disableClickProgation]);
+
+    return container ? createPortal(children, container) : null;
+}
 
 export default function MapsPage() {
     const [locations, setLocations] = useState<FeatureCollection<Point, PointProperties>>(turf.featureCollection([]));
@@ -64,11 +97,6 @@ export default function MapsPage() {
 
     return (
         <>
-            <Header>
-                <DatePicker variant="outline" date={date} setDate={handleDate} />
-                <DeviceSelect className='' selectedDevice={device || "all"} onSelectedDevice={handleDevice} />
-                <LayerCheckbox {...layerSettings} />
-            </Header>
             <div className="flex flex-1 flex-col gap-4">
                 <MapContainer
                     className="size-full"
@@ -81,6 +109,13 @@ export default function MapsPage() {
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
+                    <MapControl position='topleft'>
+                        <Header className='leaflet-bar leaflet-touch flex bg-white'>
+                            <DatePicker variant="outline" date={date} setDate={handleDate} />
+                            <DeviceSelect className='' selectedDevice={device || "all"} onSelectedDevice={handleDevice} />
+                            <LayerCheckbox {...layerSettings} />
+                        </Header>
+                    </MapControl>
                     <Markers locations={locations} lastKnowLocation={lastKnownLocation} {...layerSettings} />
                 </MapContainer>
             </div>
