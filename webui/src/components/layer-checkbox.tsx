@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Layers } from "lucide-react";
 import type { Checked } from "@/types/checked";
 import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 export type LayerState = {
     showLines: Checked,
@@ -11,12 +12,20 @@ export type LayerState = {
     showMovingPoints: Checked,
 }
 
-export const useLayerState = create<LayerState>()(() => ({
-    showLines: true,
-    showPoints: true,
-    showLastKnown: true,
-    showMovingPoints: false
-}));
+export const useLayerState = create<LayerState>()((
+    persist(
+        () => ({
+            showLines: true as Checked,
+            showPoints: true as Checked,
+            showLastKnown: true as Checked,
+            showMovingPoints: false as Checked
+        }),
+        {
+            name: 'layer-storage',
+            storage: createJSONStorage(() => localStorage)
+        }
+    )
+));
 
 export const LayerCheckbox = ({ showLines, showPoints, showLastKnown, showMovingPoints }: LayerState) => {
     const setShowPoints = (value: Checked) => useLayerState.setState((state) => ({ ...state, showPoints: value }));
