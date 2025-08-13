@@ -12,20 +12,34 @@ function toISOLocal(date: Date) {
 
 function calculateTimediff(d1: Date, d2: Date = new Date()) {
   const rtf = new Intl.RelativeTimeFormat("en", { style: "long" });
-  const diff = (d1.getTime() - d2.getTime()) / 1000 / 60 / 60 / 24;
-  if (Math.abs(diff) < 7) {
-    console.log(diff);
-    return rtf.format(diff, "days");
-  } else if (Math.abs(diff) < 31) {
-    const weeks = diff / 7;
-    return rtf.format(Math.round(weeks), "weeks");
-  } else if (Math.abs(diff) < 365) {
-    const months = diff / 31;
-    return rtf.format(Math.round(months), "months");
-  } else {
-    const years = diff / 365;
-    return rtf.format(Math.round(years), "years");
+  let diff = (d1.getTime() - d2.getTime()) / 1000;
+  if (Math.abs(diff) < 60) {
+    return rtf.format(Math.round(diff), "seconds");
   }
+
+  diff /= 60;
+  if (Math.abs(diff) < 60) {
+    return rtf.format(Math.round(diff), "minutes");
+  }
+
+  diff /= 60 / 24
+  if (Math.abs(diff) < 1) {
+    return rtf.format(Math.round(diff), "hours");
+  }
+
+  if (Math.abs(diff) < 7) {
+    return rtf.format(Math.round(diff), "days");
+  }
+
+  if (Math.abs(diff) < 31) {
+    return rtf.format(Math.round(diff / 7), "weeks");
+  }
+
+  if (Math.abs(diff) < 365) {
+    return rtf.format(Math.round(diff / 31), "months");
+  }
+
+  return rtf.format(Math.round(diff / 365), "years");
 }
 
 export { cn, toISOLocal, calculateTimediff };
