@@ -77,8 +77,8 @@ export default function MapsPage() {
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
-                    <MapControl position='topleft'>
-                        <Header className='leaflet-bar leaflet-touch flex bg-white'>
+                    <MapControl position='topleft' disableClickPropagation={true} disableScrollPropagation={true}>
+                        <Header className='leaflet-bar leaflet-touch flex bg-white max-w-[calc(100vw-20px)]'>
                             <DatePicker variant="outline" date={date} setDate={handleDate} />
                             <DeviceSelect className='' selectedDevice={device || "all"} onSelectedDevice={handleDevice} />
                             <LayerCheckbox {...layerSettings} />
