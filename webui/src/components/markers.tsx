@@ -19,6 +19,45 @@ export type MarkersProps = React.ComponentProps<"div"> & {
     showLastKnown?: Checked
 }
 
+function MarkerPopup(props: PointProperties) {
+    const batteryIcon = (level?: number, state?: string) => {
+        if (state && state === "charging") return <BatteryCharging />
+        if (!level) return <Battery className="size-4" />
+        else if (level < 20) return <BatteryLow className="size-4" />
+        else if (level < 89) return <BatteryLow className="size-4" />
+        else return <BatteryFull className="size-4" />
+    };
+
+    return (
+        <Popup>
+            <div className="flex flex-col gap-2">
+                <div className="inline-flex gap-2 items-center"><Clock className="size-4" /> {(new Date(props.timestamp)).toLocaleString()}</div>
+                <div className="inline-flex gap-2 items-center"><Gauge className="size-4" /> {props.speed} km/h</div>
+                <div className="inline-flex gap-2 items-center"><TrendingUp className="size-4" /> {props.altitude}m <Diff className="size-4" /> {props.verticalAccuracy}m</div>
+                <div className="inline-flex gap-2 items-center"><Compass className="size-4" /> {props.course}° <Diff className="size-4" /> {props.courseAccuracy}°</div>
+                <div className="inline-flex gap-2 items-center">{batteryIcon(props.batteryLevel, props.batteryState)} {props.batteryLevel}%</div>
+                <div className="inline-flex gap-2 items-center"><Smartphone className="size-4" /> {props.deviceId}</div>
+                <div className="inline-flex gap-2 items-center"><Wifi className="size-4" /> {props.ssid}</div>
+                {props.motions && <div className="inline-flex gap-2 items-center"><Car className="size-4" /> {props.motions.join(",")}</div>}
+            </div>
+        </Popup>
+    );
+}
+
+function MarkerTooltip(props: LineStringProperties) {
+    return (
+        <Tooltip>
+            <div className="flex flex-col gap-2">
+                <div className="inline-flex gap-2 items-center"><Route className="size-4" />{props.distance?.toFixed(2) ?? 0} {props.distanceUnit}</div>
+                <div className="inline-flex gap-2 items-center"><Gauge className="size-4" />{props.speed?.toFixed(2) ?? 0} {props.speedUnit}</div>
+                <div className="inline-flex gap-2 items-center"><PlaneTakeoff className="size-4" /> {(new Date(props.startAt)).toLocaleString()}</div>
+                <div className="inline-flex gap-2 items-center"><PlaneLanding className="size-4" /> {(new Date(props.endAt)).toLocaleString()}</div>
+                {props.motions && <div><Car className="size-4" /> {props.motions.join(",")}</div>}
+            </div>
+        </Tooltip>
+    );
+}
+
 export function Markers({ locations, showLines, showPoints, showLastKnown, lastKnowLocation }: MarkersProps) {
     const map = useMap();
     const { userInfo } = useAuth();
@@ -59,13 +98,7 @@ export function Markers({ locations, showLines, showPoints, showLastKnown, lastK
             groupped[groupped.length - 1].push(toFeature);
     }
 
-    const batteryIcon = (level?: number, state?: string) => {
-        if (state && state === "charging") return <BatteryCharging />
-        if (!level) return <Battery className="size-4" />
-        else if (level < 20) return <BatteryLow className="size-4" />
-        else if (level < 89) return <BatteryLow className="size-4" />
-        else return <BatteryFull className="size-4" />
-    };
+
 
     return (<>
         {groupped.map((group, groupIndex) =>
@@ -93,15 +126,7 @@ export function Markers({ locations, showLines, showPoints, showLastKnown, lastK
                                 <Polyline
                                     key={JSON.stringify({ ...position, startAt: props.startAt, endAt: props.endAt })}
                                     positions={position}>
-                                    <Tooltip>
-                                        <div className="flex flex-col gap-2">
-                                            <div className="inline-flex gap-2 items-center"><Route className="size-4" />{props.distance?.toFixed(2) ?? 0} {props.distanceUnit}</div>
-                                            <div className="inline-flex gap-2 items-center"><Gauge className="size-4" />{props.speed?.toFixed(2) ?? 0} {props.speedUnit}</div>
-                                            <div className="inline-flex gap-2 items-center"><PlaneTakeoff className="size-4" /> {(new Date(props.startAt)).toLocaleString()}</div>
-                                            <div className="inline-flex gap-2 items-center"><PlaneLanding className="size-4" /> {(new Date(props.endAt)).toLocaleString()}</div>
-                                            {props.motions && <div><Car /> {props.motions.join(",")}</div>}
-                                        </div>
-                                    </Tooltip>
+                                    <MarkerTooltip {...props} />
                                 </Polyline>
                             );
                         }
@@ -114,18 +139,7 @@ export function Markers({ locations, showLines, showPoints, showLastKnown, lastK
                                     key={JSON.stringify({ ...position, timestamp: props.timestamp })}
                                     center={position}
                                     radius={5}>
-                                    <Popup>
-                                        <div className="flex flex-col gap-2">
-                                            <div className="inline-flex gap-2 items-center"><Clock className="size-4" /> {(new Date(props.timestamp)).toLocaleString()}</div>
-                                            <div className="inline-flex gap-2 items-center"><Gauge className="size-4" /> {props.speed} km/h</div>
-                                            <div className="inline-flex gap-2 items-center"><TrendingUp className="size-4" /> {props.altitude}m <Diff className="size-4" /> {props.verticalAccuracy}m</div>
-                                            <div className="inline-flex gap-2 items-center"><Compass className="size-4" /> {props.course}° <Diff className="size-4" /> {props.courseAccuracy}°</div>
-                                            <div className="inline-flex gap-2 items-center">{batteryIcon(props.batteryLevel, props.batteryState)} {props.batteryLevel}%</div>
-                                            <div className="inline-flex gap-2 items-center"><Smartphone className="size-4" /> {props.deviceId}</div>
-                                            <div className="inline-flex gap-2 items-center"><Wifi className="size-4" /> {props.ssid}</div>
-                                            {props.motions && <div className="inline-flex gap-2 items-center"><Car className="size-4" /> {props.motions.join(",")}</div>}
-                                        </div>
-                                    </Popup>
+                                    <MarkerPopup {...props} />
                                 </CircleMarker>);
                         }
                     }
@@ -142,18 +156,7 @@ export function Markers({ locations, showLines, showPoints, showLastKnown, lastK
                     </div>),
                 iconAnchor: [10, 10]
             })} position={L.GeoJSON.coordsToLatLng(turf.getCoord(lastKnowLocation as Feature<Point>) as [number, number])}>
-                <Popup>
-                    <div className="flex flex-col gap-2">
-                        <div className="inline-flex gap-2 items-center"><Clock className="size-4" /> {(new Date(lastKnowLocation.properties.timestamp)).toLocaleString()}</div>
-                        <div className="inline-flex gap-2 items-center"><Gauge className="size-4" /> {lastKnowLocation.properties.speed} km/h</div>
-                        <div className="inline-flex gap-2 items-center"><TrendingUp className="size-4" /> {lastKnowLocation.properties.altitude}m <Diff className="size-4" /> {lastKnowLocation.properties.verticalAccuracy}m</div>
-                        <div className="inline-flex gap-2 items-center"><Compass className="size-4" /> {lastKnowLocation.properties.course}° <Diff className="size-4" /> {lastKnowLocation.properties.courseAccuracy}°</div>
-                        <div className="inline-flex gap-2 items-center">{batteryIcon(lastKnowLocation.properties.batteryLevel, lastKnowLocation.properties.batteryState)} {lastKnowLocation.properties.batteryLevel}%</div>
-                        <div className="inline-flex gap-2 items-center"><Smartphone className="size-4" /> {lastKnowLocation.properties.deviceId}</div>
-                        <div className="inline-flex gap-2 items-center"><Wifi className="size-4" /> {lastKnowLocation.properties.ssid}</div>
-                        {lastKnowLocation.properties.motions && <div className="inline-flex gap-2 items-center"><Car className="size-4" /> {lastKnowLocation.properties.motions.join(",")}</div>}
-                    </div>
-                </Popup>
+                <MarkerPopup {...lastKnowLocation.properties} />
                 <Tooltip>{relativeTime(new Date(lastKnowLocation.properties.timestamp))}</Tooltip>
             </Marker>}
     </>);
