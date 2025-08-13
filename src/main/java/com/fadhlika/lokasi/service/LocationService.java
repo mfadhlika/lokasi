@@ -63,27 +63,29 @@ public class LocationService {
 
     public Stream<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end) {
         return findLocations(userId, Optional.of(start), Optional.of(end), Optional.empty(), Optional.empty(),
-                Optional.empty());
+                Optional.empty(), Optional.empty(), Optional.empty());
     }
 
     public Stream<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end, Optional<String> device) {
-        return findLocations(userId, Optional.of(start), Optional.of(end), device, Optional.empty(), Optional.empty());
+        return findLocations(userId, Optional.of(start), Optional.of(end), device, Optional.empty(), Optional.empty(),
+                Optional.empty(), Optional.empty());
     }
 
     public Stream<Location> findLocations(int userId, Optional<ZonedDateTime> start, Optional<ZonedDateTime> end,
-            Optional<String> device,
+            Optional<String> device, Optional<String> order, Optional<Boolean> desc,
             Optional<Integer> offset, Optional<Integer> limit) {
         try {
-            return locationRepository.findLocations(userId, start, end, device, offset, limit);
+            return locationRepository.findLocations(userId, start, end, device, order, desc, offset, limit);
         } catch (SQLException ex) {
             throw new InternalErrorException(ex.getMessage());
         }
     }
 
     public Optional<Location> findLocation(int userId, Optional<ZonedDateTime> start, Optional<ZonedDateTime> end,
-            Optional<String> device) {
+            Optional<String> device, Optional<String> order, Optional<Boolean> desc) {
         try {
-            return locationRepository.findLocation(Optional.of(userId), start, end, device, Optional.empty());
+            return locationRepository.findLocation(Optional.of(userId), start, end, device, order, desc,
+                    Optional.empty());
         } catch (SQLException ex) {
             throw new InternalErrorException(ex.getMessage());
         }

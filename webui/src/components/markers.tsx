@@ -74,7 +74,7 @@ export function Markers({ locations, showLines, showPoints, showMovingPoints, sh
             const startAt = Date.parse(prev.properties.timestamp);
             const endAt = Date.parse(cur.properties.timestamp);
 
-            const duration = (startAt - endAt) / 1000;
+            const duration = (endAt - startAt) / 1000;
             if (duration > 60 * 15) {
                 groupped[groupped.length - 1].push(cur);
                 groupped.push([]);

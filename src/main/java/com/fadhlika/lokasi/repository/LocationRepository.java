@@ -162,12 +162,16 @@ public class LocationRepository {
             Optional<ZonedDateTime> start,
             Optional<ZonedDateTime> end,
             Optional<String> device,
+            Optional<String> order,
+            Optional<Boolean> desc,
             Optional<Integer> offset,
             Optional<Integer> limit) throws SQLException {
         return findLocationsStatementSpecBuilder(Optional.of(userId),
                 start,
                 end,
                 device,
+                order,
+                desc,
                 offset,
                 limit,
                 Optional.empty(),
@@ -179,12 +183,16 @@ public class LocationRepository {
             Optional<ZonedDateTime> start,
             Optional<ZonedDateTime> end,
             Optional<String> device,
+            Optional<String> order,
+            Optional<Boolean> desc,
             Optional<Boolean> geocoded) throws SQLException {
         return findLocationsStatementSpecBuilder(
                 userId,
                 start,
                 end,
                 device,
+                order,
+                desc,
                 Optional.empty(),
                 Optional.of(1),
                 Optional.empty(),
@@ -193,6 +201,8 @@ public class LocationRepository {
 
     public Location findLocation(int id) throws SQLException {
         return findLocationsStatementSpecBuilder(
+                Optional.empty(),
+                Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
@@ -208,6 +218,8 @@ public class LocationRepository {
             Optional<ZonedDateTime> start,
             Optional<ZonedDateTime> end,
             Optional<String> device,
+            Optional<String> order,
+            Optional<Boolean> desc,
             Optional<Integer> offset,
             Optional<Integer> limit,
             Optional<Integer> id,
@@ -272,7 +284,14 @@ public class LocationRepository {
             sqlBuilder.append(" WHERE ");
             sqlBuilder.append(String.join(" AND ", where));
         }
-        sqlBuilder.append(" ORDER BY timestamp DESC");
+
+        sqlBuilder.append(" ORDER BY ");
+        sqlBuilder.append(order.orElse("timestamp"));
+
+        desc.ifPresent((v) -> {
+            if (v)
+                sqlBuilder.append(" DESC");
+        });
 
         limit.ifPresent((l) -> {
             sqlBuilder.append(" LIMIT ?");
