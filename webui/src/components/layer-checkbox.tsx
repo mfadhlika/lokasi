@@ -8,18 +8,21 @@ export type LayerState = {
     showLines: Checked,
     showPoints: Checked,
     showLastKnown: Checked,
+    showMovingPoints: Checked,
 }
 
 export const useLayerState = create<LayerState>()(() => ({
     showLines: true,
     showPoints: true,
     showLastKnown: true,
+    showMovingPoints: false
 }));
 
-export const LayerCheckbox = ({ showLines, showPoints, showLastKnown, }: LayerState) => {
+export const LayerCheckbox = ({ showLines, showPoints, showLastKnown, showMovingPoints }: LayerState) => {
     const setShowPoints = (value: Checked) => useLayerState.setState((state) => ({ ...state, showPoints: value }));
     const setShowLines = (value: Checked) => useLayerState.setState((state) => ({ ...state, showLines: value }));
     const setShowLastKnown = (value: Checked) => useLayerState.setState((state) => ({ ...state, showLastKnown: value }));
+    const setshowMovingPoints = (value: Checked) => useLayerState.setState((state) => ({ ...state, showMovingPoints: value }));
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -46,6 +49,13 @@ export const LayerCheckbox = ({ showLines, showPoints, showLastKnown, }: LayerSt
                     onCheckedChange={setShowPoints}
                 >
                     Points
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                    checked={showMovingPoints}
+                    onCheckedChange={setshowMovingPoints}
+                    disabled={!showPoints}
+                >
+                    Moving points
                 </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
         </DropdownMenu>

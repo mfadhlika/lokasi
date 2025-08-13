@@ -16,7 +16,8 @@ export type MarkersProps = React.ComponentProps<"div"> & {
     zoom?: number,
     showPoints?: Checked,
     showLines?: Checked,
-    showLastKnown?: Checked
+    showLastKnown?: Checked,
+    showMovingPoints?: Checked,
 }
 
 function MarkerPopup(props: PointProperties) {
@@ -58,7 +59,7 @@ function MarkerTooltip(props: LineStringProperties) {
     );
 }
 
-export function Markers({ locations, showLines, showPoints, showLastKnown, lastKnowLocation }: MarkersProps) {
+export function Markers({ locations, showLines, showPoints, showMovingPoints, showLastKnown, lastKnowLocation }: MarkersProps) {
     const map = useMap();
     const { userInfo } = useAuth();
 
@@ -133,6 +134,7 @@ export function Markers({ locations, showLines, showPoints, showLastKnown, lastK
                         case 'Point': {
                             if (!showPoints) return null;
                             const props = feature.properties as PointProperties;
+                            if (!showMovingPoints && props.speed && props.speed > 0) return null;
                             const position = L.GeoJSON.coordsToLatLng(turf.getCoord(feature as Feature<Point>) as [number, number]);
                             return (
                                 <CircleMarker
