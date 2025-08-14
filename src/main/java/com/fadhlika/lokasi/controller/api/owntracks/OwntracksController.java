@@ -4,12 +4,12 @@
  */
 package com.fadhlika.lokasi.controller.api.owntracks;
 
-import java.time.Instant;
-import java.time.ZoneOffset;
+import java.util.ArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,15 +33,11 @@ public class OwntracksController {
 
     private final Logger logger = LoggerFactory.getLogger(OwntracksController.class);
 
-    private final LocationService locationService;
-
     @Autowired
-    public OwntracksController(LocationService locationService) {
-        this.locationService = locationService;
-    }
+    private LocationService locationService;
 
     @PostMapping
-    public void pub(@RequestHeader("X-Limit-D") String deviceId, @RequestBody Message message)
+    public ResponseEntity<?> pub(@RequestHeader("X-Limit-D") String deviceId, @RequestBody Message message)
             throws JsonProcessingException {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -55,5 +51,7 @@ public class OwntracksController {
             default:
                 break;
         }
+
+        return ResponseEntity.ok().body(new ArrayList<>());
     }
 }
