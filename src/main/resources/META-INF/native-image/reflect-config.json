@@ -72,6 +72,18 @@
         "allDeclaredMethods": true
     },
     {
+        "name": "com.fadhlika.lokasi.dto.owntracks.Waypoint",
+        "allDeclaredConstructors": true,
+        "allDeclaredFields": true,
+        "allDeclaredMethods": true
+    },
+    {
+        "name": "com.fadhlika.lokasi.dto.owntracks.Waypoints",
+        "allDeclaredConstructors": true,
+        "allDeclaredFields": true,
+        "allDeclaredMethods": true
+    },
+    {
         "name": "com.fadhlika.lokasi.service.ExportJobRequestHandler",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
