@@ -1,5 +1,7 @@
 package com.fadhlika.lokasi.exception;
 
+import java.util.MissingResourceException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -29,16 +31,20 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(MissingRequestCookieException.class)
-    public ResponseEntity<Response<Void>> handleMissingRequestCookieException(MissingRequestCookieException ex)
-            throws MissingRequestCookieException {
+    public ResponseEntity<Response<Void>> handleMissingRequestCookieException(MissingRequestCookieException ex) {
         logger.error("MissingRequestCookieException: {}", ex.getMessage());
         return new ResponseEntity<>(new Response<>(ex.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(SignatureVerificationException.class)
-    public ResponseEntity<Response<Void>> handleSignatureVerificationException(SignatureVerificationException ex)
-            throws SignatureVerificationException {
+    public ResponseEntity<Response<Void>> handleSignatureVerificationException(SignatureVerificationException ex) {
         logger.error("SignatureVerificationException: {}", ex.getMessage());
         return new ResponseEntity<>(new Response<>(ex.getMessage()), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(MissingResourceException.class)
+    public ResponseEntity<Response<Void>> handleMissingResourceException(MissingResourceException ex) {
+        logger.error("MissingResourceException: {}", ex.getMessage());
+        return new ResponseEntity<>(new Response<>(ex.getMessage()), HttpStatus.NOT_FOUND);
     }
 }
