@@ -12,6 +12,8 @@ import { useLocationFilter } from "@/hooks/use-location-filter";
 import type { Response } from "@/types/response";
 import type { Location } from "@/types/location";
 import type { PointProperties } from "@/types/properties";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { PreviewMaps } from "@/components/preview-maps";
 
 export default function DataPage() {
     const [data, setData] = useState<Location[]>([]);
@@ -58,7 +60,14 @@ export default function DataPage() {
             header: "Coordinates",
             cell: ({ row }) => {
                 const coordinates = (row.getValue("coordinates") as Point).coordinates;
-                return (<span>{`${coordinates[1]}, ${coordinates[0]}`}</span>);
+                return (
+                    <Tooltip>
+                        <TooltipTrigger><span>{`${coordinates[1]}, ${coordinates[0]}`}</span></TooltipTrigger>
+                        <TooltipContent className="p-1" side="right">
+                            <PreviewMaps className="rounded-md w-[250px] h-[200px] m-0" locations={row.getValue("coordinates")} zoom={13} />
+                        </TooltipContent>
+                    </Tooltip>
+                );
             }
         },
         {
