@@ -40,8 +40,8 @@ public record Location(
         @JsonProperty("inregions") List<String> inRegions,
         @JsonProperty("inrids") List<String> inRids,
         @JsonProperty("motionactivities") List<String> motions,
-        @JsonProperty("SSID") String ssid,
-        @JsonProperty("BSSID") String bssid,
+        String ssid,
+        String bssid,
         @JsonProperty("created_at") int createdAt,
         Integer m,
         @JsonProperty("_id") String id) implements Message {
