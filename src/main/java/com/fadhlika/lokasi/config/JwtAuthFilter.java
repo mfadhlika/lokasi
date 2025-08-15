@@ -17,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.fadhlika.lokasi.exception.UnauthorizedException;
 import com.fadhlika.lokasi.model.User;
 import com.fadhlika.lokasi.service.JwtAuthService;
 import com.fadhlika.lokasi.service.UserService;
@@ -52,23 +53,23 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             jwt = authHeader.substring(7);
         }
 
-        if (jwt != null) {
-            try {
-                if ((username = jwtAuthService.decodeAccessToken(jwt).getClaim("username").asString()) != null
-                        && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    User user = (User) this.userService.loadUserByUsername(username);
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(user,
-                            null, user.getAuthorities());
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                } else {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    return;
-                }
-            } catch (TokenExpiredException | SignatureVerificationException | JWTDecodeException _) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
+        if (jwt == null) {
+            throw new UnauthorizedException("unauthorized");
+        }
+
+        try {
+            if ((username = jwtAuthService.decodeAccessToken(jwt).getClaim("username").asString()) != null
+                    && SecurityContextHolder.getContext().getAuthentication() == null) {
+                User user = (User) this.userService.loadUserByUsername(username);
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(user,
+                        null, user.getAuthorities());
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            } else {
+                throw new UnauthorizedException("unauthorized");
             }
+        } catch (TokenExpiredException | SignatureVerificationException | JWTDecodeException ex) {
+            throw new UnauthorizedException(ex.getMessage());
         }
 
         filterChain.doFilter(request, response);
