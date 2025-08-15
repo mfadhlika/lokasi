@@ -5,6 +5,16 @@ import hash from "object-hash";
 import { cn } from "@/lib/utils";
 import * as turf from "@turf/turf";
 import { type LatLngBoundsExpression, type LatLngTuple } from "leaflet";
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconRetina from 'leaflet/dist/images/marker-icon-2x.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+import L from 'leaflet';
+
+L.Icon.Default.mergeOptions({
+    iconUrl: icon,
+    iconRetinaUrl: iconRetina,
+    shadowUrl: iconShadow,
+});
 
 export type PreviewMapsProps = React.ComponentProps<"div"> & {
     locations: FeatureCollection | Feature,
