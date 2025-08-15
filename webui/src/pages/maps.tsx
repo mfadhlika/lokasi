@@ -1,5 +1,5 @@
 import 'leaflet/dist/leaflet.css';
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { axiosInstance } from "@/lib/request.ts";
 import type { DateRange } from "react-day-picker";
 import { DatePicker } from "@/components/date-picker.tsx";
@@ -18,12 +18,12 @@ import { TileLayer } from 'react-leaflet';
 import { Header } from '@/components/header';
 import { MapControl } from '@/components/map-control';
 
-
 export default function MapsPage() {
     const [locations, setLocations] = useState<FeatureCollection<Point, PointProperties>>(turf.featureCollection([]));
     const [lastKnownLocation, setLastKnownLocation] = useState<Feature<Point, PointProperties> | undefined>();
     const [{ date, device }, setFilter] = useLocationFilter();
     const layerSettings = useLayerState();
+    const mapRef = useRef<L.Map>(null);
 
     useEffect(() => {
         const params = new URLSearchParams();
@@ -48,6 +48,14 @@ export default function MapsPage() {
             .catch(err => toast.error(`Failed to get user's lsat known locations: ${err}`));
     }, [layerSettings.showLastKnown]);
 
+    useEffect(() => {
+        let center;
+        if (locations && locations.features?.length > 0) center = turf.flip(turf.center(locations)).geometry.coordinates as [number, number];
+        else if (lastKnownLocation) center = turf.flip(lastKnownLocation).geometry.coordinates as [number, number];
+
+        if (center) mapRef.current?.setView(center);
+    }, [lastKnownLocation, locations]);
+
 
     const handleDate = (newDate: DateRange | undefined) => {
         setFilter({
@@ -64,30 +72,29 @@ export default function MapsPage() {
     }
 
     return (
-        <>
-            <div className="flex flex-1 flex-col gap-4">
-                <MapContainer
-                    className="size-full"
-                    center={[-6.175, 106.8275]}
-                    zoom={13}
-                    scrollWheelZoom={true}
-                    zoomControl={false}>
-                    <ZoomControl position="bottomleft" />
-                    <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    />
-                    <MapControl position='topleft' disableClickPropagation={true} disableScrollPropagation={true}>
-                        <Header className='leaflet-bar leaflet-touch flex bg-white max-w-[calc(100vw-20px)]'>
-                            <DatePicker variant="outline" date={date} setDate={handleDate} />
-                            <DeviceSelect className='' selectedDevice={device || "all"} onSelectedDevice={handleDevice} />
-                            <LayerCheckbox {...layerSettings} />
-                        </Header>
-                    </MapControl>
-                    <Markers locations={locations} lastKnowLocation={lastKnownLocation} {...layerSettings} />
-                </MapContainer>
-            </div>
-        </>
+        <div className="flex flex-1 flex-col gap-4">
+            <MapContainer
+                ref={mapRef}
+                className="size-full"
+                center={[-6.175, 106.8275]}
+                zoom={13}
+                scrollWheelZoom={true}
+                zoomControl={false}>
+                <ZoomControl position="bottomleft" />
+                <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <MapControl position='topleft' disableClickPropagation={true} disableScrollPropagation={true}>
+                    <Header className='leaflet-bar leaflet-touch flex bg-white max-w-[calc(100vw-20px)]'>
+                        <DatePicker variant="outline" date={date} setDate={handleDate} />
+                        <DeviceSelect className='' selectedDevice={device || "all"} onSelectedDevice={handleDevice} />
+                        <LayerCheckbox {...layerSettings} />
+                    </Header>
+                </MapControl>
+                <Markers locations={locations} lastKnowLocation={lastKnownLocation} {...layerSettings} />
+            </MapContainer>
+        </div>
     )
 
 }
