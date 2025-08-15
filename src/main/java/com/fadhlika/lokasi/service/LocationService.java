@@ -75,7 +75,8 @@ public class LocationService {
             Optional<String> device, Optional<String> order, Optional<Boolean> desc,
             Optional<Integer> offset, Optional<Integer> limit) {
         try {
-            return locationRepository.findLocations(userId, start, end, device, order, desc, offset, limit);
+            return locationRepository.findLocations(Optional.of(userId), start, end, device, order, desc, offset,
+                    limit);
         } catch (SQLException ex) {
             throw new InternalErrorException(ex.getMessage());
         }
