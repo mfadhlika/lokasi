@@ -158,7 +158,7 @@ public class LocationRepository {
     }
 
     public Stream<Location> findLocations(
-            int userId,
+            Optional<Integer> userId,
             Optional<ZonedDateTime> start,
             Optional<ZonedDateTime> end,
             Optional<String> device,
@@ -166,7 +166,7 @@ public class LocationRepository {
             Optional<Boolean> desc,
             Optional<Integer> offset,
             Optional<Integer> limit) throws SQLException {
-        return findLocationsStatementSpecBuilder(Optional.of(userId),
+        return findLocationsStatementSpecBuilder(userId,
                 start,
                 end,
                 device,
