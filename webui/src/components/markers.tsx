@@ -2,7 +2,6 @@ import type { Feature, FeatureCollection, LineString, Point } from "geojson";
 import { FeatureGroup, CircleMarker, Popup, Polyline, Tooltip, Marker, } from "react-leaflet";
 import 'leaflet/dist/leaflet.css';
 import type { LineStringProperties, PointProperties } from "@/types/properties";
-import { relativeTime } from "@/lib/utils";
 import * as turf from "@turf/turf";
 import type { Checked } from "@/types/checked";
 import L from "leaflet";
@@ -10,6 +9,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { useAuth } from "@/hooks/use-auth";
 import { Battery, BatteryCharging, BatteryFull, BatteryLow, Car, Clock, Compass, Gauge, TrendingUp, Wifi, Route, Smartphone, PlaneTakeoff, PlaneLanding } from "lucide-react";
 import { useMemo } from "react";
+import { formatDistanceToNow } from "date-fns";
 
 export type MarkersProps = React.ComponentProps<"div"> & {
     locations: FeatureCollection<Point, PointProperties>,
@@ -153,7 +153,7 @@ export function Markers({ locations, showLines, showPoints, showMovingPoints, sh
                 iconAnchor: [10, 10]
             })} position={L.GeoJSON.coordsToLatLng(turf.getCoord(lastKnowLocation as Feature<Point>) as [number, number])}>
                 <MarkerPopup {...lastKnowLocation.properties} />
-                <Tooltip>{relativeTime(new Date(lastKnowLocation.properties.timestamp))}</Tooltip>
+                <Tooltip>{formatDistanceToNow(new Date(lastKnowLocation.properties.timestamp))} ago</Tooltip>
             </Marker>}
     </>);
 }
