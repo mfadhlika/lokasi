@@ -3,12 +3,11 @@ import { type DateRange } from "react-day-picker"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar";
-import { format, subDays, subMonths, subWeeks } from "date-fns";
+import { compareAsc, format, subDays } from "date-fns";
 import { Popover, PopoverContent } from "./ui/popover";
 import { PopoverTrigger } from "@radix-ui/react-popover";
 import { CalendarIcon } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@/components/ui/select";
-import { useState } from "react";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
 export type DatePickerProps = {
     className?: string,
@@ -18,140 +17,74 @@ export type DatePickerProps = {
 }
 
 export function DatePicker({
-    className,
     date,
     setDate,
     variant
 }: DatePickerProps) {
-    const [value, setValue] = useState<string>();
-    const [key, setKey] = useState<number>(0);
-
-    const endOfDay = () => {
-        const end = new Date();
-        end.setHours(23, 59, 59, 59);
-        return end;
+    const selectDate = (value?: DateRange) => {
+        value?.from?.setHours(0, 0, 0, 0);
+        value?.to?.setHours(23, 59, 59, 59);
+        setDate(value);
     }
 
-    const setToday = () => {
-        const start = new Date();
-        start.setHours(0, 0, 0, 0);
-
-        setDate({
-            from: start,
-            to: endOfDay(),
-        });
-    };
-
-    const setYesterday = () => {
-        const start = subDays(new Date(), 1);
-        start.setHours(0, 0, 0, 0);
-
-        const end = subDays(new Date(), 1);
-        end.setHours(23, 59, 59, 59);
-
-        setDate({
-            from: start,
-            to: endOfDay(),
-        });
-    };
-
-    const setLastWeek = () => {
-        const start = subWeeks(new Date(), 1);
-        start.setHours(0, 0, 0, 0);
-
-        const end = new Date();
-        end.setHours(23, 59, 59, 59);
-
-        setDate({
-            from: start,
-            to: endOfDay(),
-        });
-    };
-
-    const setLastMonth = () => {
-        const start = subMonths(new Date(), 1);
-        start.setHours(0, 0, 0, 0);
-
-        const end = new Date();
-        end.setHours(23, 59, 59, 59);
-
-        setDate({
-            from: start,
-            to: endOfDay(),
-        });
-    };
-
-    const onValueChange = (value: string) => {
-        switch (value) {
-            case "today":
-                setToday();
-                break;
-            case "yesterday":
-                setYesterday();
-                break;
-            case "lastweek":
-                setLastWeek();
-                break;
-            case "lastmonth":
-                setLastMonth();
-                break;
-        }
-
-        setValue(value);
+    const formatDateRange = (range?: DateRange): string => {
+        if (!range) return "Pick a date";
+        if (compareAsc(range.from!.toDateString(), range.to!.toDateString()) === 0) return format(range.from!, "LLL dd, y");
+        return `${format(range.from!, "LLL dd, y")} - ${format(range.to!, "LLL dd, y")}`
     }
 
     return (
-        <div className={cn("grid gap-2", className)}>
-            <Popover>
-                <PopoverTrigger asChild>
-                    <Button id="date" variant={variant ?? "ghost"} className={cn(
-                        "w-auto justify-start text-left font-normal",
-                        !date && "text-muted-foreground"
-                    )}>
-                        <CalendarIcon />
-                        {date?.from ? (
-                            date.to ? (
-                                <>
-                                    {format(date.from, "LLL dd, y")} -{" "}
-                                    {format(date.to, "LLL dd, y")}
-                                </>
-                            ) : (
-                                format(date.from, "LLL dd, y")
-                            )
-                        ) : (
-                            <span>Pick a date</span>
-                        )}
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 z-100000" align="start">
-                    <div className={cn("flex flex-1 flex-col rounded-md gap-2 shadow-md", className)}>
-                        <div className="flex flex-1 pr-2 pt-2 justify-end">
-                            <Select key={key} value={value} onValueChange={onValueChange}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select a period" />
-                                </SelectTrigger>
-                                <SelectContent className="z-10000000">
-                                    <SelectItem value="today">Today</SelectItem>
-                                    <SelectItem value="yesterday">Yesterday</SelectItem>
-                                    <SelectItem value="lastweek">Last Week</SelectItem>
-                                    <SelectItem value="lastmonth">Last Month</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+        <Popover>
+            <PopoverTrigger asChild>
+                <Button id="date" variant={variant ?? "ghost"} className={cn(
+                    "w-auto justify-start text-left font-normal",
+                    !date && "text-muted-foreground"
+                )}>
+                    <CalendarIcon />
+                    {formatDateRange(date)}
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="p-0 z-100000" align="start" asChild>
+                <Card className="max-w-[300px] py-4">
+                    <CardContent>
                         <Calendar
                             autoFocus
                             mode="range"
                             selected={date}
-                            onSelect={(d) => {
-                                setDate(d);
-                                setValue(undefined);
-                                setKey((k) => k + 1);
-                            }}
-                            className="border-r-2"
+                            onSelect={selectDate}
+                            captionLayout="dropdown"
                         />
-                    </div>
-                </PopoverContent>
-            </Popover>
-        </div>
+                    </CardContent>
+                    <CardFooter className="flex flex-wrap gap-2 border-t px-4 !pt-4">
+                        {[
+                            { label: "Today", value: 0 },
+                            { label: "Yesterday", value: 1 },
+                            { label: "Last week", value: 7 },
+                            { label: "Last 2 weeks", value: 14 },
+                            { label: "Last Month", value: 31 },
+                        ].map((preset) => (
+                            <Button
+                                key={preset.value}
+                                variant="outline"
+                                size="sm"
+                                className="flex-1"
+                                onClick={() => {
+                                    const todayDate = new Date();
+                                    todayDate.setHours(23, 59, 59, 59);
+                                    const newDate = subDays(todayDate, preset.value);
+                                    newDate.setHours(0, 0, 0, 0);
+                                    setDate({
+                                        from: newDate,
+                                        to: todayDate
+                                    });
+                                }}
+                            >
+                                {preset.label}
+                            </Button>
+                        ))}
+                    </CardFooter>
+                </Card>
+            </PopoverContent>
+        </Popover>
     )
 }
