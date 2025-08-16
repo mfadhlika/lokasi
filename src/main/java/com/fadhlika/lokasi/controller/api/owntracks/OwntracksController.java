@@ -45,10 +45,9 @@ public class OwntracksController {
             case com.fadhlika.lokasi.dto.owntracks.Location location:
                 this.locationService.saveLocation(location.toLocation(user.getId(), deviceId));
                 break;
-            case com.fadhlika.lokasi.dto.owntracks.Status status:
-                ObjectMapper mapper = new ObjectMapper();
-                logger.info(mapper.writeValueAsString(status));
             default:
+                ObjectMapper mapper = new ObjectMapper();
+                logger.info(mapper.writeValueAsString(message));
                 break;
         }
 
