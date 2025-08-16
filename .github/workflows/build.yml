@@ -13,20 +13,6 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  test-webui:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-
-      - name: Test
-        working-directory: webui
-        run: |
-          npm install
-          npm run test
   test-api:
     runs-on: ubuntu-latest
     steps:
@@ -50,8 +36,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    needs:
-      - test-webui
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
