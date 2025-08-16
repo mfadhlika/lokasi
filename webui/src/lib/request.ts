@@ -1,5 +1,4 @@
 import axios from "axios";
-import router from "./router";
 import { toast } from "sonner";
 import type { Login } from "@/types/login";
 import type { Response } from "@/types/response";
@@ -19,7 +18,7 @@ async function logout() {
     try {
         await axiosInstance.delete("v1/logout");
         localStorage.removeItem("accessToken");
-        await router.navigate("/login");
+        location.reload();
     } catch (err) {
         console.error(err);
         toast.error(`logging out failed: ${err}`);
