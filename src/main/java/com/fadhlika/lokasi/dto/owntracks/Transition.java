@@ -1,6 +1,6 @@
 package com.fadhlika.lokasi.dto.owntracks;
 
-public record Transtition(
+public record Transition(
         int wtst,
         double lat,
         double lon,
@@ -10,6 +10,6 @@ public record Transtition(
         String event,
         String desc,
         String t,
-        String rid) {
+        String rid) implements Message {
 
 }

@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
                 @Type(value = Lwt.class, name = "lwt"),
                 @Type(value = Card.class, name = "card"),
                 @Type(value = Cmd.class, name = "cmd"),
-                @Type(value = Transtition.class, name = "transition"),
+                @Type(value = Transition.class, name = "transition"),
                 @Type(value = Waypoint.class, name = "waypoint"),
                 @Type(value = Waypoints.class, name = "waypoints"),
                 @Type(value = Status.class, name = "status") })
