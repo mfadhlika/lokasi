@@ -42,8 +42,8 @@ public class ImportRepository {
                 .param(anImport.source())
                 .param(anImport.filename())
                 .param(new String(anImport.content().readAllBytes(), StandardCharsets.UTF_8))
-                .param(anImport.count())
                 .param(anImport.checksum())
+                .param(anImport.count())
                 .param(anImport.createdAt())
                 .update();
     }
