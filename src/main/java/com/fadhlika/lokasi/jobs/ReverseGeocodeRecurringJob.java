@@ -37,21 +37,23 @@ public class ReverseGeocodeRecurringJob {
             logger.debug("start running reverse geocode job");
             Instant start = Instant.now();
 
-            List<Location> locations = locationRepository
-                    .findLocations(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-                            Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(25))
-                    .toList();
+            for (int i = 0; i < 4; i++) {
+                List<Location> locations = locationRepository
+                        .findLocations(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+                                Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(25))
+                        .toList();
 
-            for (Location l : locations) {
-                Coordinate coord = l.getGeometry().getCoordinate();
-                FeatureCollection geocode = photonRepository.reverseGeocode(coord.y, coord.x);
+                for (Location l : locations) {
+                    Coordinate coord = l.getGeometry().getCoordinate();
+                    FeatureCollection geocode = photonRepository.reverseGeocode(coord.y, coord.x);
 
-                locationRepository.updateLocationGeocode(l.getId(), geocode);
-                Thread.sleep(1000);
+                    locationRepository.updateLocationGeocode(l.getId(), geocode);
+                    Thread.sleep(1000);
+                }
+
+                Duration duration = start.until(Instant.now());
+                logger.info("reverse geocoded {} locations in {}s", locations.size(), duration.getSeconds());
             }
-
-            Duration duration = start.until(Instant.now());
-            logger.info("reverse geocoded {} locations in {}s", locations.size(), duration.getSeconds());
         } catch (Exception ex) {
             ex.printStackTrace();
             throw ex;
