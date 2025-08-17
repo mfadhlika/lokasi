@@ -4,7 +4,7 @@ import { axiosInstance } from "@/lib/request.ts";
 import type { DateRange } from "react-day-picker";
 import { DatePicker } from "@/components/date-picker.tsx";
 import { DeviceSelect } from "@/components/device-select.tsx";
-import { Markers } from "@/components/markers";
+import { MapLayers } from "@/components/map-layers";
 import type { Feature, FeatureCollection, Point } from "geojson";
 import { toast } from "sonner";
 import { useLocationFilter } from "@/hooks/use-location-filter";
@@ -92,7 +92,7 @@ export default function MapsPage() {
                         <LayerCheckbox {...layerSettings} />
                     </Header>
                 </MapControl>
-                <Markers locations={locations} lastKnowLocation={lastKnownLocation} {...layerSettings} />
+                <MapLayers locations={locations} lastKnowLocation={lastKnownLocation} {...layerSettings} />
             </MapContainer>
         </div>
     )

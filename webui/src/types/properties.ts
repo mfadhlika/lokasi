@@ -22,8 +22,8 @@ type LineStringProperties = {
     distanceUnit: string,
     speed?: number,
     speedUnit: string,
-    startAt: string,
-    endAt: string,
+    startAt: Date,
+    endAt: Date,
     motions: string[]
 };
 

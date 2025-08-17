@@ -10,6 +10,7 @@ export type LayerState = {
     showPoints: Checked,
     showLastKnown: Checked,
     showMovingPoints: Checked,
+    showVisits: Checked,
 }
 
 export const useLayerState = create<LayerState>()((
@@ -18,7 +19,8 @@ export const useLayerState = create<LayerState>()((
             showLines: true as Checked,
             showPoints: true as Checked,
             showLastKnown: true as Checked,
-            showMovingPoints: false as Checked
+            showMovingPoints: false as Checked,
+            showVisits: false as Checked
         }),
         {
             name: 'layer-storage',
@@ -27,11 +29,12 @@ export const useLayerState = create<LayerState>()((
     )
 ));
 
-export const LayerCheckbox = ({ showLines, showPoints, showLastKnown, showMovingPoints }: LayerState) => {
+export const LayerCheckbox = ({ showLines, showPoints, showLastKnown, showMovingPoints, showVisits }: LayerState) => {
     const setShowPoints = (value: Checked) => useLayerState.setState((state) => ({ ...state, showPoints: value }));
     const setShowLines = (value: Checked) => useLayerState.setState((state) => ({ ...state, showLines: value }));
     const setShowLastKnown = (value: Checked) => useLayerState.setState((state) => ({ ...state, showLastKnown: value }));
     const setshowMovingPoints = (value: Checked) => useLayerState.setState((state) => ({ ...state, showMovingPoints: value }));
+    const setShowVisits = (value: Checked) => useLayerState.setState((state) => ({ ...state, showVisits: value }));
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -65,6 +68,12 @@ export const LayerCheckbox = ({ showLines, showPoints, showLastKnown, showMoving
                     disabled={!showPoints}
                 >
                     Moving points
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                    checked={showVisits}
+                    onCheckedChange={setShowVisits}
+                >
+                    Visits
                 </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
         </DropdownMenu>
