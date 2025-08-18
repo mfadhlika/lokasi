@@ -32,9 +32,9 @@ public class ExportController {
     public ResponseEntity<Response<Void>> exportLocations(@RequestBody Export export) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        export = new Export(user.getId(), export.startAt(), export.endAt());
+        export = exportService.exportLocations(new Export(user.getId(), export.startAt(), export.endAt()));
 
-        exportService.exportLocations(export);
+        exportService.processExportLocations(export);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new Response<>("export queued"));
     }

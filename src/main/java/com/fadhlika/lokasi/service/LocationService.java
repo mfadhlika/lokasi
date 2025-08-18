@@ -5,21 +5,29 @@
 package com.fadhlika.lokasi.service;
 
 import java.sql.SQLException;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
 
-import org.jobrunr.scheduling.BackgroundJobRequest;
+import org.locationtech.jts.geom.Coordinate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fadhlika.lokasi.dto.jobs.ReverseGeocodeJobRequest;
+import com.fadhlika.lokasi.dto.FeatureCollection;
+import com.fadhlika.lokasi.exception.ConflictException;
 import com.fadhlika.lokasi.exception.InternalErrorException;
 import com.fadhlika.lokasi.model.Location;
 import com.fadhlika.lokasi.repository.LocationRepository;
@@ -35,11 +43,17 @@ public class LocationService {
 
     private static final Logger logger = LoggerFactory.getLogger(LocationService.class);
 
+    @Value("${reverse_geocode.batch_size}")
+    private int batchSize;
+
     @Autowired
     private LocationRepository locationRepository;
 
     @Autowired
     private PhotonRepository photonRepository;
+
+    @Autowired
+    private ReverseGeocodeService reverseGeocodeService;
 
     public void saveLocation(Location location) {
         try {
@@ -101,7 +115,9 @@ public class LocationService {
     }
 
     public void reverseGeocode() {
-        BackgroundJobRequest.enqueue(UUID.fromString(ReverseGeocodeJobRequest.id),
-                new ReverseGeocodeJobRequest());
+        if (!reverseGeocodeService.tryLock())
+            throw new ConflictException("reverse geocode job already running");
+
+        reverseGeocodeService.startReverseGeocode();
     }
 }

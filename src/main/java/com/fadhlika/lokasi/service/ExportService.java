@@ -1,22 +1,24 @@
 package com.fadhlika.lokasi.service;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import org.jobrunr.scheduling.BackgroundJobRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fadhlika.lokasi.dto.jobs.ExportLocationJobRequest;
+import com.fadhlika.lokasi.dto.Feature;
+import com.fadhlika.lokasi.dto.FeatureCollection;
+import com.fadhlika.lokasi.dto.PointProperties;
 import com.fadhlika.lokasi.exception.InternalErrorException;
 import com.fadhlika.lokasi.model.Export;
 import com.fadhlika.lokasi.repository.ExportRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class ExportService {
@@ -25,8 +27,10 @@ public class ExportService {
     @Autowired
     private ExportRepository exportRepository;
 
-    @Transactional
-    public void exportLocations(Export export) {
+    @Autowired
+    private LocationService locationService;
+
+    public Export exportLocations(Export export) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");
         String filename = String.format("export_%s_to_%s.json", export.startAt().format(formatter),
                 export.endAt().format(formatter));
@@ -38,9 +42,7 @@ public class ExportService {
             throw new InternalErrorException(e.getMessage());
         }
 
-        Export createdExport = exportRepository.get(export.userId(), export.filename());
-        int exportId = createdExport.id();
-        BackgroundJobRequest.enqueue(new ExportLocationJobRequest(exportId));
+        return exportRepository.get(export.userId(), export.filename());
     }
 
     public List<Export> getExports(int userId) {
@@ -53,5 +55,48 @@ public class ExportService {
 
     public void deleteExport(int id) {
         exportRepository.delete(id);
+    }
+
+    @Async
+    public void processExportLocations(Export export) {
+        logger.info("start exporting {}", export.id());
+
+        try {
+            List<Feature> features = locationService.findLocations(export.userId(), export.startAt(), export.endAt())
+                    .map((location) -> {
+                        PointProperties props = new PointProperties(
+                                location.getTimestamp(),
+                                location.getAltitude(),
+                                location.getSpeed(),
+                                location.getCourse(),
+                                location.getCourseAccuracy(),
+                                location.getAccuracy(),
+                                location.getVerticalAccuracy(),
+                                location.getMotions(),
+                                location.getBatteryState().toString(),
+                                location.getBattery(),
+                                location.getDeviceId(),
+                                location.getSsid(),
+                                location.getGeocode(),
+                                location.getRawData());
+
+                        return new Feature(location.getGeometry(), props);
+                    }).toList();
+
+            FeatureCollection featureCollection = new FeatureCollection(features);
+
+            ObjectMapper mapper = new ObjectMapper();
+            ByteArrayInputStream is = new ByteArrayInputStream(mapper.writeValueAsBytes(featureCollection));
+
+            export = new Export(export.id(), export.userId(), export.filename(), export.startAt(), export.endAt(),
+                    is, true,
+                    export.createdAt());
+            exportRepository.save(export);
+        } catch (Exception e) {
+            logger.error("Error running processExport", e);
+            return;
+        }
+
+        logger.info("export {} completed", export.id());
     }
 }

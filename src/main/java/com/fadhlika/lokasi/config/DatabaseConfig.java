@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import org.flywaydb.core.Flyway;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,23 +53,6 @@ public class DatabaseConfig {
 
         flyway.baseline();
         flyway.migrate();
-
-        return ds;
-    }
-
-    @Bean
-    @Qualifier("jobrunrDataSource")
-    public DataSource jobrunrDataSource() {
-        SQLiteDataSource sqliteDataSource = new SQLiteDataSource();
-        sqliteDataSource.setUrl(String.format("jdbc:sqlite:%s/jobrunr.db", dataDir));
-        sqliteDataSource.setJournalMode("WAL");
-
-        HikariDataSource ds = new HikariDataSource();
-        ds.setDataSource(sqliteDataSource);
-        ds.setMinimumIdle(2);
-        ds.setMaximumPoolSize(10);
-        ds.setIdleTimeout(120000);
-        ds.setLeakDetectionThreshold(300000);
 
         return ds;
     }

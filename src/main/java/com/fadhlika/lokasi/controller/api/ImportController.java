@@ -24,8 +24,10 @@ public class ImportController {
             @RequestParam("file") MultipartFile file) throws IOException {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        importService.importLocations(user.getId(), source, file.getOriginalFilename(),
+        Import createdImport = importService.importLocations(user.getId(), source, file.getOriginalFilename(),
                 file.getInputStream());
+
+        importService.processImport(createdImport);
 
         return new Response<>("uploaded");
     }

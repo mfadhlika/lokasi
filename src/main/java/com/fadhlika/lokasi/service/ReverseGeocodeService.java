@@ -1,29 +1,29 @@
-package com.fadhlika.lokasi.jobs;
+package com.fadhlika.lokasi.service;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-import org.jobrunr.jobs.annotations.Job;
-import org.jobrunr.jobs.annotations.Recurring;
-import org.jobrunr.jobs.lambdas.JobRequestHandler;
 import org.locationtech.jts.geom.Coordinate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
 import com.fadhlika.lokasi.dto.FeatureCollection;
-import com.fadhlika.lokasi.dto.jobs.ReverseGeocodeJobRequest;
 import com.fadhlika.lokasi.model.Location;
 import com.fadhlika.lokasi.repository.LocationRepository;
 import com.fadhlika.lokasi.repository.PhotonRepository;
 
-@Component
-public class ReverseGeocodeJob implements JobRequestHandler<ReverseGeocodeJobRequest> {
-    private static final Logger logger = LoggerFactory.getLogger(ReverseGeocodeJob.class);
+@Service
+public class ReverseGeocodeService {
+    private static final Logger logger = LoggerFactory.getLogger(ReverseGeocodeService.class);
 
     @Value("${reverse_geocode.batch_size}")
     private int batchSize;
@@ -34,10 +34,26 @@ public class ReverseGeocodeJob implements JobRequestHandler<ReverseGeocodeJobReq
     @Autowired
     private PhotonRepository photonRepository;
 
-    @Recurring(id = ReverseGeocodeJobRequest.id, cron = "0 0 * * *")
-    @Job(name = "Reverse geocode job", retries = 0)
-    public void execute() throws Exception {
+    private Lock lock = new ReentrantLock();
+
+    @Scheduled(cron = "0 0 0 * * *")
+    public void scheduledReverseGeocode() {
+        if (lock.tryLock())
+            processReverseGeocode();
+    }
+
+    public boolean tryLock() {
+        return lock.tryLock();
+    }
+
+    @Async
+    public void startReverseGeocode() {
+        processReverseGeocode();
+    }
+
+    public void processReverseGeocode() {
         try {
+
             logger.debug("start running reverse geocode job");
             Instant start = Instant.now();
 
@@ -61,12 +77,8 @@ public class ReverseGeocodeJob implements JobRequestHandler<ReverseGeocodeJobReq
             logger.info("reverse geocoded {} locations in {}s", locations.size(), duration.getSeconds());
         } catch (Exception ex) {
             ex.printStackTrace();
-            throw ex;
+        } finally {
+            lock.unlock();
         }
-    }
-
-    @Override
-    public void run(ReverseGeocodeJobRequest arg0) throws Exception {
-        execute();
     }
 }
