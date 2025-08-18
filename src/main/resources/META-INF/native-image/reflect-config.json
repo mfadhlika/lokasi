@@ -106,5 +106,17 @@
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
+    },
+    {
+        "name": "com.fadhlika.lokasi.service.ReverseGeocodeJob",
+        "allDeclaredConstructors": true,
+        "allDeclaredFields": true,
+        "allDeclaredMethods": true
+    },
+    {
+        "name": "com.fadhlika.lokasi.dto.jobs.ReverseGeocodeJobRequest",
+        "allDeclaredConstructors": true,
+        "allDeclaredFields": true,
+        "allDeclaredMethods": true
     }
 ]

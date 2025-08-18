@@ -4,14 +4,14 @@
  */
 package com.fadhlika.lokasi.service;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
-import org.locationtech.jts.geom.Coordinate;
+import org.jobrunr.scheduling.BackgroundJobRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fadhlika.lokasi.dto.FeatureCollection;
+import com.fadhlika.lokasi.dto.jobs.ReverseGeocodeJobRequest;
 import com.fadhlika.lokasi.exception.InternalErrorException;
 import com.fadhlika.lokasi.model.Location;
 import com.fadhlika.lokasi.repository.LocationRepository;
@@ -100,20 +100,8 @@ public class LocationService {
         }
     }
 
-    public Location reverseGeocode(int id) {
-        try {
-            Location location = locationRepository.findLocation(id);
-
-            Coordinate coord = location.getGeometry().getCoordinate();
-            FeatureCollection featureCollection = photonRepository.reverseGeocode(coord.y, coord.x);
-
-            location.setGeocode(featureCollection);
-
-            locationRepository.createLocation(location);
-
-            return location;
-        } catch (SQLException | IOException | InterruptedException e) {
-            throw new InternalErrorException(e.getMessage());
-        }
+    public void reverseGeocode() {
+        BackgroundJobRequest.enqueue(UUID.fromString(ReverseGeocodeJobRequest.id),
+                new ReverseGeocodeJobRequest());
     }
 }

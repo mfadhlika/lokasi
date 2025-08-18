@@ -14,7 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,7 +26,6 @@ import com.fadhlika.lokasi.dto.Response;
 import com.fadhlika.lokasi.model.Location;
 import com.fadhlika.lokasi.model.User;
 import com.fadhlika.lokasi.service.LocationService;
-import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequestMapping("/api/v1/locations")
@@ -108,27 +107,11 @@ public class LocationController {
                 }
         }
 
-        @PutMapping("/{importId}/reverseGeocode")
-        public Response<Feature> reverseGeocode(@PathVariable int importId) {
-                Location location = locationService.reverseGeocode(importId);
+        @PostMapping("/reverse")
+        public Response<?> reverseGeocode() {
+                locationService.reverseGeocode();
 
-                PointProperties props = new PointProperties(
-                                location.getTimestamp(),
-                                location.getAltitude(),
-                                location.getSpeed(),
-                                location.getCourse(),
-                                location.getCourseAccuracy(),
-                                location.getAccuracy(),
-                                location.getVerticalAccuracy(),
-                                location.getMotions(),
-                                location.getBatteryState().toString(),
-                                location.getBattery(),
-                                location.getDeviceId(),
-                                location.getSsid(),
-                                location.getGeocode(),
-                                location.getRawData());
-
-                return new Response<Feature>(new Feature(location.getGeometry(), props));
+                return new Response<>("reverse geocode job started");
         }
 
 }

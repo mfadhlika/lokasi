@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.jobrunr.jobs.annotations.Job;
 import org.jobrunr.jobs.annotations.Recurring;
+import org.jobrunr.jobs.lambdas.JobRequestHandler;
 import org.locationtech.jts.geom.Coordinate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,12 +16,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fadhlika.lokasi.dto.FeatureCollection;
+import com.fadhlika.lokasi.dto.jobs.ReverseGeocodeJobRequest;
 import com.fadhlika.lokasi.model.Location;
 import com.fadhlika.lokasi.repository.LocationRepository;
 import com.fadhlika.lokasi.repository.PhotonRepository;
 
 @Component
-public class ReverseGeocodeJob {
+public class ReverseGeocodeJob implements JobRequestHandler<ReverseGeocodeJobRequest> {
     private static final Logger logger = LoggerFactory.getLogger(ReverseGeocodeJob.class);
 
     @Value("${reverse_geocode.batch_size}")
@@ -32,7 +34,7 @@ public class ReverseGeocodeJob {
     @Autowired
     private PhotonRepository photonRepository;
 
-    @Recurring(id = "reverse-geocode-job", cron = "0 0 * * *")
+    @Recurring(id = ReverseGeocodeJobRequest.id, cron = "0 0 * * *")
     @Job(name = "Reverse geocode job", retries = 0)
     public void execute() throws Exception {
         try {
@@ -61,5 +63,10 @@ public class ReverseGeocodeJob {
             ex.printStackTrace();
             throw ex;
         }
+    }
+
+    @Override
+    public void run(ReverseGeocodeJobRequest arg0) throws Exception {
+        execute();
     }
 }
