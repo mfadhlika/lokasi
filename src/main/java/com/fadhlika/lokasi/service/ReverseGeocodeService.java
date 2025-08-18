@@ -57,24 +57,28 @@ public class ReverseGeocodeService {
             logger.debug("start running reverse geocode job");
             Instant start = Instant.now();
 
-            List<Location> locations;
-            do {
-                locations = locationRepository
-                        .findLocations(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-                                Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(batchSize))
-                        .toList();
+            int i = 0;
+            while (true) {
+                Optional<Location> location = locationRepository
+                        .findLocation(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+                                Optional.empty(), Optional.empty(), Optional.of(true));
 
-                for (Location l : locations) {
-                    Coordinate coord = l.getGeometry().getCoordinate();
-                    FeatureCollection geocode = photonRepository.reverseGeocode(coord.y, coord.x);
+                if (location.isEmpty())
+                    break;
 
-                    locationRepository.updateLocationGeocode(l.getId(), geocode);
-                    Thread.sleep(1000);
-                }
-            } while (!locations.isEmpty());
+                Location l = location.get();
+                Coordinate coord = l.getGeometry().getCoordinate();
+                FeatureCollection geocode = photonRepository.reverseGeocode(coord.y, coord.x);
+
+                locationRepository.updateLocationGeocode(l.getId(), geocode);
+
+                i++;
+
+                Thread.sleep(1000);
+            }
 
             Duration duration = start.until(Instant.now());
-            logger.info("reverse geocoded {} locations in {}s", locations.size(), duration.getSeconds());
+            logger.info("reverse geocoded {} locations in {}s", i, duration.getSeconds());
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
