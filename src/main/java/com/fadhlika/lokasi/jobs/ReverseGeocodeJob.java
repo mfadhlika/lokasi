@@ -11,8 +11,8 @@ import org.locationtech.jts.geom.Coordinate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.fadhlika.lokasi.dto.FeatureCollection;
 import com.fadhlika.lokasi.model.Location;
@@ -20,8 +20,11 @@ import com.fadhlika.lokasi.repository.LocationRepository;
 import com.fadhlika.lokasi.repository.PhotonRepository;
 
 @Component
-public class ReverseGeocodeRecurringJob {
-    private static final Logger logger = LoggerFactory.getLogger(ReverseGeocodeRecurringJob.class);
+public class ReverseGeocodeJob {
+    private static final Logger logger = LoggerFactory.getLogger(ReverseGeocodeJob.class);
+
+    @Value("${reverse_geocode.batch_size}")
+    private int batchSize;
 
     @Autowired
     private LocationRepository locationRepository;
@@ -31,16 +34,16 @@ public class ReverseGeocodeRecurringJob {
 
     @Recurring(id = "reverse-geocode-job", cron = "0 0 * * *")
     @Job(name = "Reverse geocode job", retries = 0)
-    @Transactional
     public void execute() throws Exception {
         try {
             logger.debug("start running reverse geocode job");
             Instant start = Instant.now();
 
-            for (int i = 0; i < 4; i++) {
-                List<Location> locations = locationRepository
+            List<Location> locations;
+            do {
+                locations = locationRepository
                         .findLocations(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-                                Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(25))
+                                Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(batchSize))
                         .toList();
 
                 for (Location l : locations) {
@@ -50,10 +53,10 @@ public class ReverseGeocodeRecurringJob {
                     locationRepository.updateLocationGeocode(l.getId(), geocode);
                     Thread.sleep(1000);
                 }
+            } while (!locations.isEmpty());
 
-                Duration duration = start.until(Instant.now());
-                logger.info("reverse geocoded {} locations in {}s", locations.size(), duration.getSeconds());
-            }
+            Duration duration = start.until(Instant.now());
+            logger.info("reverse geocoded {} locations in {}s", locations.size(), duration.getSeconds());
         } catch (Exception ex) {
             ex.printStackTrace();
             throw ex;
