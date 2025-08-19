@@ -115,9 +115,6 @@ public class LocationService {
     }
 
     public void reverseGeocode() {
-        if (!reverseGeocodeService.tryLock())
-            throw new ConflictException("reverse geocode job already running");
-
         reverseGeocodeService.startReverseGeocode();
     }
 }

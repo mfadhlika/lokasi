@@ -35,23 +35,15 @@ public class ReverseGeocodeService {
 
     private Lock lock = new ReentrantLock();
 
-    @Scheduled(cron = "0 0 0 * * *")
-    public void scheduledReverseGeocode() {
-        if (lock.tryLock())
-            processReverseGeocode();
-    }
-
-    public boolean tryLock() {
-        return lock.tryLock();
-    }
-
     @Async
     public void startReverseGeocode() {
         processReverseGeocode();
     }
 
+    @Scheduled(cron = "0 0 0 * * *")
     public void processReverseGeocode() {
         try {
+            lock.lock();
 
             logger.debug("start running reverse geocode job");
             Instant start = Instant.now();
