@@ -2,7 +2,6 @@ package com.fadhlika.lokasi.service;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -68,9 +67,13 @@ public class ReverseGeocodeService {
 
                 Location l = location.get();
                 Coordinate coord = l.getGeometry().getCoordinate();
-                FeatureCollection geocode = photonRepository.reverseGeocode(coord.y, coord.x);
+                try {
+                    FeatureCollection geocode = photonRepository.reverseGeocode(coord.y, coord.x, 3);
 
-                locationRepository.updateLocationGeocode(l.getId(), geocode);
+                    locationRepository.updateLocationGeocode(l.getId(), geocode);
+                } catch (Exception ex) {
+                    logger.error("error: {}, skipping...", ex.getMessage());
+                }
 
                 i++;
 
@@ -82,6 +85,7 @@ public class ReverseGeocodeService {
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
+            logger.info("unlocking...");
             lock.unlock();
         }
     }

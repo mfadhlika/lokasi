@@ -38,19 +38,30 @@ public class PhotonRepository {
     }
 
     public FeatureCollection reverseGeocode(double lat, double lon) throws IOException, InterruptedException {
+        return reverseGeocode(lat, lon, 0);
+    }
+
+    public FeatureCollection reverseGeocode(double lat, double lon, int retry)
+            throws IOException, InterruptedException {
         URI uri = URI
                 .create(String.format("%s/reverse?lat=%s&lon=%s", baseUrl, Double.toString(lat), Double.toString(lon)));
         HttpRequest req = HttpRequest.newBuilder(uri).GET().build();
 
         logger.info("requesting {}", uri.toString());
 
-        HttpResponse<InputStream> res = client.send(req, BodyHandlers.ofInputStream());
+        int i = 0;
+        do {
+            i++;
 
-        if (res.statusCode() != HttpStatus.OK.value()) {
+            HttpResponse<InputStream> res = client.send(req, BodyHandlers.ofInputStream());
+            if (res.statusCode() == HttpStatus.OK.value()) {
+                return mapper.readValue(res.body(), FeatureCollection.class);
+            }
+
             String message = new String(res.body().readAllBytes(), StandardCharsets.UTF_8);
-            throw new InternalErrorException(message);
-        }
+            logger.error("error while fetch reverse geocode: {}", message);
+        } while (i <= retry);
 
-        return mapper.readValue(res.body(), FeatureCollection.class);
+        throw new InternalErrorException("");
     }
 }
