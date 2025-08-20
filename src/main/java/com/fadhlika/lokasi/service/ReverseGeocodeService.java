@@ -33,17 +33,14 @@ public class ReverseGeocodeService {
     @Autowired
     private PhotonRepository photonRepository;
 
-    private Lock lock = new ReentrantLock();
-
     @Async
     public void startReverseGeocode() {
         processReverseGeocode();
     }
 
     @Scheduled(cron = "0 0 0 * * *")
-    public void processReverseGeocode() {
+    public synchronized void processReverseGeocode() {
         try {
-            lock.lock();
 
             logger.debug("start running reverse geocode job");
             Instant start = Instant.now();
@@ -76,9 +73,6 @@ public class ReverseGeocodeService {
             logger.info("reverse geocoded {} locations in {}s", i, duration.getSeconds());
         } catch (Exception ex) {
             ex.printStackTrace();
-        } finally {
-            logger.info("unlocking...");
-            lock.unlock();
         }
     }
 }
