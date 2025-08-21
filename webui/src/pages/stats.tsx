@@ -12,6 +12,8 @@ export default function StatsPage() {
     const [stats, setStats] = useState<Stats>({
         totalPoints: 0,
         totalReverseGeocodedPoints: 0,
+        totalCitiesVisited: 0,
+        totalCountriesVisited: 0,
         lastPointTimestamp: undefined
     });
 
@@ -57,6 +59,22 @@ export default function StatsPage() {
                             <CardDescription>Reverse geocoded points</CardDescription>
                             <CardTitle>
                                 <span className="text-xl">{stats.totalReverseGeocodedPoints > 0 ? stats.totalReverseGeocodedPoints : 'No reverse geocoded points'}</span>
+                            </CardTitle>
+                        </CardHeader>
+                    </Card>
+                    <Card className="@container/card px-4">
+                        <CardHeader>
+                            <CardDescription>City visited</CardDescription>
+                            <CardTitle>
+                                <span className="text-xl">{stats.totalCitiesVisited > 0 ? stats.totalCitiesVisited : 'No reverse geocoded points'}</span>
+                            </CardTitle>
+                        </CardHeader>
+                    </Card>
+                    <Card className="@container/card px-4">
+                        <CardHeader>
+                            <CardDescription>Country visited</CardDescription>
+                            <CardTitle>
+                                <span className="text-xl">{stats.totalCountriesVisited > 0 ? stats.totalCountriesVisited : 'No reverse geocoded points'}</span>
                             </CardTitle>
                         </CardHeader>
                     </Card>

@@ -18,6 +18,8 @@ public class StatsRepository {
     private final RowMapper<Stats> rowMapper = (ResultSet rs, int rowNum) -> new Stats(
             rs.getInt("total_points"),
             rs.getInt("total_reverse_geocoded_points"),
+            rs.getInt("total_cities_visited"),
+            rs.getInt("total_countries_visited"),
             ZonedDateTime.parse(rs.getString("last_point_timestamp")));
 
     public Stats getStats(int userId) {
@@ -25,6 +27,8 @@ public class StatsRepository {
                     SELECT
                         COUNT(1) AS total_points,
                         SUM(geocode != jsonb('null')) AS total_reverse_geocoded_points,
+                        COUNT(DISTINCT geocode->'$.features[0].properties.city') AS total_cities_visited,
+                        COUNT(DISTINCT geocode->'$.features[0].properties.country') AS total_countries_visited,
                         MAX(timestamp) AS last_point_timestamp
                     FROM location
                     WHERE user_id = ?
