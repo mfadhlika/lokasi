@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.core.simple.JdbcClient.MappedQuerySpec;
@@ -41,18 +40,13 @@ public class LocationRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(LocationRepository.class);
 
-    private final JdbcClient jdbcClient;
+    @Autowired
+    private JdbcClient jdbcClient;
 
-    private final WKTReader wktReader;
-
-    private ObjectMapper mapper;
+    private final WKTReader wktReader = new WKTReader();
 
     @Autowired
-    public LocationRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcClient = JdbcClient.create(jdbcTemplate);
-        this.wktReader = new WKTReader();
-        this.mapper = new ObjectMapper();
-    }
+    private ObjectMapper mapper;
 
     private final RowMapper<Location> locationRowMapper = new RowMapper<Location>() {
         @Override
@@ -163,7 +157,7 @@ public class LocationRepository {
             Optional<String> order,
             Optional<Boolean> desc,
             Optional<Integer> offset,
-            Optional<Integer> limit) throws SQLException {
+            Optional<Integer> limit) {
         return findLocationsStatementSpecBuilder(userId,
                 start,
                 end,
@@ -183,7 +177,7 @@ public class LocationRepository {
             Optional<String> device,
             Optional<String> order,
             Optional<Boolean> desc,
-            Optional<Boolean> geocoded) throws SQLException {
+            Optional<Boolean> geocoded) {
         return findLocationsStatementSpecBuilder(
                 userId,
                 start,
@@ -197,7 +191,7 @@ public class LocationRepository {
                 geocoded).optional();
     }
 
-    public Location findLocation(int id) throws SQLException {
+    public Location findLocation(int id) {
         return findLocationsStatementSpecBuilder(
                 Optional.empty(),
                 Optional.empty(),
@@ -221,7 +215,7 @@ public class LocationRepository {
             Optional<Integer> offset,
             Optional<Integer> limit,
             Optional<Integer> id,
-            Optional<Boolean> geocoded) throws SQLException {
+            Optional<Boolean> geocoded) {
         List<String> where = new ArrayList<>();
 
         List<Object> args = new ArrayList<Object>();

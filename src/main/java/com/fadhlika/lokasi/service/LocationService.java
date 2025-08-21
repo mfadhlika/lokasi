@@ -88,30 +88,18 @@ public class LocationService {
     public Stream<Location> findLocations(int userId, Optional<ZonedDateTime> start, Optional<ZonedDateTime> end,
             Optional<String> device, Optional<String> order, Optional<Boolean> desc,
             Optional<Integer> offset, Optional<Integer> limit) {
-        try {
-            return locationRepository.findLocations(Optional.of(userId), start, end, device, order, desc, offset,
-                    limit);
-        } catch (SQLException ex) {
-            throw new InternalErrorException(ex.getMessage());
-        }
+        return locationRepository.findLocations(Optional.of(userId), start, end, device, order, desc, offset,
+                limit);
     }
 
     public Optional<Location> findLocation(int userId, Optional<ZonedDateTime> start, Optional<ZonedDateTime> end,
             Optional<String> device, Optional<String> order, Optional<Boolean> desc) {
-        try {
-            return locationRepository.findLocation(Optional.of(userId), start, end, device, order, desc,
-                    Optional.empty());
-        } catch (SQLException ex) {
-            throw new InternalErrorException(ex.getMessage());
-        }
+        return locationRepository.findLocation(Optional.of(userId), start, end, device, order, desc,
+                Optional.empty());
     }
 
     public Location findLocation(int id) {
-        try {
-            return locationRepository.findLocation(id);
-        } catch (SQLException ex) {
-            throw new InternalErrorException(ex.getMessage());
-        }
+        return locationRepository.findLocation(id);
     }
 
     public void reverseGeocode() {
