@@ -254,9 +254,9 @@ public class LocationRepository {
 
         geocoded.ifPresent((v) -> {
             if (v)
-                where.add("geocode IS NOT NULL");
+                where.add("geocode != jsonb('null')");
             else
-                where.add("geocode IS NULL");
+                where.add("geocode = jsonb('null')");
         });
 
         StringBuilder sqlBuilder = new StringBuilder("""

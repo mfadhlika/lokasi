@@ -49,7 +49,7 @@ public class ReverseGeocodeService {
             while (true) {
                 Optional<Location> location = locationRepository
                         .findLocation(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-                                Optional.empty(), Optional.empty(), Optional.of(true));
+                                Optional.empty(), Optional.empty(), Optional.of(false));
 
                 if (location.isEmpty())
                     break;
