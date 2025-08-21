@@ -1,6 +1,6 @@
 import axios from "axios";
 import { toast } from "sonner";
-import type { Login } from "@/types/login";
+import type { Login } from "@/types/responses/login";
 import type { Response } from "@/types/response";
 
 let refreshTokenPromise: Promise<string> | null = null;

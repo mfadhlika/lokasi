@@ -4,38 +4,29 @@ import { useNavigate } from "react-router";
 import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Card, CardContent } from "@/components/ui/card";
-import { axiosInstance } from "@/lib/request";
 import type { Response } from "@/types/response";
-import type { Login } from "@/types/login";
-import z from "zod";
 import { useForm } from "react-hook-form";
+import type { Login as LoginRequest } from "@/types/requests/login";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormControl, FormField, FormItem, FormLabel, Form, FormMessage } from "@/components/ui/form";
 import type { AxiosError } from "axios";
-
-const loginFormSchema = z.object({
-    username: z.string(),
-    password: z.string()
-});
+import { loginFormSchema } from "@/types/schema/login";
+import { loginService } from "@/services/login-service";
 
 
 export default function LoginPage() {
     const { userInfo, login } = useAuth();
     const navigate = useNavigate();
 
-    const loginForm = useForm<z.infer<typeof loginFormSchema>>({
+    const loginForm = useForm<LoginRequest>({
         resolver: zodResolver(loginFormSchema),
         defaultValues: {}
     });
 
-    const onSubmit = (values: z.infer<typeof loginFormSchema>) => {
-        axiosInstance.post<Response<Login>>("v1/login", {
-            username: values.username,
-            password: values.password
-        }).then(({ data }) => {
-            login(data.data.accessToken, () => {
-                navigate("/");
-            })
+    const onSubmit = (values: LoginRequest) => {
+        loginService.login(values).then(({ data }) => {
+            login(data.accessToken);
+            navigate("/");
         })
             .catch((err: AxiosError<Response>) => {
                 console.error(err);

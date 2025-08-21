@@ -13,7 +13,30 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  test-webui:
+    name: "Test Web UI"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+
+      - name: Install dependencies
+        working-directory: webui
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        working-directory: webui
+        run: npx playwright install --with-deps
+
+      - name: Run tests
+        working-directory: webui
+        run: npm run test
+
   test-api:
+    name: "Test API"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -32,10 +55,13 @@ jobs:
         run: mvn test
 
   build-webui:
+    name: "Build Web UI"
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+    needs:
+      - test-webui
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -43,11 +69,13 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
 
+      - name: Install dependencies
+        working-directory: webui
+        run: npm ci
+
       - name: Build webui
         working-directory: webui
-        run: |
-          npm install
-          npm run build
+        run: npm run build
 
       - name: Upload production-ready build files
         uses: actions/upload-artifact@v4
@@ -56,6 +84,7 @@ jobs:
           path: ./webui/dist
 
   build:
+    name: "Build Application"
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read

@@ -9,14 +9,14 @@ interface AuthContextType {
         username: string
     } | null | undefined;
     accessToken: string | null | undefined;
-    login: (accessToken: string, callback: () => void) => void;
+    login: (accessToken: string) => void;
     logout: (callback: () => void) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
     userInfo: undefined,
     accessToken: null,
-    login: (_accessToken: string, _callback: () => void) => void {
+    login: (_accessToken: string) => void {
 
     },
     logout: (_callback: () => void) => void {
@@ -27,18 +27,18 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: React.ComponentProps<"div">) => {
     const [accessToken, setAccessToken] = useState<string | null>(localStorage.getItem("accessToken"));
 
-    const login = (accessToken: string, callback: () => void) => {
+    const login = (accessToken: string) => {
         if (!accessToken) return;
         localStorage.setItem("accessToken", accessToken);
         setAccessToken(accessToken);
-        callback();
     };
 
     const logout = (callback: () => void) => {
-        localStorage.removeItem("accessToken");
-        setAccessToken(null);
-        callback();
-        axiosInstance.delete("v1/logout").catch(err => {
+        axiosInstance.delete("v1/logout").then(() => {
+            localStorage.removeItem("accessToken");
+            setAccessToken(null);
+            callback();
+        }).catch(err => {
             console.error(err);
             toast.error("logging out failed", err);
         });
