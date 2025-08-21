@@ -80,7 +80,14 @@ public class Location {
     private ZonedDateTime createdAt;
     private FeatureCollection geocode;
 
-    public Location() {
+    public Location(Geometry point) {
+        this.geometry = point;
+        this.createdAt = ZonedDateTime.now(ZoneOffset.UTC);
+    }
+
+    public Location(double lat, double lon) {
+        GeometryFactory gf = new GeometryFactory();
+        this.geometry = gf.createPoint(new Coordinate(lon, lat));
         this.createdAt = ZonedDateTime.now(ZoneOffset.UTC);
     }
 

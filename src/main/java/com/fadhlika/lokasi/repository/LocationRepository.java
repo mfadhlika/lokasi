@@ -57,7 +57,13 @@ public class LocationRepository {
     private final RowMapper<Location> locationRowMapper = new RowMapper<Location>() {
         @Override
         public Location mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Location location = new Location();
+            Location location;
+            String pointWkt = rs.getString("geometry");
+            try {
+                location = new Location(wktReader.read(pointWkt));
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
             location.setId(rs.getInt("id"));
             location.setDeviceId(rs.getString("device_id"));
             location.setAltitude(rs.getInt("altitude"));
@@ -72,14 +78,6 @@ public class LocationRepository {
             location.setCourseAccuracy(rs.getInt("course_accuracy"));
             location.setCreatedAt(ZonedDateTime.parse(rs.getString("created_at")));
             location.setRawData(rs.getString("raw_data"));
-            String pointWkt = rs.getString("geometry");
-            if (pointWkt != null) {
-                try {
-                    location.setGeometry(wktReader.read(pointWkt));
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
-            }
 
             String motions = rs.getString("motions");
             if (motions != null) {

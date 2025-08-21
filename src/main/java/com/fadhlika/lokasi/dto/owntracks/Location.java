@@ -47,12 +47,11 @@ public record Location(
         @JsonProperty("_id") String id) implements Message {
 
     public com.fadhlika.lokasi.model.Location toLocation(int userId, String deviceId) throws JsonProcessingException {
-        com.fadhlika.lokasi.model.Location l = new com.fadhlika.lokasi.model.Location();
+        com.fadhlika.lokasi.model.Location l = new com.fadhlika.lokasi.model.Location(this.lat(), this.lon());
 
         l.setUserId(userId);
         if (deviceId != null)
             l.setDeviceId(deviceId);
-        l.setGeometry(this.lon(), this.lat());
         if (this.alt() != null)
             l.setAltitude(this.alt());
         if (this.bs() != null)

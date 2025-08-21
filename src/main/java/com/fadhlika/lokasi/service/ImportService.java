@@ -110,9 +110,8 @@ public class ImportService {
         FeatureCollection featureCollection = mapper.readValue(anImport.content(), FeatureCollection.class);
 
         for (Feature feature : featureCollection.features()) {
-            Location l = new Location();
+            Location l = new Location(feature.getGeometry());
 
-            l.setGeometry(feature.getGeometry());
             l.setUserId(anImport.userId());
             l.setImportId(anImport.id());
 

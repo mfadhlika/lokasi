@@ -36,7 +36,7 @@ public class OverlandController {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         List<Location> locations = input.locations().stream().map(feature -> {
-            Location l = new Location();
+            Location l = new Location(feature.getGeometry());
 
             l.setUserId(user.getId());
 
@@ -44,7 +44,6 @@ public class OverlandController {
 
             });
             l.setDeviceId(props.deviceId());
-            l.setGeometry(feature.getGeometry());
             l.setAltitude(props.altitude());
             l.setBatteryState(props.batteryState());
             l.setBattery(props.batteryLevel());
