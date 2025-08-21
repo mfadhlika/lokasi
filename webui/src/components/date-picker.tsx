@@ -85,7 +85,7 @@ export function DatePicker({
                                         todayDate.setHours(23, 59, 59, 59);
                                         const newDate = subDays(todayDate, preset.value);
                                         newDate.setHours(0, 0, 0, 0);
-                                        setDate({
+                                        setTempDate({
                                             from: newDate,
                                             to: todayDate
                                         });
