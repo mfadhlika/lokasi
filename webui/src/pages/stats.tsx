@@ -1,16 +1,18 @@
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { axiosInstance } from "@/lib/request";
 import { type Response } from "@/types/response";
 import { type Stats } from "@/types/stats";
+import { formatDate } from "date-fns";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function StatsPage() {
     const [stats, setStats] = useState<Stats>({
         totalPoints: 0,
-        totalReverseGeocodedPoints: 9
+        totalReverseGeocodedPoints: 0,
+        lastPointTimestamp: undefined
     });
 
     useEffect(() => {
@@ -45,6 +47,9 @@ export default function StatsPage() {
                             <CardTitle>
                                 <span className="text-xl">{stats.totalPoints > 0 ? stats.totalPoints : 'No points'}</span>
                             </CardTitle>
+                            <CardFooter className="pl-0">
+                                <span className="text-sm">{stats.lastPointTimestamp && formatDate(stats.lastPointTimestamp, 'LLL dd, y HH:mm')}</span>
+                            </CardFooter>
                         </CardHeader>
                     </Card>
                     <Card className="@container/card px-4">
