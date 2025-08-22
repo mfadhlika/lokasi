@@ -3,7 +3,6 @@ package com.fadhlika.lokasi.service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,7 @@ public class TourService {
     }
 
     public List<Tour> fetchTours(int userId) {
-        return tourRepository.fetchTours(userId).toList();
+        return tourRepository.fetchTours(userId);
     }
 
     public Tour fetchTour(UUID uuid) {
@@ -37,7 +36,7 @@ public class TourService {
         tourRepository.deleteTour(uuid);
     }
 
-    public Stream<Location> findToursLocations(UUID uuid) {
+    public List<Location> findToursLocations(UUID uuid) {
         Tour tour = tourRepository.fetchTour(uuid);
 
         return locationService.findLocations(tour.userId(), Optional.of(tour.from()),

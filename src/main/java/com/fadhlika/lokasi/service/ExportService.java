@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.fadhlika.lokasi.dto.Feature;
 import com.fadhlika.lokasi.dto.FeatureCollection;
@@ -63,7 +62,7 @@ public class ExportService {
 
         try {
             List<Feature> features = locationService.findLocations(export.userId(), export.startAt(), export.endAt())
-                    .map((location) -> {
+                    .stream().map((location) -> {
                         PointProperties props = new PointProperties(
                                 location.getTimestamp(),
                                 location.getAltitude(),

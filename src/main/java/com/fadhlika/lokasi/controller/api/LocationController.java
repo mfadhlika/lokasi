@@ -4,7 +4,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,31 +46,27 @@ public class LocationController {
                         @RequestParam Optional<Integer> limit) {
                 User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-                try (Stream<Location> stream = this.locationService.findLocations(user.getId(), Optional.of(start),
-                                Optional.of(end), device, order, desc, offset, limit)) {
-                        List<Feature> features = stream.map(curr -> {
-                                PointProperties props = new PointProperties(
-                                                curr.getTimestamp(),
-                                                curr.getAltitude(),
-                                                curr.getSpeed(),
-                                                curr.getCourse(),
-                                                curr.getCourseAccuracy(),
-                                                curr.getAccuracy(),
-                                                curr.getVerticalAccuracy(),
-                                                curr.getMotions(),
-                                                curr.getBatteryState().toString(),
-                                                curr.getBattery(),
-                                                curr.getDeviceId(),
-                                                curr.getSsid(),
-                                                curr.getGeocode(),
-                                                curr.getRawData());
-                                return new Feature(curr.getGeometry(), props);
-                        }).toList();
+                List<Feature> features = this.locationService.findLocations(user.getId(), Optional.of(start),
+                                Optional.of(end), device, order, desc, offset, limit).stream().map(curr -> {
+                                        PointProperties props = new PointProperties(
+                                                        curr.getTimestamp(),
+                                                        curr.getAltitude(),
+                                                        curr.getSpeed(),
+                                                        curr.getCourse(),
+                                                        curr.getCourseAccuracy(),
+                                                        curr.getAccuracy(),
+                                                        curr.getVerticalAccuracy(),
+                                                        curr.getMotions(),
+                                                        curr.getBatteryState().toString(),
+                                                        curr.getBattery(),
+                                                        curr.getDeviceId(),
+                                                        curr.getSsid(),
+                                                        curr.getGeocode(),
+                                                        curr.getRawData());
+                                        return new Feature(curr.getGeometry(), props);
+                                }).toList();
 
-                        return new Response<>(new FeatureCollection(features));
-                } catch (Exception ex) {
-                        throw ex;
-                }
+                return new Response<>(new FeatureCollection(features));
         }
 
         @GetMapping("/last")

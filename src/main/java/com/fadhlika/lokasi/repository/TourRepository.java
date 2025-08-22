@@ -2,6 +2,7 @@ package com.fadhlika.lokasi.repository;
 
 import java.sql.ResultSet;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -40,12 +41,12 @@ public class TourRepository {
                 .update();
     }
 
-    public Stream<Tour> fetchTours(int userId) {
+    public List<Tour> fetchTours(int userId) {
         return jdbcClient
                 .sql("SELECT * FROM owntracks_tour WHERE user_id = ?")
                 .param(userId)
                 .query(rowMapper)
-                .stream();
+                .list();
     }
 
     public Tour fetchTour(UUID uuid) {
