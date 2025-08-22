@@ -26,9 +26,9 @@ describe('login page', async () => {
             navigate: vi.fn()
         }))
 
-        vi.mock('@/services/login-service', async () => {
+        vi.mock('@/services/auth-service', async () => {
             return {
-                loginService: {
+                authService: {
                     login: mocks.login
                 }
             };

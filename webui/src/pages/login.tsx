@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FormControl, FormField, FormItem, FormLabel, Form, FormMessage } from "@/components/ui/form";
 import type { AxiosError } from "axios";
 import { loginFormSchema } from "@/types/schema/login";
-import { loginService } from "@/services/login-service";
+import { authService } from "@/services/auth-service";
 
 
 export default function LoginPage() {
@@ -24,7 +24,7 @@ export default function LoginPage() {
     });
 
     const onSubmit = (values: LoginRequest) => {
-        loginService.login(values).then(({ data }) => {
+        authService.login(values).then(({ data }) => {
             login(data.accessToken);
             navigate("/");
         })
