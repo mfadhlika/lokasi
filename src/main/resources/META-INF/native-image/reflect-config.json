@@ -84,37 +84,13 @@
         "allDeclaredMethods": true
     },
     {
-        "name": "com.fadhlika.lokasi.service.ExportJobRequestHandler",
+        "name": "com.fadhlika.lokasi.dto.owntracks.Request",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
     },
     {
-        "name": "com.fadhlika.lokasi.dto.jobs.ExportLocationJobRequest",
-        "allDeclaredConstructors": true,
-        "allDeclaredFields": true,
-        "allDeclaredMethods": true
-    },
-    {
-        "name": "com.fadhlika.lokasi.service.ImportJobRequestHandler",
-        "allDeclaredConstructors": true,
-        "allDeclaredFields": true,
-        "allDeclaredMethods": true
-    },
-    {
-        "name": "com.fadhlika.lokasi.dto.jobs.ImportLocationJobRequest",
-        "allDeclaredConstructors": true,
-        "allDeclaredFields": true,
-        "allDeclaredMethods": true
-    },
-    {
-        "name": "com.fadhlika.lokasi.service.ReverseGeocodeJob",
-        "allDeclaredConstructors": true,
-        "allDeclaredFields": true,
-        "allDeclaredMethods": true
-    },
-    {
-        "name": "com.fadhlika.lokasi.dto.jobs.ReverseGeocodeJobRequest",
+        "name": "com.fadhlika.lokasi.dto.owntracks.Tour",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true

@@ -80,6 +80,7 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/login").permitAll()
                                                 .requestMatchers("/api/v1/auth/refresh").permitAll()
                                                 .requestMatchers("/api/v1/logout").permitAll()
+                                                .requestMatchers("/api/v1/tours/**").permitAll()
                                                 .requestMatchers("/api/v1/**").authenticated())
                                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                                 .addFilterBefore(securityFilterException, JwtAuthFilter.class);

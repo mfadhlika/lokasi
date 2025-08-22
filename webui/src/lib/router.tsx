@@ -8,11 +8,16 @@ import TripsPage from "@/pages/trips";
 import ImportPage from "@/pages/import";
 import ExportPage from "@/pages/export";
 import StatsPage from "@/pages/stats";
+import ToursPage from "@/pages/tours";
 
 const router = createBrowserRouter([
     {
         path: "/login",
         element: <LoginPage />
+    },
+    {
+        path: "/tours/:uuid",
+        element: <ToursPage />
     },
     {
         path: "/",

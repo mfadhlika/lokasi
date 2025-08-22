@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -30,6 +31,7 @@ import com.fadhlika.lokasi.dto.FeatureCollection;
 import com.fadhlika.lokasi.exception.ConflictException;
 import com.fadhlika.lokasi.exception.InternalErrorException;
 import com.fadhlika.lokasi.model.Location;
+import com.fadhlika.lokasi.model.Tour;
 import com.fadhlika.lokasi.repository.LocationRepository;
 import com.fadhlika.lokasi.repository.PhotonRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -48,9 +50,6 @@ public class LocationService {
 
     @Autowired
     private LocationRepository locationRepository;
-
-    @Autowired
-    private PhotonRepository photonRepository;
 
     @Autowired
     private ReverseGeocodeService reverseGeocodeService;
