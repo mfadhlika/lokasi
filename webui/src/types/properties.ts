@@ -1,4 +1,4 @@
-import type { FeatureCollection } from "geojson";
+import type { FeatureCollection, Point } from "geojson";
 
 type PointProperties = {
     timestamp: string,
@@ -14,7 +14,7 @@ type PointProperties = {
     deviceId: string,
     ssid?: string,
     rawData: string,
-    geocode?: FeatureCollection
+    geocode?: FeatureCollection<Point, GeocodeProperties>
 };
 
 type LineStringProperties = {
@@ -31,6 +31,17 @@ type TripProperties = {
     title: string,
     startAt: string,
     endAt: string
+}
+
+type GeocodeProperties = {
+    postcode: string,
+    name: string,
+    country: string,
+    city: string,
+    district: string,
+    locality: string,
+    street: string,
+    state: string
 }
 
 export type { PointProperties, LineStringProperties, TripProperties };

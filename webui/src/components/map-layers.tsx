@@ -70,6 +70,7 @@ type Visit = {
     endAt: Date,
     mode?: string[],
     distance?: number
+    address?: string
 }
 
 type Props = {
@@ -103,12 +104,24 @@ export function MapLayers({ locations, showLines, showPoints, showMovingPoints, 
             const endAt = Date.parse(cur.properties.timestamp);
 
             if (prevVisit.name === cur.properties.geocode?.features[0].properties?.name) prevVisit.endAt = new Date(cur.properties.timestamp);
-            else if ((cur.properties.speed ?? 0) === 0) props.visits.push({
-                name: cur.properties.geocode?.features[0].properties?.name,
-                coordinates: L.GeoJSON.coordsToLatLng(cur.geometry.coordinates as [number, number]),
-                startAt: new Date(cur.properties.timestamp),
-                endAt: new Date(cur.properties.timestamp)
-            });
+            else if ((cur.properties.speed ?? 0) === 0) {
+                const geocodeProps = cur.properties.geocode?.features[0].properties;
+
+                let address = '';
+                if (geocodeProps?.street) address += geocodeProps?.street + ','
+                if (geocodeProps?.district) address += geocodeProps?.district + ','
+                if (geocodeProps?.city) address += geocodeProps?.city + ','
+                if (geocodeProps?.country) address += geocodeProps?.country + ' '
+                if (geocodeProps?.postcode) address += geocodeProps?.postcode
+
+                props.visits.push({
+                    name: geocodeProps?.name ?? geocodeProps?.locality,
+                    coordinates: L.GeoJSON.coordsToLatLng(cur.geometry.coordinates as [number, number]),
+                    startAt: new Date(cur.properties.timestamp),
+                    endAt: new Date(cur.properties.timestamp),
+                    address
+                });
+            }
 
             const duration = (endAt - startAt) / 1000;
             if (duration > 60 * 15) {
@@ -148,17 +161,18 @@ export function MapLayers({ locations, showLines, showPoints, showMovingPoints, 
     }, [locations]);
 
     return (<>
-        {showVisits && <MapControl position={isMobile ? "topleft" : "topright"} disableClickPropagation={true} disableScrollPropagation={true}>
-            <div className="leaflet-touch bg-sidebar rounded-xl border border-gray-300 w-[calc(100vw-20px)] md:w-auto max-w-[calc(100vw-20px)] max-h-[25vh] md:max-h-[calc(100vh-2rem)] overflow-y-auto flex flex-col p-4 gap-4">
+        {showVisits && <MapControl position={isMobile ? "bottomleft" : "topleft"} disableClickPropagation={true} disableScrollPropagation={true}>
+            <div className="leaflet-touch bg-sidebar rounded-xl border border-gray-300 w-[calc(100vw-20px)] md:w-[20vw] max-h-[25vh] md:max-h-[calc(90vh)] overflow-y-auto flex flex-col p-4 gap-4">
                 {visits.map((cur) => (
                     <div key={`${cur.name}-${cur.startAt.getTime()}`}
                         className="flex flex-col gap-1 cursor-pointer"
                         onClick={() => map.setView(cur.coordinates)}>
                         <div className="inline-flex gap-2 items-center"><span className="font-semibold">{cur.name ?? '?'}</span>{cur.mode?.includes('automotive') && <Car className="size-4" />}</div>
-                        <div>
-                            {cur.distance && <span>{cur.distance.toFixed(2)} km · </span>}
+                        {cur.name === 'Moving' && <div>
+                            <span>{cur.distance?.toFixed(2)} km · </span>
                             <span>{formatDistanceStrict(cur.endAt, cur.startAt)}</span>
-                        </div>
+                        </div>}
+                        {cur.address && <span>{cur.address}</span>}
                         <span>{cur.startAt.toLocaleTimeString()} - {cur.endAt.toLocaleTimeString()}</span>
                     </div>
                 ))}
