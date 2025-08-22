@@ -32,10 +32,10 @@ export default function TripsPage() {
             </Header>
             <div className="flex-1 grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
                 {
-                    trips.features.map((feature, index) => {
-                        const props = feature.properties as TripProperties;
+                    trips.features.map((trip, index) => {
+                        const props = trip.properties as TripProperties;
                         return (
-                            <Card key={index} className="aspect-square">
+                            <Card key={index} className="h-min">
                                 <CardHeader>
                                     <CardTitle>{props.title}</CardTitle>
                                     <CardDescription>
@@ -46,7 +46,7 @@ export default function TripsPage() {
                                     </CardAction>
                                 </CardHeader>
                                 <CardContent>
-                                    <PreviewMaps className="min-h-[200px]" locations={feature} />
+                                    <PreviewMaps className="min-h-[200px]" locations={trip} />
                                 </CardContent>
                                 <CardFooter className="flex-col gap-2">
                                     <Button className="w-full" variant="outline" asChild>

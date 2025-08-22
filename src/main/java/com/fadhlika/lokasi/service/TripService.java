@@ -26,17 +26,18 @@ public class TripService {
     public List<Trip> getTrips(int userId) {
         List<Trip> trips = tripRepository.getTrips(userId);
 
-        return trips.stream().map(
-                (trip) -> {
-                    List<Location> locations = locationRepository
-                            .findLocations(Optional.of(userId), Optional.of(trip.startAt()),
-                                    Optional.of(trip.endAt()), Optional.empty(), Optional.empty(),
-                                    Optional.empty(), Optional.empty(), Optional.empty())
-                            .toList();
+        for (int i = 0; i < trips.size(); i++) {
+            Trip trip = trips.get(i);
+            List<Location> locations = locationRepository
+                    .findLocations(Optional.of(userId), Optional.of(trip.startAt()),
+                            Optional.of(trip.endAt()), Optional.empty(), Optional.empty(),
+                            Optional.empty(), Optional.empty(), Optional.empty())
+                    .toList();
 
-                    return new Trip(trip.userId(), trip.title(), trip.startAt(), trip.endAt(), trip.createdAt(),
-                            locations);
-                })
-                .toList();
+            trips.set(i, new Trip(trip.userId(), trip.title(), trip.startAt(), trip.endAt(), trip.createdAt(),
+                    locations));
+        }
+
+        return trips;
     }
 }

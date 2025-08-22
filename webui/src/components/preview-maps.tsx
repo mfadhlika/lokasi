@@ -28,7 +28,7 @@ export function PreviewMaps({ locations, className, zoom }: PreviewMapsProps) {
         const coords = turf.center(locations).geometry.coordinates;
         center = [coords[1], coords[0]];
 
-        const bbox = turf.bbox(locations);
+        const bbox = turf.bbox(locations, { recompute: true });
         bounds = [
             [bbox[1], bbox[0]],
             [bbox[3], bbox[2]],
