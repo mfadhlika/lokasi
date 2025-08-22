@@ -10,7 +10,7 @@ import path from "node:path";
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-    const env = loadEnv(mode, process.cwd(), 'VITE_');
+    const env = loadEnv(mode, path.dirname(process.cwd()), 'VITE_');
 
     return {
         plugins: [react(), tailwindcss()],
