@@ -129,13 +129,15 @@ export function MapLayers({ locations, showLines, showPoints, showMovingPoints, 
             if (prevVisit.name === 'Moving') {
                 prevVisit.endAt = new Date(endAt);
                 prevVisit.mode = prevVisit.mode?.concat(cur.properties.motions)
-            } else props.visits.push({
-                name: 'Moving',
-                coordinates: L.GeoJSON.coordsToLatLng(cur.geometry.coordinates as [number, number]),
-                startAt: new Date(endAt),
-                endAt: new Date(endAt),
-                mode
-            });
+            } else if (((prev.properties.speed ?? 0) !== 0) || ((prev.properties.motions ?? []).includes('automotive'))) {
+                props.visits.push({
+                    name: 'Moving',
+                    coordinates: L.GeoJSON.coordsToLatLng(cur.geometry.coordinates as [number, number]),
+                    startAt: new Date(endAt),
+                    endAt: new Date(endAt),
+                    mode
+                });
+            }
 
             if (i == features.length - 1) props.groupped[props.groupped.length - 1].push(cur);
             return props;
@@ -171,7 +173,7 @@ export function MapLayers({ locations, showLines, showPoints, showMovingPoints, 
                         });
                     }
                 }}>
-                {group.map((feature) => {
+                {group.map((feature, i) => {
                     switch (feature.geometry.type) {
                         case 'LineString': {
                             if (!showLines) return null;
@@ -188,7 +190,10 @@ export function MapLayers({ locations, showLines, showPoints, showMovingPoints, 
                         case 'Point': {
                             if (!showPoints) return null;
                             const props = feature.properties as PointProperties;
-                            if (!showMovingPoints && props.speed && props.speed > 0) return null;
+                            if (!showMovingPoints &&
+                                props.speed &&
+                                props.speed > 0 &&
+                                i > 0 && i < group.length - 1) return null;
                             const position = L.GeoJSON.coordsToLatLng(turf.getCoord(feature as Feature<Point>) as [number, number]);
                             return (
                                 <CircleMarker
