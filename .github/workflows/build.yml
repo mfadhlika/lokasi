@@ -49,7 +49,9 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Spatialite
-        run: sudo apt install libspatialite-dev libsqlite3-mod-spatialite spatialite-bin
+        run: |
+          sudo apt update && \
+          sudo apt install -y libspatialite-dev libsqlite3-mod-spatialite spatialite-bin
 
       - name: Test
         run: mvn test
@@ -138,7 +140,9 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Install Spatialite
-        run: sudo apt install libspatialite-dev libsqlite3-mod-spatialite spatialite-bin
+        run: |
+          sudo apt update && \
+          sudo apt install -y libspatialite-dev libsqlite3-mod-spatialite spatialite-bin
 
       - name: Build
         run: mvn native:compile -Pnative
