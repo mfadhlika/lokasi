@@ -20,7 +20,8 @@ export type DatePickerProps = {
 export function DatePicker({
     date,
     setDate,
-    variant
+    variant,
+    className
 }: DatePickerProps) {
     const [tempDate, setTempDate] = useState<DateRange | undefined>(date);
     const selectDate = (value?: DateRange) => {
@@ -48,7 +49,8 @@ export function DatePicker({
             <PopoverTrigger asChild>
                 <Button id="date" variant={variant ?? "ghost"} className={cn(
                     "w-auto justify-start text-left font-normal",
-                    !tempDate && "text-muted-foreground"
+                    !tempDate && "text-muted-foreground",
+                    className
                 )}>
                     <CalendarIcon />
                     {formatDateRange(date)}

@@ -9,7 +9,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { useAuth } from "@/hooks/use-auth";
 import { Battery, BatteryCharging, BatteryFull, BatteryLow, Car, Clock, Compass, Gauge, TrendingUp, Wifi, Route, Smartphone, PlaneTakeoff, PlaneLanding } from "lucide-react";
 import { useMemo } from "react";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceStrict, formatDistanceToNow } from "date-fns";
 import { MapControl } from "./map-control";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -68,7 +68,8 @@ type Visit = {
     coordinates: L.LatLng,
     startAt: Date,
     endAt: Date,
-    mode?: string[]
+    mode?: string[],
+    distance?: number
 }
 
 type Props = {
@@ -129,12 +130,14 @@ export function MapLayers({ locations, showLines, showPoints, showMovingPoints, 
             if (prevVisit.name === 'Moving') {
                 prevVisit.endAt = new Date(endAt);
                 prevVisit.mode = prevVisit.mode?.concat(cur.properties.motions)
+                prevVisit.distance = (prevVisit.distance ?? 0) + distance;
             } else if (((prev.properties.speed ?? 0) !== 0) || ((prev.properties.motions ?? []).includes('automotive'))) {
                 props.visits.push({
                     name: 'Moving',
                     coordinates: L.GeoJSON.coordsToLatLng(cur.geometry.coordinates as [number, number]),
                     startAt: new Date(endAt),
                     endAt: new Date(endAt),
+                    distance,
                     mode
                 });
             }
@@ -146,12 +149,16 @@ export function MapLayers({ locations, showLines, showPoints, showMovingPoints, 
 
     return (<>
         {showVisits && <MapControl position={isMobile ? "topleft" : "topright"} disableClickPropagation={true} disableScrollPropagation={true}>
-            <div className="leaflet-bar leaflet-touch flex bg-white w-[calc(100vw-20px)] md:w-auto max-w-[calc(100vw-20px)] max-h-[25vh] md:max-h-[calc(100vh-2rem)] overflow-y-auto flex flex-col p-4 gap-2">
+            <div className="leaflet-touch bg-sidebar rounded-xl border border-gray-300 w-[calc(100vw-20px)] md:w-auto max-w-[calc(100vw-20px)] max-h-[25vh] md:max-h-[calc(100vh-2rem)] overflow-y-auto flex flex-col p-4 gap-4">
                 {visits.map((cur) => (
                     <div key={`${cur.name}-${cur.startAt.getTime()}`}
                         className="flex flex-col gap-1 cursor-pointer"
                         onClick={() => map.setView(cur.coordinates)}>
                         <div className="inline-flex gap-2 items-center"><span className="font-semibold">{cur.name ?? '?'}</span>{cur.mode?.includes('automotive') && <Car className="size-4" />}</div>
+                        <div>
+                            {cur.distance && <span>{cur.distance.toFixed(2)} km · </span>}
+                            <span>{formatDistanceStrict(cur.endAt, cur.startAt)}</span>
+                        </div>
                         <span>{cur.startAt.toLocaleTimeString()} - {cur.endAt.toLocaleTimeString()}</span>
                     </div>
                 ))}

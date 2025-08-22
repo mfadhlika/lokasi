@@ -6,10 +6,11 @@ import { useMap } from "react-leaflet";
 type MapControlProps = React.ComponentProps<"div"> & {
     position?: ControlPosition,
     disableClickPropagation?: boolean,
-    disableScrollPropagation?: boolean
+    disableScrollPropagation?: boolean,
+    className?: string
 }
 
-function MapControl({ children, position, disableClickPropagation, disableScrollPropagation }: MapControlProps) {
+function MapControl({ children, position, disableClickPropagation, disableScrollPropagation, className }: MapControlProps) {
     const [container, setContainer] = useState<HTMLElement | null>(null);
     const map = useMap();
 
@@ -17,7 +18,7 @@ function MapControl({ children, position, disableClickPropagation, disableScroll
         const mapControl = new Control({ position });
 
         mapControl.onAdd = () => {
-            const section = DomUtil.create('section');
+            const section = DomUtil.create('section', className);
             if (disableClickPropagation) {
                 DomEvent.disableClickPropagation(section);
             }
@@ -34,7 +35,7 @@ function MapControl({ children, position, disableClickPropagation, disableScroll
         return () => {
             map.removeControl(mapControl);
         };
-    }, [map, position, disableClickPropagation, disableScrollPropagation]);
+    }, [map, position, disableClickPropagation, disableScrollPropagation, className]);
 
     return container ? createPortal(children, container) : null;
 }

@@ -5,7 +5,7 @@ import type { Checked } from "@/types/checked";
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-export type LayerState = {
+export type LayerState = React.ComponentProps<"div"> & {
     showLines: Checked,
     showPoints: Checked,
     showLastKnown: Checked,
@@ -29,7 +29,7 @@ export const useLayerState = create<LayerState>()((
     )
 ));
 
-export const LayerCheckbox = ({ showLines, showPoints, showLastKnown, showMovingPoints, showVisits }: LayerState) => {
+export const LayerCheckbox = ({ showLines, showPoints, showLastKnown, showMovingPoints, showVisits, className }: LayerState) => {
     const setShowPoints = (value: Checked) => useLayerState.setState((state) => ({ ...state, showPoints: value }));
     const setShowLines = (value: Checked) => useLayerState.setState((state) => ({ ...state, showLines: value }));
     const setShowLastKnown = (value: Checked) => useLayerState.setState((state) => ({ ...state, showLastKnown: value }));
@@ -38,7 +38,7 @@ export const LayerCheckbox = ({ showLines, showPoints, showLastKnown, showMoving
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="outline">
+                <Button variant="outline" className={className}>
                     <Layers />
                     Layers
                 </Button>

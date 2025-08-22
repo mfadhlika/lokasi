@@ -13,7 +13,6 @@ import { LayerCheckbox, useLayerState } from "@/components/layer-checkbox";
 import * as turf from "@turf/turf";
 import type { PointProperties } from "@/types/properties";
 import { MapContainer } from 'react-leaflet/MapContainer';
-import { ZoomControl } from 'react-leaflet/ZoomControl';
 import { TileLayer } from 'react-leaflet';
 import { Header } from '@/components/header';
 import { MapControl } from '@/components/map-control';
@@ -80,16 +79,15 @@ export default function MapsPage() {
                 zoom={13}
                 scrollWheelZoom={true}
                 zoomControl={false}>
-                <ZoomControl position="bottomleft" />
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 <MapControl position='topleft' disableClickPropagation={true} disableScrollPropagation={true}>
-                    <Header className='leaflet-bar leaflet-touch flex bg-white max-w-[calc(100vw-20px)]'>
-                        <DatePicker variant="outline" date={date} setDate={handleDate} />
-                        <DeviceSelect className='' selectedDevice={device || "all"} onSelectedDevice={handleDevice} />
-                        <LayerCheckbox {...layerSettings} />
+                    <Header className='leaflet-touch flex bg-sidebar rounded-2xl border border-gray-300 max-w-[calc(100vw-20px)]'>
+                        <DatePicker className='bg-sidebar' variant="outline" date={date} setDate={handleDate} />
+                        <DeviceSelect className='bg-sidebar' selectedDevice={device || "all"} onSelectedDevice={handleDevice} />
+                        <LayerCheckbox className='bg-sidebar' {...layerSettings} />
                     </Header>
                 </MapControl>
                 <MapLayers locations={locations} lastKnowLocation={lastKnownLocation} {...layerSettings} />
