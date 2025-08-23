@@ -4,6 +4,15 @@
 
 Self-hosted location tracking history
 
+## Features
+
+- Track your locations using Owntracks/Overland
+
+### Owntracks specific
+
+- Tours (iOS)
+  - Need to enable remote command, you can do this by export settings, edit `cmd` to `true` in `config.otrc`, then open the config in Owntracks.
+
 ## Screenshots
 
 ![Maps](.github/screenshots/maps.png)
