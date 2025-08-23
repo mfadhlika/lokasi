@@ -9,6 +9,7 @@ public class WebUiConfig implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/{path:\\w+}").setViewName("forward:/");
+        registry.addViewController("/{path:^(?!api)[^.]*$}").setViewName("forward:/index.html");
+        registry.addViewController("/{path:^(?!api).*$}/**/{path:^(?!api)[^.]*$}").setViewName("forward:/index.html");
     }
 }
