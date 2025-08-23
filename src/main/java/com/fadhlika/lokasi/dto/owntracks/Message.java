@@ -16,14 +16,15 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
  */
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "_type")
 @JsonSubTypes({
-                @Type(value = Location.class, name = "location"),
-                @Type(value = Lwt.class, name = "lwt"),
-                @Type(value = Card.class, name = "card"),
-                @Type(value = Cmd.class, name = "cmd"),
-                @Type(value = Transition.class, name = "transition"),
-                @Type(value = Waypoint.class, name = "waypoint"),
-                @Type(value = Waypoints.class, name = "waypoints"),
-                @Type(value = Status.class, name = "status"),
-                @Type(value = Request.class, name = "request") })
+        @Type(value = Location.class, name = "location"),
+        @Type(value = Lwt.class, name = "lwt"),
+        @Type(value = Card.class, name = "card"),
+        @Type(value = Cmd.class, name = "cmd"),
+        @Type(value = Transition.class, name = "transition"),
+        @Type(value = Waypoint.class, name = "waypoint"),
+        @Type(value = Waypoints.class, name = "waypoints"),
+        @Type(value = Status.class, name = "status"),
+        @Type(value = Dump.class, name = "dump"),
+        @Type(value = Request.class, name = "request") })
 public interface Message {
 }
