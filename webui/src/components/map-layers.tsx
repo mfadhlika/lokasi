@@ -87,7 +87,7 @@ export function MapLayers({ locations, showLines, showPoints, showMovingPoints, 
         return locations.features.reduce<Props>((props, cur, i, features) => {
             if (i == 0) {
                 props.visits.push({
-                    name: cur.properties.geocode?.features[0].properties?.name,
+                    name: cur.properties.geocode?.features.at(0)?.properties?.name,
                     coordinates: L.GeoJSON.coordsToLatLng(cur.geometry.coordinates as [number, number]),
                     startAt: new Date(cur.properties.timestamp),
                     endAt: new Date(cur.properties.timestamp)
@@ -103,9 +103,9 @@ export function MapLayers({ locations, showLines, showPoints, showMovingPoints, 
             const startAt = Date.parse(prev.properties.timestamp);
             const endAt = Date.parse(cur.properties.timestamp);
 
-            if (prevVisit.name === cur.properties.geocode?.features[0].properties?.name) prevVisit.endAt = new Date(cur.properties.timestamp);
+            if (prevVisit.name === cur.properties.geocode?.features.at(0)?.properties?.name) prevVisit.endAt = new Date(cur.properties.timestamp);
             else if ((cur.properties.speed ?? 0) === 0) {
-                const geocodeProps = cur.properties.geocode?.features[0].properties;
+                const geocodeProps = cur.properties.geocode?.features.at(0)?.properties;
 
                 let address = '';
                 if (geocodeProps?.street) address += geocodeProps?.street + ','
