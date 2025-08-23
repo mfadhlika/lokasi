@@ -47,7 +47,7 @@ public class DatabaseConfig {
 
         Flyway flyway = Flyway.configure()
                 .dataSource(ds)
-                .locations("classpath:db/migrations")
+                .locations("classpath:db/migration")
                 .baselineVersion("0")
                 .load();
 
