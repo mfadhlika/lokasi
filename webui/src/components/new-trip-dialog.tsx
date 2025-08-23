@@ -22,23 +22,32 @@ import type { PointProperties } from "@/types/properties";
 import type { Response } from "@/types/response";
 import { PreviewMaps } from "./preview-maps";
 import * as turf from "@turf/turf";
+import { isAfter } from "date-fns";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
     title: z.string(),
     startAt: z.coerce.date<Date>(),
-    endAt: z.coerce.date<Date>()
-}).refine((data) => data.endAt > data.startAt, {
+    endAt: z.coerce.date<Date>(),
+    isPublic: z.boolean()
+}).refine((data) => isAfter(data.endAt, data.startAt), {
     path: ['endAt'],
     error: 'End at must be after start at'
 });
 
-export const NewTripDialog = ({ className }: React.ComponentProps<"div">) => {
+export type NewTripDialogProps = React.ComponentProps<"div"> & {
+    onClose?: () => void
+}
+
+export const NewTripDialog = ({ className, onClose }: NewTripDialogProps) => {
     const [open, setOpen] = useState(false);
     const [locations, setLocations] = useState<Feature<MultiLineString>>(turf.multiLineString([]));
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        defaultValues: {},
+        defaultValues: {
+            isPublic: false
+        },
     });
 
     const { formState, watch, } = form;
@@ -65,11 +74,13 @@ export const NewTripDialog = ({ className }: React.ComponentProps<"div">) => {
         axiosInstance.post(`v1/trips`, {
             title: values.title,
             startAt: values.startAt,
-            endAt: values.endAt
+            endAt: values.endAt,
+            isPublic: values.isPublic
         })
             .then(_ => {
                 toast.success("Trip saved successfully");
                 setOpen(false);
+                if (onClose) onClose();
             })
             .catch(err => {
                 toast.error(`Failed to save trip`, err);
@@ -77,7 +88,7 @@ export const NewTripDialog = ({ className }: React.ComponentProps<"div">) => {
     }
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={setOpen} >
             <DialogTrigger asChild>
                 <Button variant="outline" className={cn("shadow-xs", className)}>
                     <Map />
@@ -122,6 +133,18 @@ export const NewTripDialog = ({ className }: React.ComponentProps<"div">) => {
                                             <Input type="datetime-local" ref={field.ref} value={toISOLocal(field.value)} onChange={e => field.onChange(e.target.valueAsDate)} />
                                         </FormControl>
                                         {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
+                                    </FormItem>
+                                )} />
+                            <FormField control={form.control} name="isPublic"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-row items-center gap-2">
+                                        <FormControl>
+                                            <Checkbox
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                            />
+                                        </FormControl>
+                                        <FormLabel>Public</FormLabel>
                                     </FormItem>
                                 )} />
                             <Button type="submit" disabled={formState.isSubmitting}>

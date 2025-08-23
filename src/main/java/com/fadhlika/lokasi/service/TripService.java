@@ -35,8 +35,9 @@ public class TripService {
                             Optional.of(trip.endAt()), Optional.empty(), Optional.empty(),
                             Optional.empty(), Optional.empty(), Optional.empty());
 
-            trips.set(i, new Trip(trip.userId(), trip.title(), trip.startAt(), trip.endAt(), trip.createdAt(),
-                    locations, trip.uuid(), trip.isPublic()));
+            trips.set(i,
+                    new Trip(trip.id(), trip.userId(), trip.title(), trip.startAt(), trip.endAt(), trip.createdAt(),
+                            locations, trip.uuid(), trip.isPublic()));
         }
 
         return trips;
@@ -50,11 +51,16 @@ public class TripService {
                         Optional.of(trip.endAt()), Optional.empty(), Optional.empty(),
                         Optional.empty(), Optional.empty(), Optional.empty());
 
-        return new Trip(trip.userId(), trip.title(), trip.startAt(), trip.endAt(), trip.createdAt(),
+        return new Trip(trip.id(), trip.userId(), trip.title(), trip.startAt(), trip.endAt(), trip.createdAt(),
                 locations, trip.uuid(), trip.isPublic());
     }
 
     public void deleteTrip(UUID uuid) {
+        tripRepository.deleteTrip(uuid);
+    }
+
+    public void deleteTrip(int id) {
+        tripRepository.deleteTrip(id);
 
     }
 }

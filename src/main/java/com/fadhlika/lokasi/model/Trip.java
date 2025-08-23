@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 public record Trip(
+                int id,
                 int userId,
                 String title,
                 ZonedDateTime startAt,
@@ -19,7 +20,7 @@ public record Trip(
                         String title,
                         ZonedDateTime startAt,
                         ZonedDateTime endAt) {
-                this(
+                this(0,
                                 userId,
                                 title,
                                 startAt,
@@ -36,7 +37,7 @@ public record Trip(
                         ZonedDateTime startAt,
                         ZonedDateTime endAt,
                         boolean isPublic) {
-                this(
+                this(0,
                                 userId,
                                 title,
                                 startAt,

@@ -12,6 +12,7 @@ import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.MultiLineString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,16 +36,19 @@ public class TripController {
     private TripService tripService;
 
     @PostMapping
-    public void saveTrip(@RequestBody Trip trip) {
+    public Response<?> saveTrip(@RequestBody Trip trip) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         trip = new Trip(
                 user.getId(),
                 trip.title(),
                 trip.startAt(),
-                trip.endAt());
+                trip.endAt(),
+                trip.isPublic());
 
         tripService.saveTrip(trip);
+
+        return new Response<>("trip saved");
     }
 
     @GetMapping
@@ -81,7 +85,7 @@ public class TripController {
 
             MultiLineString geom = gf.createMultiLineString(lineStrings.toArray(new LineString[0]));
 
-            TripProperties props = new TripProperties(trip.title(), trip.startAt(), trip.endAt());
+            TripProperties props = new TripProperties(trip.id(), trip.title(), trip.startAt(), trip.endAt());
 
             features.add(new Feature(geom, props));
         }
@@ -120,10 +124,17 @@ public class TripController {
 
         MultiLineString geom = gf.createMultiLineString(lineStrings.toArray(new LineString[0]));
 
-        TripProperties props = new TripProperties(trip.title(), trip.startAt(), trip.endAt());
+        TripProperties props = new TripProperties(trip.id(), trip.title(), trip.startAt(), trip.endAt());
 
         features.add(new Feature(geom, props));
 
         return new Response<>(new FeatureCollection(features));
+    }
+
+    @DeleteMapping("/{tripId}")
+    public Response<?> deleteTrip(@PathVariable int tripId) {
+        tripService.deleteTrip(tripId);
+
+        return new Response<>("trip deleted");
     }
 }

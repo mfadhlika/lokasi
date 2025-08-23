@@ -21,17 +21,18 @@ public class TripRepository {
 
     private final RowMapper<Trip> rowMapper = (ResultSet rs, int rowNum) -> {
         UUID uuid = null;
-        if(rs.getString("uuid") != null) 
+        if (rs.getString("uuid") != null)
             uuid = UUID.fromString(rs.getString("uuid"));
         return new Trip(
-            rs.getInt("user_id"),
-            rs.getString("title"),
-            ZonedDateTime.parse(rs.getString("start_at")),
-            ZonedDateTime.parse(rs.getString("end_at")),
-            ZonedDateTime.parse(rs.getString("created_at")),
-            null,
-            uuid,
-            rs.getBoolean("is_public"));
+                rs.getInt("id"),
+                rs.getInt("user_id"),
+                rs.getString("title"),
+                ZonedDateTime.parse(rs.getString("start_at")),
+                ZonedDateTime.parse(rs.getString("end_at")),
+                ZonedDateTime.parse(rs.getString("created_at")),
+                null,
+                uuid,
+                rs.getBoolean("is_public"));
     };
 
     public void saveTrip(Trip trip) {
@@ -83,6 +84,12 @@ public class TripRepository {
     public void deleteTrip(UUID uuid) {
         jdbcClient.sql("DELETE FROM trip WHERE uuid = ?")
                 .param(uuid)
+                .update();
+    }
+
+    public void deleteTrip(int id) {
+        jdbcClient.sql("DELETE FROM trip WHERE id = ?")
+                .param(id)
                 .update();
     }
 }
