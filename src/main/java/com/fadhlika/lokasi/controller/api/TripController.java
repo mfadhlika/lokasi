@@ -3,6 +3,8 @@ package com.fadhlika.lokasi.controller.api;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -11,6 +13,7 @@ import org.locationtech.jts.geom.MultiLineString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,7 +51,7 @@ public class TripController {
     public Response<FeatureCollection> getTrips() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        List<Trip> trips = tripService.getTrips(user.getId());
+        List<Trip> trips = tripService.getTrips(user.getId(), Optional.empty());
 
         List<Feature> features = new ArrayList<>();
         for (Trip trip : trips) {
@@ -82,6 +85,44 @@ public class TripController {
 
             features.add(new Feature(geom, props));
         }
+
+        return new Response<>(new FeatureCollection(features));
+    }
+
+    @GetMapping("/{uuid:^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$}")
+    public Response<FeatureCollection> getTripByUUID(@PathVariable UUID uuid) {
+        Trip trip = tripService.getTrip(uuid);
+
+        List<Feature> features = new ArrayList<>();
+        List<Location> locations = trip.locations();
+
+        GeometryFactory gf = new GeometryFactory();
+        List<LineString> lineStrings = new ArrayList<>();
+        for (int i = 1; i < locations.size(); i++) {
+            Location curr = locations.get(i);
+
+            Location prev = locations.get(i - 1);
+
+            Duration duration = Duration.between(prev.getTimestamp(), curr.getTimestamp());
+
+            if (duration.getSeconds() > 15 * 60) {
+                continue;
+            }
+
+            Coordinate[] twoPoints = {
+                    prev.getGeometry().getCoordinate(),
+                    curr.getGeometry().getCoordinate()
+            };
+
+            GeometryFactory gf1 = new GeometryFactory();
+            lineStrings.add(gf1.createLineString(twoPoints));
+        }
+
+        MultiLineString geom = gf.createMultiLineString(lineStrings.toArray(new LineString[0]));
+
+        TripProperties props = new TripProperties(trip.title(), trip.startAt(), trip.endAt());
+
+        features.add(new Feature(geom, props));
 
         return new Response<>(new FeatureCollection(features));
     }

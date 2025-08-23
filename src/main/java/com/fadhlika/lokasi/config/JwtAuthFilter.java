@@ -81,6 +81,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         return path.startsWith("/api/v1/login")
                 || path.startsWith("/api/v1/logout")
                 || path.startsWith("/api/v1/auth/refresh")
-                || path.startsWith("/api/v1/tours");
+                || path.matches("/api/v1/trips/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$");
     }
 }

@@ -4,8 +4,13 @@
  */
 package com.fadhlika.lokasi.controller.api.owntracks;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,10 +25,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fadhlika.lokasi.dto.owntracks.Message;
-import com.fadhlika.lokasi.model.Tour;
+import com.fadhlika.lokasi.model.Trip;
 import com.fadhlika.lokasi.model.User;
 import com.fadhlika.lokasi.service.LocationService;
-import com.fadhlika.lokasi.service.TourService;
+import com.fadhlika.lokasi.service.TripService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -44,7 +49,7 @@ public class OwntracksController {
     private LocationService locationService;
 
     @Autowired
-    private TourService tourService;
+    private TripService tripService;
 
     @PostMapping
     public ResponseEntity<?> pub(@RequestHeader("X-Limit-D") String deviceId,
@@ -60,27 +65,34 @@ public class OwntracksController {
                 switch (request.request()) {
                     case "tour":
                         logger.info("request tour creation");
-                        Tour tour = this.tourService.createTour(
-                                new Tour(user.getId(), request.tour().label(), request.tour().from(),
-                                        request.tour().to()));
+                        Trip trip = this.tripService.saveTrip(
+                                new Trip(user.getId(), request.tour().label(),
+                                        LocalDateTime
+                                                .parse(request.tour().from(), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                                                .atZone(ZoneOffset.UTC),
+                                        LocalDateTime.parse(request.tour().to(), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                                                .atZone(ZoneOffset.UTC),
+                                        true));
 
                         return ResponseEntity.ok().body(new com.fadhlika.lokasi.dto.owntracks.Cmd("response", 200,
-                                new com.fadhlika.lokasi.dto.owntracks.Tour(tour.label(),
-                                        tour.from(),
-                                        tour.to(), tour.uuid(),
-                                        String.format("%s/view/%s", baseUrl, tour.uuid()))));
+                                new com.fadhlika.lokasi.dto.owntracks.Tour(trip.title(),
+                                        trip.startAt(),
+                                        trip.endAt(), trip.uuid(),
+                                        String.format("%s/trips/%s", baseUrl, trip.uuid()))));
                     case "tours":
                         logger.info("request tours");
-                        List<com.fadhlika.lokasi.dto.owntracks.Tour> tours = this.tourService.fetchTours(user.getId())
+                        List<com.fadhlika.lokasi.dto.owntracks.Tour> tours = this.tripService
+                                .getTrips(user.getId(), Optional.of(true))
                                 .stream()
-                                .map((t) -> new com.fadhlika.lokasi.dto.owntracks.Tour(t.label(),
-                                        t.from(),
-                                        t.to(), t.uuid(), String.format("%s/view/%s", baseUrl, t.uuid())))
+                                .map((t) -> new com.fadhlika.lokasi.dto.owntracks.Tour(t.title(),
+                                        t.startAt(),
+                                        t.endAt(), t.uuid(),
+                                        String.format("%s/trips/%s", baseUrl, t.uuid())))
                                 .toList();
                         return ResponseEntity.ok().body(new com.fadhlika.lokasi.dto.owntracks.Cmd("response", tours));
                     case "untour":
                         logger.info("request tour deletion");
-                        this.tourService.deleteTour(request.uuid());
+                        this.tripService.deleteTrip(request.uuid());
                         break;
                 }
                 break;

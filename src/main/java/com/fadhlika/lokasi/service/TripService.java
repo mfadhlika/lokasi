@@ -2,6 +2,7 @@ package com.fadhlika.lokasi.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,12 +20,13 @@ public class TripService {
     @Autowired
     private LocationRepository locationRepository;
 
-    public void saveTrip(Trip trip) {
+    public Trip saveTrip(Trip trip) {
         tripRepository.saveTrip(trip);
+        return tripRepository.getTrip(trip.uuid());
     }
 
-    public List<Trip> getTrips(int userId) {
-        List<Trip> trips = tripRepository.getTrips(userId);
+    public List<Trip> getTrips(int userId, Optional<Boolean> isPublic) {
+        List<Trip> trips = tripRepository.getTrips(userId, isPublic);
 
         for (int i = 0; i < trips.size(); i++) {
             Trip trip = trips.get(i);
@@ -34,9 +36,25 @@ public class TripService {
                             Optional.empty(), Optional.empty(), Optional.empty());
 
             trips.set(i, new Trip(trip.userId(), trip.title(), trip.startAt(), trip.endAt(), trip.createdAt(),
-                    locations));
+                    locations, trip.uuid(), trip.isPublic()));
         }
 
         return trips;
+    }
+
+    public Trip getTrip(UUID uuid) {
+        Trip trip = tripRepository.getTrip(uuid);
+
+        List<Location> locations = locationRepository
+                .findLocations(Optional.of(trip.userId()), Optional.of(trip.startAt()),
+                        Optional.of(trip.endAt()), Optional.empty(), Optional.empty(),
+                        Optional.empty(), Optional.empty(), Optional.empty());
+
+        return new Trip(trip.userId(), trip.title(), trip.startAt(), trip.endAt(), trip.createdAt(),
+                locations, trip.uuid(), trip.isPublic());
+    }
+
+    public void deleteTrip(UUID uuid) {
+
     }
 }

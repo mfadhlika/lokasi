@@ -8,12 +8,12 @@ import { toast } from "sonner";
 import type { Response } from "@/types/response";
 import * as turf from "@turf/turf";
 
-export default function ToursPage() {
+export default function TripPage() {
     const { uuid } = useParams();
     const [locations, setLocations] = useState<FeatureCollection<Point, PointProperties>>(turf.featureCollection([]));
 
     useEffect(() => {
-        axiosInstance.get<Response<FeatureCollection<Point, PointProperties>>>(`v1/tours/${uuid}`)
+        axiosInstance.get<Response<FeatureCollection<Point, PointProperties>>>(`v1/trips/${uuid}`)
             .then(({ data }) => {
                 setLocations(data.data);
             })
