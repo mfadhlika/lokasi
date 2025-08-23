@@ -5,18 +5,18 @@ import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 public record Tour(
-        UUID uuid,
         String label,
         String from,
         String to,
+        UUID uuid,
         String url) {
     public Tour(
-            UUID uuid,
             String label,
             ZonedDateTime from,
             ZonedDateTime to,
+            UUID uuid,
             String url) {
-        this(uuid, label, from.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                to.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME), url);
+        this(label, from.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                to.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME), uuid, url);
     }
 }

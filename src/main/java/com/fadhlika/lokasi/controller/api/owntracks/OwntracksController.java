@@ -4,7 +4,6 @@
  */
 package com.fadhlika.lokasi.controller.api.owntracks;
 
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +47,8 @@ public class OwntracksController {
     private TourService tourService;
 
     @PostMapping
-    public ResponseEntity<?> pub(@RequestHeader("X-Limit-D") String deviceId, @RequestBody(required = false) Message message)
+    public ResponseEntity<?> pub(@RequestHeader("X-Limit-D") String deviceId,
+            @RequestBody(required = false) Message message)
             throws JsonProcessingException {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -59,31 +59,34 @@ public class OwntracksController {
             case com.fadhlika.lokasi.dto.owntracks.Request request:
                 switch (request.request()) {
                     case "tour":
+                        logger.info("request tour creation");
                         Tour tour = this.tourService.createTour(
                                 new Tour(user.getId(), request.tour().label(), request.tour().from(),
                                         request.tour().to()));
-                        return ResponseEntity.ok()
-                                .body(new com.fadhlika.lokasi.dto.owntracks.Cmd("response", 200,
-                                        new com.fadhlika.lokasi.dto.owntracks.Tour(tour.uuid(), tour.label(),
-                                                tour.from(),
-                                                tour.to(), String.format("%s/tours/%s", baseUrl, tour.uuid()))));
 
+                        return ResponseEntity.ok().body(new com.fadhlika.lokasi.dto.owntracks.Cmd("response", 200,
+                                new com.fadhlika.lokasi.dto.owntracks.Tour(tour.label(),
+                                        tour.from(),
+                                        tour.to(), tour.uuid(),
+                                        String.format("%s/view/%s", baseUrl, tour.uuid()))));
                     case "tours":
+                        logger.info("request tours");
                         List<com.fadhlika.lokasi.dto.owntracks.Tour> tours = this.tourService.fetchTours(user.getId())
                                 .stream()
-                                .map((t) -> new com.fadhlika.lokasi.dto.owntracks.Tour(t.uuid(), t.label(),
+                                .map((t) -> new com.fadhlika.lokasi.dto.owntracks.Tour(t.label(),
                                         t.from(),
-                                        t.to(), String.format("%s/tours/%s", baseUrl, t.uuid())))
+                                        t.to(), t.uuid(), String.format("%s/view/%s", baseUrl, t.uuid())))
                                 .toList();
-
-                        return ResponseEntity.ok()
-                                .body(new com.fadhlika.lokasi.dto.owntracks.Cmd("response", 200, tours));
+                        return ResponseEntity.ok().body(new com.fadhlika.lokasi.dto.owntracks.Cmd("response", tours));
                     case "untour":
+                        logger.info("request tour deletion");
                         this.tourService.deleteTour(request.uuid());
+                        break;
                 }
+                break;
             default:
                 ObjectMapper mapper = new ObjectMapper();
-                logger.info(mapper.writeValueAsString(message));
+                logger.info("received unhandled message: {}", mapper.writeValueAsString(message));
                 break;
         }
 

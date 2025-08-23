@@ -5,23 +5,24 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 public record Cmd(
+                String _type,
                 String action,
                 @JsonInclude(JsonInclude.Include.NON_NULL) String request,
                 @JsonInclude(JsonInclude.Include.NON_NULL) Integer status,
                 @JsonInclude(JsonInclude.Include.NON_NULL) Tour tour,
-                @JsonInclude(JsonInclude.Include.NON_NULL) List<Tour> tours) {
+                @JsonInclude(JsonInclude.Include.NON_NULL) List<Tour> tours,
+                @JsonInclude(JsonInclude.Include.NON_NULL) Integer ntours) implements Message {
         public Cmd(
                         String action,
-                        Integer status,
                         List<Tour> tours) {
-                this(action, "tours", status, null, tours);
+                this("cmd", action, "tours", null, null, tours, tours.size());
         }
 
         public Cmd(
                         String action,
                         Integer status,
                         Tour tour) {
-                this(action, "tour", status, tour, null);
+                this("cmd", action, "tour", status, tour, null, null);
         }
 
 }
