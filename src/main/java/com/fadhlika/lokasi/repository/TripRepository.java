@@ -19,15 +19,20 @@ public class TripRepository {
     @Autowired
     private JdbcClient jdbcClient;
 
-    private final RowMapper<Trip> rowMapper = (ResultSet rs, int rowNum) -> new Trip(
+    private final RowMapper<Trip> rowMapper = (ResultSet rs, int rowNum) -> {
+        UUID uuid = null;
+        if(rs.getString("uuid") != null) 
+            uuid = UUID.fromString(rs.getString("uuid"));
+        return new Trip(
             rs.getInt("user_id"),
             rs.getString("title"),
             ZonedDateTime.parse(rs.getString("start_at")),
             ZonedDateTime.parse(rs.getString("end_at")),
             ZonedDateTime.parse(rs.getString("created_at")),
             null,
-            UUID.fromString(rs.getString("uuid")),
+            uuid,
             rs.getBoolean("is_public"));
+    };
 
     public void saveTrip(Trip trip) {
         jdbcClient
