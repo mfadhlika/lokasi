@@ -45,6 +45,51 @@ public class OwntracksControllerIntegrationTest {
   }
 
   @Test
+  public void createTour() throws Exception {
+    mvc.perform(post("/api/owntracks")
+        .header("Authorization", "Basic b3dudHJhY2tzOm93bnRyYWNrcw==")
+        .header("X-Limit-D", "tes-device")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+            {
+              "_type": "request",
+              "request": "tour",
+              "tour": {
+                "label": "Meeting with C. in Essen",
+                "from": "2022-08-01T05:35:58",
+                "to": "2022-08-02T15:00:58"
+              }
+            }"""))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$._type", equalTo("cmd")))
+        .andExpect(jsonPath("$.action", equalTo("response")))
+        .andExpect(jsonPath("$.request", equalTo("tour")))
+        .andExpect(jsonPath("$.status", equalTo(200)))
+        .andExpect(jsonPath("$.tour.label", equalTo("Meeting with C. in Essen")))
+        .andExpect(jsonPath("$.tour.from", equalTo("2022-08-01T05:35:58")))
+        .andExpect(jsonPath("$.tour.to", equalTo("2022-08-02T15:00:58")));
+
+    mvc.perform(post("/api/owntracks")
+        .header("Authorization", "Basic b3dudHJhY2tzOm93bnRyYWNrcw==")
+        .header("X-Limit-D", "tes-device")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+            {
+              "_type": "request",
+              "request": "tours"
+            }"""))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$._type", equalTo("cmd")))
+        .andExpect(jsonPath("$.action", equalTo("response")))
+        .andExpect(jsonPath("$.request", equalTo("tours")))
+        .andExpect(jsonPath("$.ntours", equalTo(1)))
+        .andExpect(jsonPath("$.tours[0].label", equalTo("Meeting with C. in Essen")))
+        .andExpect(jsonPath("$.tours[0].from", equalTo("2022-08-01T05:35:58")))
+        .andExpect(jsonPath("$.tours[0].to", equalTo("2022-08-02T15:00:58")));
+
+  }
+
+  @Test
   public void publishWaypoint() throws Exception {
     mvc.perform(post("/api/owntracks")
         .header("Authorization", "Basic b3dudHJhY2tzOm93bnRyYWNrcw==")
