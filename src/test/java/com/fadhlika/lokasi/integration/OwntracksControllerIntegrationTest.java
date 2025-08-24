@@ -6,12 +6,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import com.fadhlika.lokasi.LokasiApplication;
+import com.fadhlika.lokasi.config.DatabaseConfigTestContext;
+
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = LokasiApplication.class)
+@ContextConfiguration(classes = DatabaseConfigTestContext.class)
 @AutoConfigureMockMvc
 public class OwntracksControllerIntegrationTest {
   @Autowired

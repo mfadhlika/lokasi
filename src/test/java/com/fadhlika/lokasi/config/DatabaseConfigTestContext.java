@@ -23,15 +23,10 @@ public class DatabaseConfigTestContext {
         SQLiteDataSource sqliteDataSource = new SQLiteDataSource();
         sqliteDataSource.setUrl("jdbc:sqlite::memory:");
         sqliteDataSource.setLoadExtension(true);
-        sqliteDataSource.setJournalMode("WAL");
 
         HikariDataSource ds = new HikariDataSource();
         ds.setDataSource(sqliteDataSource);
         ds.setConnectionInitSql("SELECT load_extension('mod_spatialite')");
-        ds.setMinimumIdle(2);
-        ds.setMaximumPoolSize(10);
-        ds.setIdleTimeout(120000);
-        ds.setLeakDetectionThreshold(300000);
 
         try (Connection conn = ds.getConnection();
                 final PreparedStatement stmt = conn
