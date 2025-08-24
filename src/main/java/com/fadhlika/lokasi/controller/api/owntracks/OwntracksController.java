@@ -4,9 +4,9 @@
  */
 package com.fadhlika.lokasi.controller.api.owntracks;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +25,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fadhlika.lokasi.dto.owntracks.Message;
+import com.fadhlika.lokasi.model.Region;
 import com.fadhlika.lokasi.model.Trip;
 import com.fadhlika.lokasi.model.User;
 import com.fadhlika.lokasi.service.LocationService;
+import com.fadhlika.lokasi.service.RegionService;
 import com.fadhlika.lokasi.service.TripService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,6 +52,9 @@ public class OwntracksController {
 
     @Autowired
     private TripService tripService;
+
+    @Autowired
+    private RegionService regionService;
 
     @PostMapping
     public ResponseEntity<?> pub(@RequestHeader("X-Limit-D") String deviceId,
@@ -95,6 +100,18 @@ public class OwntracksController {
                         this.tripService.deleteTrip(request.uuid());
                         break;
                 }
+                break;
+            case com.fadhlika.lokasi.dto.owntracks.Waypoint waypoint:
+                regionService.createRegion(new Region(
+                        user.getId(),
+                        waypoint.lat(),
+                        waypoint.lon(),
+                        waypoint.rad(),
+                        waypoint.uuid(),
+                        waypoint.major(),
+                        waypoint.minor(),
+                        waypoint.rid(),
+                        Instant.ofEpochSecond(waypoint.tst()).atZone(ZoneOffset.UTC)));
                 break;
             default:
                 ObjectMapper mapper = new ObjectMapper();

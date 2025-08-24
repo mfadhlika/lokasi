@@ -115,11 +115,6 @@ public class Location {
         this.geometry = geometry;
     }
 
-    public void setGeometry(Double latitude, Double longitude) {
-        GeometryFactory gf = new GeometryFactory();
-        this.geometry = gf.createPoint(new Coordinate(latitude, longitude));
-    }
-
     public Geometry getGeometry() {
         return geometry;
     }
