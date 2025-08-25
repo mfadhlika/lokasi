@@ -2,6 +2,7 @@ import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { axiosInstance } from "@/lib/request";
+import { locationService } from "@/services/location-service";
 import { type Response } from "@/types/response";
 import { type Stats } from "@/types/stats";
 import { formatDate } from "date-fns";
@@ -25,8 +26,8 @@ export default function StatsPage() {
     }, []);
 
     const handleStartJob = () => {
-        axiosInstance.post<Response>('v1/locations/reverse')
-            .then(({ data }) => {
+        locationService.reverseGeocode()
+            .then(data => {
                 toast.info(data.message);
             })
             .catch(err => {

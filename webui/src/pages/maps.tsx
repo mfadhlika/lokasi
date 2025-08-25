@@ -1,6 +1,5 @@
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useState } from "react";
-import { axiosInstance } from "@/lib/request.ts";
 import type { DateRange } from "react-day-picker";
 import { DatePicker } from "@/components/date-picker.tsx";
 import { DeviceSelect } from "@/components/device-select.tsx";
@@ -8,7 +7,6 @@ import { MapLayers } from "@/components/map-layers";
 import type { Feature, FeatureCollection, Point } from "geojson";
 import { toast } from "sonner";
 import { useLocationFilter } from "@/hooks/use-location-filter";
-import type { Response } from "@/types/response";
 import { LayerCheckbox, useLayerState } from "@/components/layer-checkbox";
 import * as turf from "@turf/turf";
 import type { PointProperties } from "@/types/properties";
@@ -20,6 +18,7 @@ import { Scan } from 'lucide-react';
 import { Toggle } from '@/components/ui/toggle';
 import type { LatLngBounds } from 'leaflet';
 import { Button } from '@/components/ui/button';
+import { locationService } from '@/services/location-service';
 
 export default function MapsPage() {
     const [locations, setLocations] = useState<FeatureCollection<Point, PointProperties>>(turf.featureCollection([]));
@@ -35,9 +34,14 @@ export default function MapsPage() {
         if (device && device != 'all') params.append('device', device);
         if (bounded && bounds) params.set('bounds', bounds.toBBoxString());
 
-        axiosInstance.get<Response<FeatureCollection<Point, PointProperties>>>(`v1/locations?${params.toString()}`)
+        locationService.fetchLocations({
+            start: date?.from,
+            end: date?.to,
+            device,
+            bounds: bounded ? bounds : undefined
+        })
             .then(({ data }) => {
-                setLocations(data.data);
+                setLocations(data);
             })
             .catch(err => toast.error(`Failed to get user's locations: ${err}`));
     }, [date, device, bounded, bounds]);
@@ -45,9 +49,9 @@ export default function MapsPage() {
     useEffect(() => {
         if (!layerSettings.showLastKnown) return
 
-        axiosInstance.get<Response<Feature<Point, PointProperties>>>('v1/locations/last')
+        locationService.fetchLastLocation()
             .then(({ data }) => {
-                setLastKnownLocation(data.data);
+                setLastKnownLocation(data);
             })
             .catch(err => toast.error(`Failed to get user's lsat known locations: ${err}`));
     }, [layerSettings.showLastKnown]);

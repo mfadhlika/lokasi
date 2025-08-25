@@ -1,5 +1,4 @@
-import { axiosInstance } from "@/lib/request";
-import type { FeatureCollection, Point } from "geojson";
+import type { Point } from "geojson";
 import { useState, useEffect } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/data-table";
@@ -9,11 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/header";
 import { toast } from "sonner";
 import { useLocationFilter } from "@/hooks/use-location-filter";
-import type { Response } from "@/types/response";
 import type { Location } from "@/types/location";
-import type { PointProperties } from "@/types/properties";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { PreviewMaps } from "@/components/preview-maps";
+import { locationService } from "@/services/location-service";
 
 export default function DataPage() {
     const [data, setData] = useState<Location[]>([]);
@@ -25,21 +23,9 @@ export default function DataPage() {
     const limit = filter.limit || 25;
 
     useEffect(() => {
-        const params = new URLSearchParams();
-        params.set('offset', `${offset}`);
-        params.set('limit', `${limit}`);
-        if (date?.from) {
-            params.set('start', date.from.toISOString());
-        }
-        if (date?.to) {
-            params.set('end', date.to.toISOString());
-        }
-        if (device && device !== 'all') {
-            params.set('device', device);
-        }
-        axiosInstance.get<Response<FeatureCollection<Point, PointProperties>>>(`v1/locations?${params.toString()}`)
+        locationService.fetchLocations({ start: date?.from, end: date?.to, device })
             .then(({ data }) => {
-                const newData = data.data.features.map(feature => {
+                const newData = data.features.map(feature => {
                     return {
                         ...feature.properties,
                         coordinates: feature.geometry,

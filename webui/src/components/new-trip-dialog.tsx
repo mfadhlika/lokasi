@@ -17,13 +17,12 @@ import { axiosInstance } from "@/lib/request.ts";
 import { useEffect, useState } from "react";
 import { cn, toISOLocal } from "@/lib/utils";
 import { toast } from "sonner";
-import type { Feature, FeatureCollection, MultiLineString, Point } from "geojson";
-import type { PointProperties } from "@/types/properties";
-import type { Response } from "@/types/response";
+import type { Feature, MultiLineString } from "geojson";
 import { PreviewMaps } from "./preview-maps";
 import * as turf from "@turf/turf";
 import { isAfter } from "date-fns";
 import { Checkbox } from "@/components/ui/checkbox";
+import { locationService } from "@/services/location-service";
 
 const formSchema = z.object({
     title: z.string(),
@@ -63,9 +62,9 @@ export const NewTripDialog = ({ className, onClose }: NewTripDialogProps) => {
         params.set("start", (new Date(startAt)).toISOString());
         params.set("end", (new Date(endAt)).toISOString());
 
-        axiosInstance.get<Response<FeatureCollection<Point, PointProperties>>>(`v1/locations?${params.toString()}`)
+        locationService.fetchLocations({ start: new Date(startAt), end: new Date(endAt) })
             .then(({ data }) => {
-                const coordinates = data.data.features.map(feature => feature.geometry.coordinates);
+                const coordinates = data.features.map(feature => feature.geometry.coordinates);
                 setLocations(turf.multiLineString([coordinates]));
             });
     }, [startAt, endAt]);
