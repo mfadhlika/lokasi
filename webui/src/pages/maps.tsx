@@ -1,5 +1,5 @@
 import 'leaflet/dist/leaflet.css';
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { axiosInstance } from "@/lib/request.ts";
 import type { DateRange } from "react-day-picker";
 import { DatePicker } from "@/components/date-picker.tsx";
@@ -16,26 +16,31 @@ import { MapContainer } from 'react-leaflet/MapContainer';
 import { TileLayer } from 'react-leaflet';
 import { Header } from '@/components/header';
 import { MapControl } from '@/components/map-control';
+import { Scan } from 'lucide-react';
+import { Toggle } from '@/components/ui/toggle';
+import type { LatLngBounds } from 'leaflet';
+import { Button } from '@/components/ui/button';
 
 export default function MapsPage() {
     const [locations, setLocations] = useState<FeatureCollection<Point, PointProperties>>(turf.featureCollection([]));
     const [lastKnownLocation, setLastKnownLocation] = useState<Feature<Point, PointProperties> | undefined>();
-    const [{ date, device }, setFilter] = useLocationFilter();
+    const [{ date, device, bounds }, setFilter] = useLocationFilter();
+    const [bounded, setBounded] = useState<boolean>(bounds != undefined);
     const layerSettings = useLayerState();
-    const mapRef = useRef<L.Map>(null);
 
     useEffect(() => {
         const params = new URLSearchParams();
         if (date?.from) params.set('start', date.from.toJSON());
         if (date?.to) params.set('end', date.to.toJSON());
         if (device && device != 'all') params.append('device', device);
+        if (bounded && bounds) params.set('bounds', bounds.toBBoxString());
 
         axiosInstance.get<Response<FeatureCollection<Point, PointProperties>>>(`v1/locations?${params.toString()}`)
             .then(({ data }) => {
                 setLocations(data.data);
             })
             .catch(err => toast.error(`Failed to get user's locations: ${err}`));
-    }, [date, device]);
+    }, [date, device, bounded, bounds]);
 
     useEffect(() => {
         if (!layerSettings.showLastKnown) return
@@ -47,38 +52,42 @@ export default function MapsPage() {
             .catch(err => toast.error(`Failed to get user's lsat known locations: ${err}`));
     }, [layerSettings.showLastKnown]);
 
-    useEffect(() => {
-        let center;
-        if (locations && locations.features?.length > 0) center = turf.flip(turf.center(locations)).geometry.coordinates as [number, number];
-        else if (lastKnownLocation) center = turf.flip(lastKnownLocation).geometry.coordinates as [number, number];
-
-        if (center) mapRef.current?.setView(center);
-    }, [lastKnownLocation, locations]);
-
-
     const handleDate = (newDate: DateRange | undefined) => {
         setFilter({
+            device,
+            bounds,
             date: newDate,
-            device
         });
     }
 
     const handleDevice = (newDevice: string) => {
         setFilter({
             date,
+            bounds,
             device: newDevice
+        });
+    }
+
+    const handleBounds = (bounds: LatLngBounds) => {
+        if (!bounded) return;
+
+        setFilter({
+            device,
+            date,
+            bounds
         });
     }
 
     return (
         <div className="flex flex-1 flex-col gap-4">
             <MapContainer
-                ref={mapRef}
                 className="size-full"
                 center={[-6.175, 106.8275]}
                 zoom={13}
                 scrollWheelZoom={true}
-                zoomControl={false}>
+                zoomControl={false}
+                bounds={bounds}
+            >
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -87,12 +96,19 @@ export default function MapsPage() {
                     <Header className='leaflet-touch flex bg-sidebar rounded-2xl border border-gray-300 max-w-[calc(100vw-20px)]'>
                         <DatePicker className='bg-sidebar' variant="outline" date={date} setDate={handleDate} />
                         <DeviceSelect className='bg-sidebar' selectedDevice={device || "all"} onSelectedDevice={handleDevice} />
-                        <LayerCheckbox className='bg-sidebar' {...layerSettings} />
+                        <Toggle pressed={bounded} onPressedChange={setBounded} asChild>
+                            <Button className='[[data-state="on"]]:bg-red-100' variant='outline' >
+                                <Scan />Within area
+                            </Button>
+                        </Toggle>
                     </Header>
                 </MapControl>
-                <MapLayers locations={locations} lastKnowLocation={lastKnownLocation} {...layerSettings} />
+                <MapControl position='bottomright'>
+                    <LayerCheckbox className='bg-sidebar' {...layerSettings} />
+                </MapControl>
+                <MapLayers locations={locations} lastKnowLocation={lastKnownLocation} bounded={bounded} onBoundsChange={handleBounds} {...layerSettings} />
             </MapContainer>
-        </div>
+        </div >
     )
 
 }

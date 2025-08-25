@@ -4,11 +4,11 @@ import 'leaflet/dist/leaflet.css';
 import type { LineStringProperties, PointProperties } from "@/types/properties";
 import * as turf from "@turf/turf";
 import type { Checked } from "@/types/checked";
-import L from "leaflet";
+import L, { LatLngBounds, type LatLngBoundsExpression } from "leaflet";
 import { renderToStaticMarkup } from "react-dom/server";
 import { useAuth } from "@/hooks/use-auth";
 import { Battery, BatteryCharging, BatteryFull, BatteryLow, Car, Clock, Compass, Gauge, TrendingUp, Wifi, Route, Smartphone, PlaneTakeoff, PlaneLanding } from "lucide-react";
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { formatDistanceStrict, formatDistanceToNow } from "date-fns";
 import { MapControl } from "./map-control";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -22,6 +22,8 @@ export type MarkersProps = React.ComponentProps<"div"> & {
     showLastKnown?: Checked,
     showMovingPoints?: Checked,
     showVisits?: Checked,
+    bounded: boolean,
+    onBoundsChange: (bounds: LatLngBounds) => void
 }
 
 function MarkerPopup(props: PointProperties) {
@@ -78,10 +80,41 @@ type Props = {
     visits: Visit[]
 }
 
-export function MapLayers({ locations, showLines, showPoints, showMovingPoints, showLastKnown, lastKnowLocation, showVisits }: MarkersProps) {
+export function MapLayers({ locations, showLines, showPoints, showMovingPoints, showLastKnown, lastKnowLocation, showVisits, bounded, onBoundsChange }: MarkersProps) {
     const { userInfo } = useAuth();
-    const map = useMap();
     const isMobile = useIsMobile();
+    const map = useMap();
+
+    const onDragEnd = useCallback(() => {
+        onBoundsChange(map.getBounds());
+    }, [map, onBoundsChange]);
+
+    useEffect(() => {
+        map.on({
+            'dragend': onDragEnd,
+            'zoomend': onDragEnd
+        });
+        return () => {
+            map.off({
+                'dragend': onDragEnd,
+                'zoomend': onDragEnd
+            });
+        }
+    }, [map, onDragEnd]);
+
+    useEffect(() => {
+        try {
+            const bbox = turf.bbox(locations, { recompute: true });
+            const bounds: LatLngBoundsExpression = [
+                [bbox[1], bbox[0]],
+                [bbox[3], bbox[2]],
+            ];
+
+            if (!bounded) map.fitBounds(bounds);
+        } catch {
+            // noop
+        }
+    }, [bounded, locations, map]);
 
     const { groupped, visits } = useMemo(() => {
         return locations.features.reduce<Props>((props, cur, i, features) => {
@@ -161,7 +194,7 @@ export function MapLayers({ locations, showLines, showPoints, showMovingPoints, 
     }, [locations]);
 
     return (<>
-        {showVisits && <MapControl position={isMobile ? "bottomleft" : "topleft"} disableClickPropagation={true} disableScrollPropagation={true}>
+        {showVisits && <MapControl position={isMobile ? "bottomright" : "topleft"} disableClickPropagation={true} disableScrollPropagation={true}>
             <div className="leaflet-touch bg-sidebar rounded-xl border border-gray-300 w-[calc(100vw-20px)] md:w-[20vw] max-h-[25vh] md:max-h-[calc(90vh)] overflow-y-auto flex flex-col p-4 gap-4">
                 {visits.map((cur) => (
                     <div key={`${cur.name}-${cur.startAt.getTime()}`}

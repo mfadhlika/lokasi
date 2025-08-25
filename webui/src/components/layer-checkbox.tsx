@@ -40,10 +40,9 @@ export const LayerCheckbox = ({ showLines, showPoints, showLastKnown, showMoving
             <DropdownMenuTrigger asChild>
                 <Button variant="outline" className={className}>
                     <Layers />
-                    Layers
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
+            <DropdownMenuContent align="end">
                 <DropdownMenuCheckboxItem
                     checked={showLastKnown}
                     onCheckedChange={setShowLastKnown}

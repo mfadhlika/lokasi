@@ -1,3 +1,4 @@
+import { LatLngBounds, type LatLngTuple } from "leaflet";
 import { useMemo } from "react";
 import type { DateRange } from "react-day-picker";
 import { useSearchParams } from "react-router";
@@ -6,7 +7,8 @@ export type Filter = {
     date?: DateRange,
     device?: string,
     offset?: number,
-    limit?: number
+    limit?: number,
+    bounds?: LatLngBounds
 };
 
 export function useLocationFilter(): [Filter, (filter: Filter) => void] {
@@ -30,6 +32,11 @@ export function useLocationFilter(): [Filter, (filter: Filter) => void] {
         const device = searchParams.get('device') ?? undefined;
         const offset = searchParams.get('offset') ? Number(searchParams.get('offset')) : undefined;
         const limit = searchParams.get('limit') ? Number(searchParams.get('limit')) : undefined;
+        const bounds = searchParams.get('bounds')?.split(',').reduce((bbox, v, i) => {
+            if (i % 2 == 0) bbox.push([Number(v)]);
+            else bbox[bbox.length - 1].unshift(Number(v));
+            return bbox;
+        }, [] as number[][]) as LatLngTuple[];
 
         return {
             date: {
@@ -38,7 +45,8 @@ export function useLocationFilter(): [Filter, (filter: Filter) => void] {
             },
             device,
             offset,
-            limit
+            limit,
+            bounds: bounds ? new LatLngBounds(bounds) : undefined
         };
     }, [searchParams])
 
@@ -48,6 +56,7 @@ export function useLocationFilter(): [Filter, (filter: Filter) => void] {
         if (filter.date?.to) params.set("date_to", filter.date.to.toJSON());
         if (filter.device) params.set("device", filter.device);
         if (filter.offset) params.set("offset", filter.offset.toString());
+        if (filter.bounds) params.set("bounds", filter.bounds.toBBoxString());
         setSearchParams(params);
     };
 
