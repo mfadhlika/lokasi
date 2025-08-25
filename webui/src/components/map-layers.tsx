@@ -253,7 +253,10 @@ export function MapLayers({ locations, showLines, showPoints, showMovingPoints, 
                                 <CircleMarker
                                     key={JSON.stringify({ ...position, timestamp: props.timestamp })}
                                     center={position}
-                                    radius={5}>
+                                    radius={5}
+                                    fill={true}
+                                    fillOpacity={1}
+                                    fillColor="white">
                                     <MarkerPopup {...props} />
                                 </CircleMarker>);
                         }
