@@ -4,10 +4,9 @@ import { PreviewMaps } from "@/components/preview-maps";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { axiosInstance } from "@/lib/request";
+import { tripService } from "@/services/trip-service";
 import type { TripProperties } from "@/types/properties";
-import type { Response } from "@/types/response";
-import type { FeatureCollection, Point } from "geojson";
+import type { FeatureCollection } from "geojson";
 import { Map, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
@@ -18,10 +17,9 @@ export default function TripsPage() {
     const [trips, setTrips] = useState<FeatureCollection>({ type: 'FeatureCollection', features: [] });
 
     useEffect(() => {
-        axiosInstance
-            .get<Response<FeatureCollection<Point, TripProperties>>>("v1/trips")
+        tripService.fetchTrips()
             .then(res => {
-                setTrips(res.data.data);
+                setTrips(res.data);
             })
             .catch(err => {
                 toast.error("faled to fetch trips", err);
@@ -29,8 +27,7 @@ export default function TripsPage() {
     }, [count]);
 
     const handleDelete = (id: number) => {
-        axiosInstance
-            .delete<Response<FeatureCollection<Point, TripProperties>>>(`v1/trips/${id}`)
+        tripService.deleteTrip(id)
             .then(() => {
                 setCount((count) => count + 1);
             })

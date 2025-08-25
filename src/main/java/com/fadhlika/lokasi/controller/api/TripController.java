@@ -94,10 +94,9 @@ public class TripController {
     }
 
     @GetMapping("/{uuid:^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$}")
-    public Response<FeatureCollection> getTripByUUID(@PathVariable UUID uuid) {
+    public Response<Feature> getTripByUUID(@PathVariable UUID uuid) {
         Trip trip = tripService.getTrip(uuid);
 
-        List<Feature> features = new ArrayList<>();
         List<Location> locations = trip.locations();
 
         GeometryFactory gf = new GeometryFactory();
@@ -126,9 +125,7 @@ public class TripController {
 
         TripProperties props = new TripProperties(trip.id(), trip.title(), trip.startAt(), trip.endAt());
 
-        features.add(new Feature(geom, props));
-
-        return new Response<>(new FeatureCollection(features));
+        return new Response<>(new Feature(geom, props));
     }
 
     @DeleteMapping("/{tripId}")

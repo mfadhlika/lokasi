@@ -9,30 +9,20 @@ import {
 import { Button } from "@/components/ui/button.tsx";
 import { Loader2Icon, Map } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
-import { z } from "zod/v4";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form.tsx";
-import { axiosInstance } from "@/lib/request.ts";
 import { useEffect, useState } from "react";
 import { cn, toISOLocal } from "@/lib/utils";
 import { toast } from "sonner";
 import type { Feature, MultiLineString } from "geojson";
 import { PreviewMaps } from "./preview-maps";
 import * as turf from "@turf/turf";
-import { isAfter } from "date-fns";
 import { Checkbox } from "@/components/ui/checkbox";
 import { locationService } from "@/services/location-service";
-
-const formSchema = z.object({
-    title: z.string(),
-    startAt: z.coerce.date<Date>(),
-    endAt: z.coerce.date<Date>(),
-    isPublic: z.boolean()
-}).refine((data) => isAfter(data.endAt, data.startAt), {
-    path: ['endAt'],
-    error: 'End at must be after start at'
-});
+import type { Trip } from "@/types/requests/trip";
+import { tripFormSchema } from "@/types/schema/trip";
+import { tripService } from "@/services/trip-service";
 
 export type NewTripDialogProps = React.ComponentProps<"div"> & {
     onClose?: () => void
@@ -42,8 +32,8 @@ export const NewTripDialog = ({ className, onClose }: NewTripDialogProps) => {
     const [open, setOpen] = useState(false);
     const [locations, setLocations] = useState<Feature<MultiLineString>>(turf.multiLineString([]));
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    const form = useForm<Trip>({
+        resolver: zodResolver(tripFormSchema),
         defaultValues: {
             isPublic: false
         },
@@ -69,13 +59,8 @@ export const NewTripDialog = ({ className, onClose }: NewTripDialogProps) => {
             });
     }, [startAt, endAt]);
 
-    const onSubmit = (values: z.infer<typeof formSchema>) => {
-        axiosInstance.post(`v1/trips`, {
-            title: values.title,
-            startAt: values.startAt,
-            endAt: values.endAt,
-            isPublic: values.isPublic
-        })
+    const onSubmit = (values: Trip) => {
+        tripService.createTrip(values)
             .then(_ => {
                 toast.success("Trip saved successfully");
                 setOpen(false);
