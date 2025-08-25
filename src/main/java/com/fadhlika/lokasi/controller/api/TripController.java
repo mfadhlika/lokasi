@@ -85,7 +85,9 @@ public class TripController {
 
             MultiLineString geom = gf.createMultiLineString(lineStrings.toArray(new LineString[0]));
 
-            TripProperties props = new TripProperties(trip.id(), trip.title(), trip.startAt(), trip.endAt());
+            TripProperties props = new TripProperties(trip.id(), trip.title(), trip.startAt(), trip.endAt(),
+                    trip.uuid(),
+                    trip.isPublic());
 
             features.add(new Feature(geom, props));
         }
@@ -123,7 +125,8 @@ public class TripController {
 
         MultiLineString geom = gf.createMultiLineString(lineStrings.toArray(new LineString[0]));
 
-        TripProperties props = new TripProperties(trip.id(), trip.title(), trip.startAt(), trip.endAt());
+        TripProperties props = new TripProperties(trip.id(), trip.title(), trip.startAt(), trip.endAt(), trip.uuid(),
+                trip.isPublic());
 
         return new Response<>(new Feature(geom, props));
     }

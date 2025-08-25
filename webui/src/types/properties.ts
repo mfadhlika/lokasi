@@ -31,7 +31,8 @@ type TripProperties = {
     id: number,
     title: string,
     startAt: string,
-    endAt: string
+    endAt: string,
+    public: boolean
 }
 
 type GeocodeProperties = {
