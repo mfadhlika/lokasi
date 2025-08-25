@@ -40,14 +40,13 @@ export const NewTripDialog = ({ className, onClose, trip, children }: NewTripDia
         },
     });
 
-    const { formState, watch, } = form;
+    const { formState, watch } = form;
 
     const [startAt, endAt] = watch(['startAt', 'endAt']);
 
     useEffect(() => {
-        if (!startAt || !endAt) {
-            return;
-        }
+        if(!open) return;
+        if (!startAt || !endAt) return;
 
         const params = new URLSearchParams();
         params.set("start", (new Date(startAt)).toISOString());
@@ -58,7 +57,7 @@ export const NewTripDialog = ({ className, onClose, trip, children }: NewTripDia
                 const coordinates = data.features.map(feature => feature.geometry.coordinates);
                 setLocations(turf.multiLineString([coordinates]));
             });
-    }, [startAt, endAt]);
+    }, [open, startAt, endAt]);
 
     const onSubmit = (values: Trip) => {
         tripService.createTrip(values)
