@@ -1,5 +1,5 @@
 import type { Feature, FeatureCollection, LineString, Point } from "geojson";
-import { FeatureGroup, CircleMarker, Popup, Polyline, Tooltip, Marker, useMap, } from "react-leaflet";
+import { FeatureGroup, CircleMarker, Popup, Polyline, Tooltip, Marker, useMap } from "react-leaflet";
 import 'leaflet/dist/leaflet.css';
 import type { LineStringProperties, PointProperties } from "@/types/properties";
 import * as turf from "@turf/turf";
@@ -59,7 +59,7 @@ function MarkerTooltip(props: LineStringProperties) {
                 <div className="inline-flex gap-2 items-center"><Gauge className="size-4" />{props.speed?.toFixed(2) ?? 0} {props.speedUnit}</div>
                 <div className="inline-flex gap-2 items-center"><PlaneTakeoff className="size-4" /> {(new Date(props.startAt)).toLocaleString()}</div>
                 <div className="inline-flex gap-2 items-center"><PlaneLanding className="size-4" /> {(new Date(props.endAt)).toLocaleString()}</div>
-                {props.motions && <div><Car className="size-4" /> {props.motions.join(",")}</div>}
+                {props.motions && <div className="inline-flex gap-2 items-center"><Car className="size-4" /> {props.motions.join(",")}</div>}
             </div>
         </Tooltip>
     );
@@ -75,8 +75,8 @@ type Visit = {
     address?: string
 }
 
-type Props = {
-    groupped: Feature[][],
+type Layers = {
+    groupped: { points: Feature<Point, PointProperties>[], lines: Feature<LineString, LineStringProperties>[] }[],
     visits: Visit[]
 }
 
@@ -117,7 +117,7 @@ export function MapLayers({ locations, showLines, showPoints, showMovingPoints, 
     }, [bounded, locations, map]);
 
     const { groupped, visits } = useMemo(() => {
-        return locations.features.reduce<Props>((props, cur, i, features) => {
+        return locations.features.reduce<Layers>((props, cur, i, features) => {
             if (i == 0) {
                 props.visits.push({
                     name: cur.properties.geocode?.features.at(0)?.properties?.name,
@@ -131,7 +131,7 @@ export function MapLayers({ locations, showLines, showPoints, showMovingPoints, 
             const prev = features[i - 1]
             const prevVisit = props.visits[props.visits.length - 1];
 
-            props.groupped[props.groupped.length - 1].push(prev);
+            props.groupped[props.groupped.length - 1].points.push(prev);
 
             const startAt = Date.parse(prev.properties.timestamp);
             const endAt = Date.parse(cur.properties.timestamp);
@@ -158,7 +158,7 @@ export function MapLayers({ locations, showLines, showPoints, showMovingPoints, 
 
             const duration = (endAt - startAt) / 1000;
             if (duration > 60 * 15) {
-                props.groupped.push([]);
+                props.groupped.push({ points: [], lines: [] });
                 return props;
             };
 
@@ -166,12 +166,12 @@ export function MapLayers({ locations, showLines, showPoints, showMovingPoints, 
             const to = turf.point((cur.geometry as Point).coordinates);
             const distance = turf.distance(from, to, { units: "kilometers" });
             const speed = distance / duration / 3600;
-            const mode = (prev.properties.motions ?? []).concat(cur.properties.motions);
+            const motions = [...(new Set((prev.properties.motions ?? []).concat(cur.properties.motions)))];
 
-            props.groupped[props.groupped.length - 1].push(turf.lineString([
+            props.groupped[props.groupped.length - 1].lines.push(turf.lineString([
                 (prev.geometry as Point).coordinates,
                 cur.geometry.coordinates,
-            ], { distance, distanceUnit: "km", speed, speedUnit: "km/h", startAt: new Date(startAt), endAt: new Date(endAt), mode }));
+            ], { distance, distanceUnit: "km", speed, speedUnit: "km/h", startAt: new Date(startAt), endAt: new Date(endAt), motions }));
 
             if (prevVisit.name === 'Moving') {
                 prevVisit.endAt = new Date(endAt);
@@ -184,13 +184,13 @@ export function MapLayers({ locations, showLines, showPoints, showMovingPoints, 
                     startAt: new Date(endAt),
                     endAt: new Date(endAt),
                     distance,
-                    mode
+                    mode: motions
                 });
             }
 
-            if (i == features.length - 1) props.groupped[props.groupped.length - 1].push(cur);
+            if (i == features.length - 1) props.groupped[props.groupped.length - 1].points.push(cur);
             return props;
-        }, { groupped: [[]], visits: [] });
+        }, { groupped: [{ points: [], lines: [] }], visits: [] });
     }, [locations]);
 
     return (<>
@@ -227,40 +227,34 @@ export function MapLayers({ locations, showLines, showPoints, showMovingPoints, 
                         });
                     }
                 }}>
-                {group.map((feature, i) => {
-                    switch (feature.geometry.type) {
-                        case 'LineString': {
-                            if (!showLines) return null;
-                            const props = feature.properties as LineStringProperties;
-                            const position = L.GeoJSON.coordsToLatLngs(turf.getCoords(feature as Feature<LineString>));
-                            return (
-                                <Polyline
-                                    key={JSON.stringify({ ...position, startAt: props.startAt, endAt: props.endAt })}
-                                    positions={position}>
-                                    <MarkerTooltip {...props} />
-                                </Polyline>
-                            );
-                        }
-                        case 'Point': {
-                            if (!showPoints) return null;
-                            const props = feature.properties as PointProperties;
-                            if (!showMovingPoints &&
-                                props.speed &&
-                                props.speed > 0 &&
-                                i > 0 && i < group.length - 1) return null;
-                            const position = L.GeoJSON.coordsToLatLng(turf.getCoord(feature as Feature<Point>) as [number, number]);
-                            return (
-                                <CircleMarker
-                                    key={JSON.stringify({ ...position, timestamp: props.timestamp })}
-                                    center={position}
-                                    radius={5}
-                                    fill={true}
-                                    fillOpacity={1}
-                                    fillColor="white">
-                                    <MarkerPopup {...props} />
-                                </CircleMarker>);
-                        }
-                    }
+                {showLines && group.lines.map((feature) => {
+                    const props = feature.properties;
+                    const position = L.GeoJSON.coordsToLatLngs(turf.getCoords(feature as Feature<LineString>));
+                    return (
+                        <Polyline
+                            key={JSON.stringify({ ...position, startAt: props.startAt, endAt: props.endAt })}
+                            positions={position}>
+                            <MarkerTooltip {...props} />
+                        </Polyline>
+                    );
+                })}
+                {showPoints && group.points.map((feature, i) => {
+                    const props = feature.properties as PointProperties;
+                    if (!showMovingPoints &&
+                        props.speed &&
+                        props.speed > 0 &&
+                        i > 0 && i < group.points.length - 1) return null;
+                    const position = L.GeoJSON.coordsToLatLng(turf.getCoord(feature as Feature<Point>) as [number, number]);
+                    return (
+                        <CircleMarker
+                            key={JSON.stringify({ ...position, timestamp: props.timestamp })}
+                            center={position}
+                            radius={5}
+                            fill={true}
+                            fillOpacity={1}
+                            fillColor="white">
+                            <MarkerPopup {...props} />
+                        </CircleMarker>);
                 })}
             </FeatureGroup>
         )}
