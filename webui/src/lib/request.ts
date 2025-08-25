@@ -2,6 +2,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import type { Login } from "@/types/responses/login";
 import type { Response } from "@/types/response";
+import { redirect } from "react-router";
 
 let refreshTokenPromise: Promise<string> | null = null;
 let logoutPromise: Promise<void> | null = null;
@@ -18,7 +19,7 @@ async function logout() {
     try {
         await axiosInstance.delete("v1/logout");
         localStorage.removeItem("accessToken");
-        location.reload();
+        toast.error("Session expired. Please relogin");
     } catch (err) {
         console.error(err);
         toast.error(`logging out failed: ${err}`);
@@ -73,9 +74,8 @@ axiosInstance.interceptors.response.use(
                     logoutPromise = logout();
 
                 console.error("failed refreshing token", err);
-                toast.error("Session expired. Please relogin");
                 await logout();
-                return Promise.resolve();
+                return redirect("/");
             }
         }
 
