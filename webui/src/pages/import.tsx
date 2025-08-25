@@ -1,4 +1,3 @@
-import { axiosInstance } from "@/lib/request";
 import { useState, useEffect } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/data-table";
@@ -8,16 +7,16 @@ import { Header } from "@/components/header";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
-import type { Response } from "@/types/response";
 import type { Import } from "@/types/import";
+import { importService } from "@/services/import-service";
 
 export default function ImportPage() {
     const [data, setData] = useState<Import[]>([]);
 
     useEffect(() => {
-        axiosInstance.get<Response<Import[]>>(`v1/import`)
+        importService.fetchImports()
             .then(({ data }) => {
-                setData(data.data);
+                setData(data);
             }).catch(err => toast.error(`Failed to get user's import data: ${err}`));
     }, []);
 
@@ -64,13 +63,11 @@ export default function ImportPage() {
                             <Button variant="ghost" onClick={() => {
                                 const importId = row.getValue("id") as number;
                                 const filename = row.getValue("filename") as number;
-                                const promise = axiosInstance.get(`v1/import/${importId}/raw`, {
-                                    responseType: 'blob'
-                                });
+                                const promise = importService.fetchImportRawContent(importId);
                                 toast.promise(promise, {
                                     loading: `downloading import ${importId}`,
-                                    success: (res) => {
-                                        const href = URL.createObjectURL(res.data);
+                                    success: (data) => {
+                                        const href = URL.createObjectURL(data);
                                         return <span>download completed, click <a className="underline" href={href} download={filename}>here</a> to save</span>;
                                     },
                                     error: (err) => `failed to download: ${err}`,
@@ -85,7 +82,7 @@ export default function ImportPage() {
                         <DropdownMenuItem asChild>
                             <Button variant="ghost" onClick={() => {
                                 const importId = row.getValue("id") as number;
-                                const promise = axiosInstance.delete(`v1/import/${importId}`);
+                                const promise = importService.deleteImport(importId);
                                 toast.promise(promise, {
                                     loading: `deleting import ${importId}`,
                                     success: `import ${importId} deleted`,

@@ -9,26 +9,24 @@ import {
 import { Button } from "@/components/ui/button.tsx";
 import { Loader2Icon, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
-import { z } from "zod/v4";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form.tsx";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
-import { axiosInstance } from "@/lib/request.ts";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import type { Import as ImportRequest } from "@/types/requests/import";
+import { importFormSchema } from "@/types/schema/import";
+import { importService } from "@/services/import-service";
 
-const formSchema = z.object({
-    source: z.string(),
-    file: z.instanceof(FileList)
-});
+
 
 export const ImportDialog = ({ className }: React.ComponentProps<"div">) => {
     const [open, setOpen] = useState(false);
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    const form = useForm<ImportRequest>({
+        resolver: zodResolver(importFormSchema),
         defaultValues: {
             source: "dawarich",
         }
@@ -38,16 +36,8 @@ export const ImportDialog = ({ className }: React.ComponentProps<"div">) => {
 
     const fileRef = form.register("file");
 
-    const onSubmit = (values: z.infer<typeof formSchema>) => {
-        const formData = new FormData();
-        formData.set("source", values.source);
-        formData.set("file", values.file.item(0)!);
-
-        axiosInstance.post(`v1/import`, formData, {
-            headers: {
-                "Content-Type": "multipart/form-data"
-            }
-        })
+    const onSubmit = (values: ImportRequest) => {
+        importService.createImport(values)
             .then(_ => {
                 toast.success("File uploaded succesfully");
                 setOpen(false);
