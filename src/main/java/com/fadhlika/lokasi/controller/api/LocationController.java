@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.Geometry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,17 +41,24 @@ public class LocationController {
 
         @GetMapping
         public Response<FeatureCollection> getLocations(
-                        @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atStartOfDay().atZone(ZoneOffset.UTC)}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime start,
-                        @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().atTime(T(java.time.LocalTime).MAX).atZone(ZoneOffset.UTC)}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime end,
+                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Optional<ZonedDateTime> start,
+                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Optional<ZonedDateTime> end,
                         @RequestParam Optional<String> device,
                         @RequestParam Optional<String> order,
                         @RequestParam Optional<Boolean> desc,
                         @RequestParam Optional<Integer> offset,
-                        @RequestParam Optional<Integer> limit) {
+                        @RequestParam Optional<Integer> limit,
+                        @RequestParam Optional<double[]> bounds) {
                 User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-                List<Feature> features = this.locationService.findLocations(user.getId(), Optional.of(start),
-                                Optional.of(end), device, order, desc, offset, limit).stream().map(curr -> {
+                Optional<Geometry> rect = bounds.flatMap((b) -> {
+                        Envelope env = new Envelope(b[0], b[2], b[1], b[3]);
+                        GeometryFactory gf = new GeometryFactory(new PrecisionModel(), 4218);
+                        return Optional.of(gf.toGeometry(env));
+                });
+
+                List<Feature> features = this.locationService.findLocations(user.getId(), start,
+                                end, device, order, desc, offset, limit, rect).stream().map(curr -> {
                                         PointProperties props = new PointProperties(
                                                         curr.getTimestamp(),
                                                         curr.getAltitude(),

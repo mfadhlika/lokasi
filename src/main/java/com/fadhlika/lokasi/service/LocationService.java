@@ -8,6 +8,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.locationtech.jts.geom.Geometry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,19 +62,19 @@ public class LocationService {
 
     public List<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end) {
         return findLocations(userId, Optional.of(start), Optional.of(end), Optional.empty(), Optional.empty(),
-                Optional.empty(), Optional.empty(), Optional.empty());
+                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
     }
 
     public List<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end, Optional<String> device) {
         return findLocations(userId, Optional.of(start), Optional.of(end), device, Optional.empty(), Optional.empty(),
-                Optional.empty(), Optional.empty());
+                Optional.empty(), Optional.empty(), Optional.empty());
     }
 
     public List<Location> findLocations(int userId, Optional<ZonedDateTime> start, Optional<ZonedDateTime> end,
             Optional<String> device, Optional<String> order, Optional<Boolean> desc,
-            Optional<Integer> offset, Optional<Integer> limit) {
+            Optional<Integer> offset, Optional<Integer> limit, Optional<Geometry> bounds) {
         return locationRepository.findLocations(Optional.of(userId), start, end, device, order, desc, offset,
-                limit);
+                limit, bounds);
     }
 
     public Optional<Location> findLocation(int userId, Optional<ZonedDateTime> start, Optional<ZonedDateTime> end,

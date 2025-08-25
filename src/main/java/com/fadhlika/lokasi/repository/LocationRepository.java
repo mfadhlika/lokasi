@@ -15,6 +15,7 @@ import java.util.Optional;
 import com.fadhlika.lokasi.dto.FeatureCollection;
 import com.fadhlika.lokasi.model.Location;
 
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.slf4j.Logger;
@@ -156,7 +157,8 @@ public class LocationRepository {
             Optional<String> order,
             Optional<Boolean> desc,
             Optional<Integer> offset,
-            Optional<Integer> limit) {
+            Optional<Integer> limit,
+            Optional<Geometry> bounds) {
         return findLocationsStatementSpecBuilder(userId,
                 start,
                 end,
@@ -166,7 +168,8 @@ public class LocationRepository {
                 offset,
                 limit,
                 Optional.empty(),
-                Optional.empty()).list();
+                Optional.empty(),
+                bounds).list();
     }
 
     public Optional<Location> findLocation(
@@ -187,7 +190,8 @@ public class LocationRepository {
                 Optional.empty(),
                 Optional.of(1),
                 Optional.empty(),
-                geocoded).optional();
+                geocoded,
+                Optional.empty()).optional();
     }
 
     public Location findLocation(int id) {
@@ -201,6 +205,7 @@ public class LocationRepository {
                 Optional.empty(),
                 Optional.of(1),
                 Optional.of(id),
+                Optional.empty(),
                 Optional.empty()).single();
     }
 
@@ -214,7 +219,8 @@ public class LocationRepository {
             Optional<Integer> offset,
             Optional<Integer> limit,
             Optional<Integer> id,
-            Optional<Boolean> geocoded) {
+            Optional<Boolean> geocoded,
+            Optional<Geometry> bounds) {
         List<String> where = new ArrayList<>();
 
         List<Object> args = new ArrayList<Object>();
@@ -248,6 +254,11 @@ public class LocationRepository {
                 where.add("geocode != jsonb('null')");
             else
                 where.add("geocode = jsonb('null')");
+        });
+
+        bounds.ifPresent((b) -> {
+            where.add("ST_Within(geometry, ST_GeomFromText(?))");
+            args.add(b);
         });
 
         StringBuilder sqlBuilder = new StringBuilder("""

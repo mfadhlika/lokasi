@@ -33,7 +33,7 @@ public class TripService {
             List<Location> locations = locationRepository
                     .findLocations(Optional.of(userId), Optional.of(trip.startAt()),
                             Optional.of(trip.endAt()), Optional.empty(), Optional.empty(),
-                            Optional.empty(), Optional.empty(), Optional.empty());
+                            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
 
             trips.set(i,
                     new Trip(trip.id(), trip.userId(), trip.title(), trip.startAt(), trip.endAt(), trip.createdAt(),
@@ -49,7 +49,7 @@ public class TripService {
         List<Location> locations = locationRepository
                 .findLocations(Optional.of(trip.userId()), Optional.of(trip.startAt()),
                         Optional.of(trip.endAt()), Optional.empty(), Optional.empty(),
-                        Optional.empty(), Optional.empty(), Optional.empty());
+                        Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
 
         return new Trip(trip.id(), trip.userId(), trip.title(), trip.startAt(), trip.endAt(), trip.createdAt(),
                 locations, trip.uuid(), trip.isPublic());
