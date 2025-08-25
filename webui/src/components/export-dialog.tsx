@@ -9,35 +9,28 @@ import {
 import { Button } from "@/components/ui/button.tsx";
 import { Loader2Icon, Map } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
-import { z } from "zod/v4";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form.tsx";
-import { axiosInstance } from "@/lib/request.ts";
 import { useEffect, useState } from "react";
 import { cn, toISOLocal } from "@/lib/utils";
 import { toast } from "sonner";
 import type { Feature, MultiLineString } from "geojson";
-import type { Response } from "@/types/response";
 import { PreviewMaps } from "./preview-maps";
 import * as turf from "@turf/turf";
 import { locationService } from "@/services/location-service";
+import type { Export as ExportRequest } from "@/types/requests/export";
+import { exportFormSchema } from "@/types/schema/export";
+import { exportService } from "@/services/export-service";
 
 
-const formSchema = z.object({
-    startAt: z.coerce.date<Date>(),
-    endAt: z.coerce.date<Date>()
-}).refine((data) => data.endAt > data.startAt, {
-    path: ['endAt'],
-    error: 'End at must be after start at'
-});
 
 export const ExportDialog = ({ className }: React.ComponentProps<"div">) => {
     const [open, setOpen] = useState(false);
     const [locations, setLocations] = useState<Feature<MultiLineString>>(turf.multiLineString([]));
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    const form = useForm<ExportRequest>({
+        resolver: zodResolver(exportFormSchema),
         defaultValues: {
 
         }
@@ -63,12 +56,9 @@ export const ExportDialog = ({ className }: React.ComponentProps<"div">) => {
             });
     }, [startAt, endAt]);
 
-    const onSubmit = (values: z.infer<typeof formSchema>) => {
-        axiosInstance.post<Response>(`v1/export`, {
-            startAt: values.startAt,
-            endAt: values.endAt
-        })
-            .then(({ data }) => {
+    const onSubmit = (values: ExportRequest) => {
+        exportService.createExport(values)
+            .then((data) => {
                 toast.success(data.message)
                 setOpen(false);
             })

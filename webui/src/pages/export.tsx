@@ -1,4 +1,3 @@
-import { axiosInstance } from "@/lib/request";
 import { useState, useEffect } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/data-table";
@@ -7,16 +6,16 @@ import { Header } from "@/components/header";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
-import type { Response } from "@/types/response";
 import type { Export } from "@/types/export";
 import { ExportDialog } from "@/components/export-dialog";
+import { exportService } from "@/services/export-service";
 
 export default function ExportPage() {
     const [data, setData] = useState<Export[]>([]);
 
     useEffect(() => {
-        axiosInstance.get<Response<Export[]>>(`v1/export`)
-            .then(({ data }) => {
+        exportService.fetchExports()
+            .then(data => {
                 setData(data.data);
             }).catch(err => toast.error(`Failed to get user's export data: ${err}`));
     }, []);
@@ -56,13 +55,11 @@ export default function ExportPage() {
                             <Button variant="ghost" onClick={() => {
                                 const exportId = row.getValue("id") as number;
                                 const filename = row.getValue("filename") as number;
-                                const promise = axiosInstance.get(`v1/export/${exportId}/raw`, {
-                                    responseType: 'blob'
-                                });
+                                const promise = exportService.fetchExportRawContent(exportId);
                                 toast.promise(promise, {
                                     loading: `downloading export ${exportId}`,
-                                    success: (res) => {
-                                        const href = URL.createObjectURL(res.data);
+                                    success: (data) => {
+                                        const href = URL.createObjectURL(data);
                                         return <span>download completed, click <a className="underline" href={href} download={filename}>here</a> to save</span>;
                                     },
                                     error: (err) => `failed to download: ${err}`,
@@ -76,7 +73,7 @@ export default function ExportPage() {
                         <DropdownMenuItem asChild>
                             <Button variant="ghost" onClick={() => {
                                 const exportId = row.getValue("id") as number;
-                                const promise = axiosInstance.delete(`v1/export/${exportId}`);
+                                const promise = exportService.deleteExport(exportId);
                                 toast.promise(promise, {
                                     loading: `deleting export ${exportId}`,
                                     success: `export ${exportId} deleted`,
