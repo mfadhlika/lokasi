@@ -1,9 +1,8 @@
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { axiosInstance } from "@/lib/request";
 import { locationService } from "@/services/location-service";
-import { type Response } from "@/types/response";
+import { statsService } from "@/services/stats-service";
 import { type Stats } from "@/types/stats";
 import { formatDate } from "date-fns";
 import { useEffect, useState } from "react";
@@ -19,8 +18,8 @@ export default function StatsPage() {
     });
 
     useEffect(() => {
-        axiosInstance.get<Response<Stats>>(`v1/stats`)
-            .then(({ data }) => setStats(data.data)).catch(err => {
+        statsService.fetchStats()
+            .then(res => setStats(res.data)).catch(err => {
                 toast.error("failed to fetch stats", err);
             });
     }, []);
