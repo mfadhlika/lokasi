@@ -2,12 +2,12 @@ import { axiosInstance } from "@/lib/request";
 import type { TripProperties } from "@/types/properties";
 import type { Trip } from "@/types/requests/trip";
 import { type Response } from "@/types/response";
-import type { Feature, FeatureCollection, Point } from "geojson";
+import type { Feature, FeatureCollection, MultiLineString, Point } from "geojson";
 
 class TripSerice {
-    fetchTrips = async (): Promise<Response<FeatureCollection<Point, TripProperties>>> => {
+    fetchTrips = async (): Promise<Response<FeatureCollection<MultiLineString, TripProperties>>> => {
         return await axiosInstance
-            .get<Response<FeatureCollection<Point, TripProperties>>>("v1/trips")
+            .get<Response<FeatureCollection<MultiLineString, TripProperties>>>("v1/trips")
             .then(res => res.data);
     }
 
@@ -17,7 +17,7 @@ class TripSerice {
             .then(res => res.data);
     }
 
-    createTrip = async (trip: Trip): Promise<Response<Feature<Point, TripProperties>>> => {
+    createTrip = async (trip: Trip): Promise<Response<Feature<MultiLineString, TripProperties>>> => {
         return await axiosInstance
             .post(`v1/trips`, trip)
             .then(res => res.data);

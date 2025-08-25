@@ -5,6 +5,7 @@ export const tripFormSchema = z.object({
     title: z.string(),
     startAt: z.coerce.date<Date>(),
     endAt: z.coerce.date<Date>(),
+    uuid: z.optional(z.uuid()),
     isPublic: z.boolean()
 }).refine((data) => isAfter(data.endAt, data.startAt), {
     path: ['endAt'],

@@ -44,6 +44,7 @@ public class TripController {
                 trip.title(),
                 trip.startAt(),
                 trip.endAt(),
+                trip.uuid(),
                 trip.isPublic());
 
         tripService.saveTrip(trip);

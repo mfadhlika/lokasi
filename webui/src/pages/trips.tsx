@@ -6,15 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { tripService } from "@/services/trip-service";
 import type { TripProperties } from "@/types/properties";
-import type { FeatureCollection } from "geojson";
-import { Map, Trash } from "lucide-react";
+import type { FeatureCollection, MultiLineString } from "geojson";
+import { Globe, Pencil, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { toast } from "sonner";
 
 export default function TripsPage() {
     const [count, setCount] = useState<number>(0);
-    const [trips, setTrips] = useState<FeatureCollection>({ type: 'FeatureCollection', features: [] });
+    const [trips, setTrips] = useState<FeatureCollection<MultiLineString, TripProperties>>({ type: 'FeatureCollection', features: [] });
 
     useEffect(() => {
         tripService.fetchTrips()
@@ -39,33 +39,42 @@ export default function TripsPage() {
     return (
         <>
             <Header>
-                <NewTripDialog onClose={() => setCount((count) => count + 1)} />
+                <NewTripDialog onClose={() => setCount(count => count + 1)} />
             </Header>
             <div className="flex-1 grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
                 {
-                    trips.features.map((trip, index) => {
+                    trips.features.map((trip) => {
                         const props = trip.properties as TripProperties;
                         return (
-                            <Card key={index} className="h-min">
+                            <Card key={trip.properties.uuid} className="h-min">
                                 <CardHeader>
-                                    <CardTitle>{props.title}</CardTitle>
+                                    <CardTitle>
+                                        <Link className="underline decoration-solid" to={encodeURI(`/?date_from=${(new Date(props.startAt).toJSON())}&date_to=${(new Date(props.endAt).toJSON())}`)}>
+                                            {props.title}
+                                        </Link>
+                                    </CardTitle>
                                     <CardDescription>
                                         {(new Date(props.startAt).toLocaleDateString())} - {(new Date(props.endAt)).toLocaleDateString()}
                                     </CardDescription>
-                                    <CardAction>
-
+                                    <CardAction className="text-gray-500">
+                                        {trip.properties.public && <Globe className="size-5" />}
                                     </CardAction>
                                 </CardHeader>
                                 <CardContent>
                                     <PreviewMaps className="min-h-[200px]" locations={trip} />
                                 </CardContent>
-                                <CardFooter className="flex gap-2">
-                                    <Button className="flex-1" variant="outline" asChild>
-                                        <Link to={encodeURI(`/?date_from=${(new Date(props.startAt).toJSON())}&date_to=${(new Date(props.endAt).toJSON())}`)}>
-                                            <Map />
-                                            Maps
-                                        </Link>
-                                    </Button>
+                                <CardFooter className="flex gap-2 justify-end">
+                                    <NewTripDialog
+                                        trip={{
+                                            startAt: new Date(props.startAt),
+                                            endAt: new Date(props.endAt),
+                                            title: props.title,
+                                            uuid: props.uuid,
+                                            isPublic: props.public
+                                        }} onClose={() => setCount(count => count + 1)}>
+                                        <Pencil />
+                                        Edit
+                                    </NewTripDialog>
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
                                             <Button>

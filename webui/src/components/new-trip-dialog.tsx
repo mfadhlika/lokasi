@@ -25,16 +25,17 @@ import { tripFormSchema } from "@/types/schema/trip";
 import { tripService } from "@/services/trip-service";
 
 export type NewTripDialogProps = React.ComponentProps<"div"> & {
-    onClose?: () => void
+    onClose?: () => void,
+    trip?: Trip
 }
 
-export const NewTripDialog = ({ className, onClose }: NewTripDialogProps) => {
+export const NewTripDialog = ({ className, onClose, trip, children }: NewTripDialogProps) => {
     const [open, setOpen] = useState(false);
     const [locations, setLocations] = useState<Feature<MultiLineString>>(turf.multiLineString([]));
 
     const form = useForm<Trip>({
         resolver: zodResolver(tripFormSchema),
-        defaultValues: {
+        defaultValues: trip ?? {
             isPublic: false
         },
     });
@@ -75,8 +76,8 @@ export const NewTripDialog = ({ className, onClose }: NewTripDialogProps) => {
         <Dialog open={open} onOpenChange={setOpen} >
             <DialogTrigger asChild>
                 <Button variant="outline" className={cn("shadow-xs", className)}>
-                    <Map />
-                    New Trip
+                    {children ?? <><Map />
+                        New Trip</>}
                 </Button>
             </DialogTrigger>
             <DialogContent className="z-10000 min-w-[50%]">

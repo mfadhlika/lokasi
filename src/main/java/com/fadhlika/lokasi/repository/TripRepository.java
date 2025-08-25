@@ -37,7 +37,9 @@ public class TripRepository {
 
     public void saveTrip(Trip trip) {
         jdbcClient
-                .sql("INSERT INTO trip(user_id, title, start_at, end_at, created_at, uuid, is_public) VALUES(?, ?, ?, ?, ?, ?, ?)")
+                .sql("""
+                        INSERT OR REPLACE INTO trip(user_id, title, start_at, end_at, created_at, uuid, is_public)
+                        VALUES(?, ?, ?, ?, ?, ?, ?)""")
                 .param(trip.userId())
                 .param(trip.title())
                 .param(trip.startAt())

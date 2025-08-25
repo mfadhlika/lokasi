@@ -36,6 +36,24 @@ public record Trip(
                         String title,
                         ZonedDateTime startAt,
                         ZonedDateTime endAt,
+                        UUID uuid,
+                        boolean isPublic) {
+                this(0,
+                                userId,
+                                title,
+                                startAt,
+                                endAt,
+                                ZonedDateTime.now(),
+                                null,
+                                uuid,
+                                isPublic);
+        }
+
+        public Trip(
+                        int userId,
+                        String title,
+                        ZonedDateTime startAt,
+                        ZonedDateTime endAt,
                         boolean isPublic) {
                 this(0,
                                 userId,

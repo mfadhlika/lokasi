@@ -1,3 +1,4 @@
+import type { UUID } from "crypto";
 import type { FeatureCollection, Point } from "geojson";
 
 type PointProperties = {
@@ -32,6 +33,7 @@ type TripProperties = {
     title: string,
     startAt: string,
     endAt: string,
+    uuid: UUID,
     public: boolean
 }
 
