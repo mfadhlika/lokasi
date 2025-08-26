@@ -17,7 +17,7 @@ import com.fadhlika.lokasi.model.Location;
 
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.WKTReader;
+import org.locationtech.jts.io.WKBReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +43,7 @@ public class LocationRepository {
     @Autowired
     private JdbcClient jdbcClient;
 
-    private final WKTReader wktReader = new WKTReader();
+    private final WKBReader wkbReader = new WKBReader();
 
     @Autowired
     private ObjectMapper mapper;
@@ -52,9 +52,9 @@ public class LocationRepository {
         @Override
         public Location mapRow(ResultSet rs, int rowNum) throws SQLException {
             Location location;
-            String pointWkt = rs.getString("geometry");
+            byte[] point = rs.getBytes("geometry");
             try {
-                location = new Location(wktReader.read(pointWkt));
+                location = new Location(wkbReader.read(point));
             } catch (ParseException e) {
                 throw new RuntimeException(e);
             }
@@ -266,7 +266,7 @@ public class LocationRepository {
                     id,
                     user_id,
                     device_id,
-                    AsText(geometry) AS geometry,
+                    ST_AsBinary(geometry) AS geometry,
                     altitude,
                     course,
                     speed,
