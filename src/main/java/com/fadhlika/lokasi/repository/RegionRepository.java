@@ -1,6 +1,7 @@
 package com.fadhlika.lokasi.repository;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.ResultSet;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -24,31 +25,25 @@ public class RegionRepository {
 
     private final RowMapper<Region> rowMapper = (ResultSet rs, int rowNum) -> {
         FeatureCollection geocode = null;
-        try {
-            geocode = mapper.readValue(rs.getBinaryStream("geocode"), FeatureCollection.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        InputStream geocodeIS = rs.getBinaryStream("geocode");
+        if (geocodeIS != null) {
+            try {
+                geocode = mapper.readValue(geocodeIS, FeatureCollection.class);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
-        return new Region(
-                rs.getInt("id"),
-                rs.getInt("user_id"),
-                rs.getString("desc"),
-                rs.getDouble("lat"),
-                rs.getDouble("lon"),
-                rs.getInt("rad"),
-                rs.getString("beacon_uuid"),
-                rs.getInt("beacon_major"),
-                rs.getInt("beacon_minor"),
-                rs.getString("rid"),
-                geocode,
+        return new Region(rs.getInt("id"), rs.getInt("user_id"), rs.getString("desc"), rs.getDouble("lat"),
+                rs.getDouble("lon"), rs.getInt("rad"), rs.getString("beacon_uuid"), rs.getInt("beacon_major"),
+                rs.getInt("beacon_minor"), rs.getString("rid"), geocode,
                 ZonedDateTime.parse(rs.getString("created_at")));
     };
 
     public void createRegion(Region region) {
         jdbcClient
                 .sql("""
-                            INSERT INTO region(user_id,desc, lat, lon, rad, beacon_uuid, beacon_major, beacon_minor, rid, geocode, created_at)
+                            INSERT INTO region(user_id, desc, lat, lon, rad, beacon_uuid, beacon_major, beacon_minor, rid, geocode, created_at)
                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """)
                 .param(region.userId())

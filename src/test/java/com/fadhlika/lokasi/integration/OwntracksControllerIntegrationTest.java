@@ -8,6 +8,8 @@ import org.springframework.http.MediaType;
 import com.fadhlika.lokasi.LokasiApplication;
 import com.fadhlika.lokasi.config.DatabaseConfigTestContext;
 
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -17,6 +19,7 @@ import static org.hamcrest.Matchers.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = LokasiApplication.class)
 @ContextConfiguration(classes = DatabaseConfigTestContext.class)
 @AutoConfigureMockMvc
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class OwntracksControllerIntegrationTest {
   @Autowired
   private MockMvc mvc;

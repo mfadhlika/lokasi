@@ -1,5 +1,7 @@
 package com.fadhlika.lokasi.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,5 +15,9 @@ public class RegionService {
 
     public void createRegion(Region region) {
         regionRepository.createRegion(region);
+    }
+
+    public List<Region> fetchRegions(int userId) {
+        return regionRepository.fetchRegions(userId);
     }
 }

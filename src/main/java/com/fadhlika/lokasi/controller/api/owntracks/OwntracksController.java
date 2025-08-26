@@ -24,7 +24,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fadhlika.lokasi.dto.owntracks.Cmd;
 import com.fadhlika.lokasi.dto.owntracks.Message;
+import com.fadhlika.lokasi.dto.owntracks.Waypoint;
+import com.fadhlika.lokasi.dto.owntracks.Waypoints;
 import com.fadhlika.lokasi.model.Region;
 import com.fadhlika.lokasi.model.Trip;
 import com.fadhlika.lokasi.model.User;
@@ -62,9 +65,24 @@ public class OwntracksController {
             throws JsonProcessingException {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
+        List<Message> res = new ArrayList<>();
         switch (message) {
             case com.fadhlika.lokasi.dto.owntracks.Location location:
                 this.locationService.saveLocation(location.toLocation(user.getId(), deviceId));
+                List<Waypoint> waypoints = this.regionService.fetchRegions(user.getId()).stream()
+                        .map(region -> new Waypoint(
+                                region.desc(),
+                                region.lat(),
+                                region.lon(),
+                                region.rad(),
+                                Math.toIntExact(region.createdAt().toEpochSecond()),
+                                region.beaconUUID(),
+                                region.beaconMajor(),
+                                region.beaconMinor(),
+                                region.rid()))
+                        .toList();
+                if (!waypoints.isEmpty())
+                    res.add(new Cmd("setWaypoints", new Waypoints(null, waypoints)));
                 break;
             case com.fadhlika.lokasi.dto.owntracks.Request request:
                 switch (request.request()) {
@@ -101,16 +119,10 @@ public class OwntracksController {
                         break;
                 }
                 break;
-            case com.fadhlika.lokasi.dto.owntracks.Waypoint waypoint:
-                regionService.createRegion(new Region(
-                        user.getId(),
-                        waypoint.lat(),
-                        waypoint.lon(),
-                        waypoint.rad(),
-                        waypoint.uuid(),
-                        waypoint.major(),
-                        waypoint.minor(),
-                        waypoint.rid(),
+            case
+                    com.fadhlika.lokasi.dto.owntracks.Waypoint waypoint:
+                regionService.createRegion(new Region(user.getId(), waypoint.desc(), waypoint.lat(), waypoint.lon(),
+                        waypoint.rad(), waypoint.uuid(), waypoint.major(), waypoint.minor(), waypoint.rid(),
                         Instant.ofEpochSecond(waypoint.tst()).atZone(ZoneOffset.UTC)));
                 break;
             default:
@@ -119,6 +131,6 @@ public class OwntracksController {
                 break;
         }
 
-        return ResponseEntity.ok().body(new ArrayList<>());
+        return ResponseEntity.ok().body(res);
     }
 }
