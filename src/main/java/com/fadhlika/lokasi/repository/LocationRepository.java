@@ -257,7 +257,7 @@ public class LocationRepository {
         });
 
         bounds.ifPresent((b) -> {
-            where.add("ST_Within(geometry, ST_GeomFromText(?))");
+            where.add("ST_CoveredBy(geometry, ST_GeomFromText(?))");
             args.add(b);
         });
 
