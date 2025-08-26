@@ -45,7 +45,7 @@ export const NewTripDialog = ({ className, onClose, trip, children }: NewTripDia
     const [startAt, endAt] = watch(['startAt', 'endAt']);
 
     useEffect(() => {
-        if(!open) return;
+        if (!open) return;
         if (!startAt || !endAt) return;
 
         const params = new URLSearchParams();
@@ -87,7 +87,7 @@ export const NewTripDialog = ({ className, onClose, trip, children }: NewTripDia
                     </DialogDescription>
                 </DialogHeader>
                 <div className="flex gap-4 flex-col md:flex-row">
-                    <PreviewMaps className="rounded-md min-h-[200px] flex-1" locations={locations} />
+                    <PreviewMaps className="rounded-md min-h-[200px] flex-1" locations={locations} disableDrag />
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 space-y-8">
                             <FormField control={form.control} name="title" render={({ field }) => (

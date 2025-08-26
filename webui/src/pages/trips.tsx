@@ -65,7 +65,7 @@ export default function TripsPage() {
                                     </CardAction>
                                 </CardHeader>
                                 <CardContent>
-                                    <PreviewMaps className="min-h-[200px]" locations={trip} />
+                                    <PreviewMaps className="min-h-[200px]" locations={trip} disableDrag />
                                 </CardContent>
                                 <CardFooter className="flex gap-2 justify-end">
                                     <NewTripDialog
