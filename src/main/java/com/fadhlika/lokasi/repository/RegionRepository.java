@@ -5,9 +5,6 @@ import java.sql.ResultSet;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.WKTReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -25,8 +22,6 @@ public class RegionRepository {
     @Autowired
     private ObjectMapper mapper;
 
-    private final WKTReader wktReader = new WKTReader();
-
     private final RowMapper<Region> rowMapper = (ResultSet rs, int rowNum) -> {
         FeatureCollection geocode = null;
         try {
@@ -38,6 +33,7 @@ public class RegionRepository {
         return new Region(
                 rs.getInt("id"),
                 rs.getInt("user_id"),
+                rs.getString("desc"),
                 rs.getDouble("lat"),
                 rs.getDouble("lon"),
                 rs.getInt("rad"),
@@ -52,14 +48,15 @@ public class RegionRepository {
     public void createRegion(Region region) {
         jdbcClient
                 .sql("""
-                            INSERT INTO region(user_id, lat, lon, rad, beacon_uuid, beacon_major, beacon_minor, rid, geocode, created_at)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            INSERT INTO region(user_id,desc, lat, lon, rad, beacon_uuid, beacon_major, beacon_minor, rid, geocode, created_at)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """)
                 .param(region.userId())
+                .param(region.desc())
                 .param(region.lat())
                 .param(region.lon())
                 .param(region.rad())
-                .param(region.beacondUUID())
+                .param(region.beaconUUID())
                 .param(region.beaconMajor())
                 .param(region.beaconMinor())
                 .param(region.rid())
