@@ -34,7 +34,8 @@ type TripProperties = {
     startAt: string,
     endAt: string,
     uuid: UUID,
-    public: boolean
+    public: boolean,
+    publicUrl?: string
 }
 
 type GeocodeProperties = {

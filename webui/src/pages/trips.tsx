@@ -57,7 +57,11 @@ export default function TripsPage() {
                                         {(new Date(props.startAt).toLocaleDateString())} - {(new Date(props.endAt)).toLocaleDateString()}
                                     </CardDescription>
                                     <CardAction className="text-gray-500">
-                                        {trip.properties.public && <Globe className="size-5" />}
+                                        {trip.properties.public && <Button variant="ghost" onClick={() => {
+                                            navigator.clipboard.writeText(trip.properties.publicUrl!).then(_ => toast.info("trip url copied to clipboard"));
+                                        }}>
+                                            <Globe className="size-5" />
+                                        </Button>}
                                     </CardAction>
                                 </CardHeader>
                                 <CardContent>

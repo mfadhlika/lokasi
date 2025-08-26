@@ -11,6 +11,8 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.MultiLineString;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.fadhlika.lokasi.dto.Feature;
 import com.fadhlika.lokasi.dto.FeatureCollection;
@@ -32,6 +35,9 @@ import com.fadhlika.lokasi.service.TripService;
 @RestController
 @RequestMapping("/api/v1/trips")
 public class TripController {
+    @Value("${lokasi.base_url}")
+    private String baseUrl;
+
     @Autowired
     private TripService tripService;
 
@@ -86,9 +92,15 @@ public class TripController {
 
             MultiLineString geom = gf.createMultiLineString(lineStrings.toArray(new LineString[0]));
 
+            String publicUrl = null;
+            if (trip.isPublic()) {
+                publicUrl = String.format("%s/trips/%s", baseUrl, trip.uuid());
+            }
+
             TripProperties props = new TripProperties(trip.id(), trip.title(), trip.startAt(), trip.endAt(),
                     trip.uuid(),
-                    trip.isPublic());
+                    trip.isPublic(),
+                    publicUrl);
 
             features.add(new Feature(geom, props));
         }
@@ -99,6 +111,9 @@ public class TripController {
     @GetMapping("/{uuid:^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$}")
     public Response<Feature> getTripByUUID(@PathVariable UUID uuid) {
         Trip trip = tripService.getTrip(uuid);
+        if (!trip.isPublic()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "trip not found");
+        }
 
         List<Location> locations = trip.locations();
 
@@ -127,7 +142,7 @@ public class TripController {
         MultiLineString geom = gf.createMultiLineString(lineStrings.toArray(new LineString[0]));
 
         TripProperties props = new TripProperties(trip.id(), trip.title(), trip.startAt(), trip.endAt(), trip.uuid(),
-                trip.isPublic());
+                trip.isPublic(), String.format("%s/trips/%s", baseUrl, trip.uuid()));
 
         return new Response<>(new Feature(geom, props));
     }
