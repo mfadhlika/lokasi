@@ -30,7 +30,10 @@ public class DatabaseConfig {
 
         HikariDataSource ds = new HikariDataSource();
         ds.setDataSource(sqliteDataSource);
-        ds.setConnectionInitSql("SELECT load_extension('mod_spatialite')");
+        ds.setConnectionInitSql("""
+                SELECT load_extension('mod_spatialite');
+                PRAGMA trusted_schema=1;
+                    """);
         ds.setMinimumIdle(2);
         ds.setMaximumPoolSize(10);
         ds.setIdleTimeout(120000);
