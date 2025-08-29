@@ -86,6 +86,29 @@ public class PlaceRepository {
                 .update();
     }
 
+    public Optional<Place> fetchPlace(Geometry geometry) {
+        return jdbcClient.sql("""
+                SELECT
+                    id,
+                    provider,
+                    type,
+                    postcode,
+                    country_code,
+                    name,
+                    country,
+                    city,
+                    district,
+                    locality,
+                    street,
+                    state,
+                    ST_AsBinary(geometry) AS geometry,
+                    geodata,
+                    created_at
+                FROM geocode WHERE ST_Equals(geometry, GeomFromText(?))""")
+                .query(rowMapper)
+                .optional();
+    }
+
     public List<Place> fetchPlaces(
             Optional<String> city,
             Optional<String> country,
