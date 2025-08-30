@@ -104,7 +104,7 @@ public class PlaceRepository {
                     ST_AsBinary(geometry) AS geometry,
                     geodata,
                     created_at
-                FROM geocode WHERE ST_Equals(geometry, GeomFromText(?))""")
+                FROM place WHERE ST_Equals(geometry, GeomFromText(?))""")
                 .query(rowMapper)
                 .optional();
     }
