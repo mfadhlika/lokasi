@@ -81,6 +81,7 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/login").permitAll()
                                                 .requestMatchers("/api/v1/auth/refresh").permitAll()
                                                 .requestMatchers("/api/v1/logout").permitAll()
+                                                .requestMatchers("/api/ws").permitAll()
                                                 .requestMatchers(
                                                                 new RegexRequestMatcher(
                                                                                 "/api/v1/trips/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",

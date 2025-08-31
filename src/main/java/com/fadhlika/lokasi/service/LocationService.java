@@ -14,11 +14,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fadhlika.lokasi.dto.Feature;
+import com.fadhlika.lokasi.dto.PointProperties;
 import com.fadhlika.lokasi.exception.InternalErrorException;
 import com.fadhlika.lokasi.model.Location;
+import com.fadhlika.lokasi.model.User;
+import com.fadhlika.lokasi.model.Location.BatteryState;
 import com.fadhlika.lokasi.repository.LocationRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -40,6 +45,12 @@ public class LocationService {
     @Autowired
     private ReverseGeocodeService reverseGeocodeService;
 
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
+
     public void saveLocation(Location location) {
         try {
             locationRepository.createLocation(location);
@@ -47,17 +58,27 @@ public class LocationService {
             throw new InternalErrorException(ex.getMessage());
         }
 
+        publishLocation(location);
     }
 
     @Transactional
     public void saveLocations(List<Location> locations) {
+        if (locations.isEmpty())
+            return;
+
+        Location last = null;
         for (Location location : locations) {
             try {
                 locationRepository.createLocation(location);
+
+                last = location;
             } catch (DataAccessException | JsonProcessingException e) {
                 throw new InternalErrorException(e.getMessage());
             }
         }
+
+        assert last != null;
+        publishLocation(last);
     }
 
     public List<Location> findLocations(int userId, ZonedDateTime start, ZonedDateTime end) {
@@ -89,5 +110,32 @@ public class LocationService {
 
     public void reverseGeocode() {
         reverseGeocodeService.startReverseGeocode();
+    }
+
+    private void publishLocation(Location location) {
+        String bs = BatteryState.UNKNOWN.toString();
+        if (location.getBatteryState() != null)
+            bs = location.getBatteryState().toString();
+        PointProperties props = new PointProperties(
+                location.getTimestamp(),
+                location.getAltitude(),
+                location.getSpeed(),
+                location.getCourse(),
+                location.getCourseAccuracy(),
+                location.getAccuracy(),
+                location.getVerticalAccuracy(),
+                location.getMotions(),
+                bs,
+                location.getBattery(),
+                location.getDeviceId(),
+                location.getSsid(),
+                location.getGeocode(),
+                location.getRawData());
+
+        User user = userService.getUserByUserId(location.getUserId());
+        Feature feature = new Feature(location.getGeometry(), props);
+        simpMessagingTemplate.convertAndSendToUser(user.getUsername(),
+                "/topic/last-known-location",
+                feature);
     }
 }

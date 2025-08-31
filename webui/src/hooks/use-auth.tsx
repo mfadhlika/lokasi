@@ -1,9 +1,10 @@
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import * as React from "react";
 import { jwtDecode } from "jwt-decode";
 import { axiosInstance } from "@/lib/request";
 import { toast } from "sonner";
 import type { Claim } from "@/types/claim";
+import { stompClient } from "@/lib/websocket";
 interface AuthContextType {
     userInfo: {
         username: string
@@ -56,6 +57,11 @@ export const AuthProvider = ({ children }: React.ComponentProps<"div">) => {
             login,
             logout,
         };
+    }, [accessToken]);
+
+
+    useEffect(() => {
+        if (!stompClient.connected && accessToken) stompClient.activate();
     }, [accessToken]);
 
     return (

@@ -19,8 +19,10 @@ import { Toggle } from '@/components/ui/toggle';
 import type { LatLngBounds } from 'leaflet';
 import { Button } from '@/components/ui/button';
 import { locationService } from '@/services/location-service';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function MapsPage() {
+    const { userInfo } = useAuth();
     const [locations, setLocations] = useState<FeatureCollection<Point, PointProperties>>(turf.featureCollection([]));
     const [lastKnownLocation, setLastKnownLocation] = useState<Feature<Point, PointProperties> | undefined>();
     const [{ date, device, bounds }, setFilter] = useLocationFilter();
@@ -54,6 +56,14 @@ export default function MapsPage() {
                 setLastKnownLocation(data);
             })
             .catch(err => toast.error(`Failed to get user's lsat known locations: ${err}`));
+
+        try {
+            locationService.subscribeLastLocation(userInfo!.username, (data) => {
+                setLastKnownLocation(data);
+            });
+        } catch (error) {
+            console.error(error);
+        }
     }, [layerSettings.showLastKnown]);
 
     const handleDate = (newDate: DateRange | undefined) => {

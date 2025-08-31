@@ -21,7 +21,11 @@ export default defineConfig(({ mode }) => {
         },
         server: {
             proxy: {
-                '/api': env.VITE_API_BASE_URL
+                '/api': `http://${env.VITE_API_BASE_URL}`,
+                '/api/ws': {
+                    target: `ws://${env.VITE_API_BASE_URL}`,
+                    ws: true,
+                }
             }
         },
         test: {
@@ -37,5 +41,8 @@ export default defineConfig(({ mode }) => {
                 ]
             },
         },
+        define: {
+            global: 'globalThis',
+        }
     };
 })
