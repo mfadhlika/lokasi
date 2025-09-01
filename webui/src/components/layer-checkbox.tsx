@@ -10,7 +10,7 @@ export type LayerState = React.ComponentProps<"div"> & {
     showPoints: Checked,
     showLastKnown: Checked,
     showMovingPoints: Checked,
-    showVisits: Checked,
+    showTimeline: Checked,
 }
 
 export const useLayerState = create<LayerState>()((
@@ -20,7 +20,7 @@ export const useLayerState = create<LayerState>()((
             showPoints: true as Checked,
             showLastKnown: true as Checked,
             showMovingPoints: false as Checked,
-            showVisits: false as Checked
+            showTimeline: false as Checked
         }),
         {
             name: 'layer-storage',
@@ -29,12 +29,12 @@ export const useLayerState = create<LayerState>()((
     )
 ));
 
-export const LayerCheckbox = ({ showLines, showPoints, showLastKnown, showMovingPoints, showVisits, className }: LayerState) => {
+export const LayerCheckbox = ({ showLines, showPoints, showLastKnown, showMovingPoints, showTimeline, className }: LayerState) => {
     const setShowPoints = (value: Checked) => useLayerState.setState((state) => ({ ...state, showPoints: value }));
     const setShowLines = (value: Checked) => useLayerState.setState((state) => ({ ...state, showLines: value }));
     const setShowLastKnown = (value: Checked) => useLayerState.setState((state) => ({ ...state, showLastKnown: value }));
     const setshowMovingPoints = (value: Checked) => useLayerState.setState((state) => ({ ...state, showMovingPoints: value }));
-    const setShowVisits = (value: Checked) => useLayerState.setState((state) => ({ ...state, showVisits: value }));
+    const setShowTimeline = (value: Checked) => useLayerState.setState((state) => ({ ...state, showTimeline: value }));
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -69,10 +69,10 @@ export const LayerCheckbox = ({ showLines, showPoints, showLastKnown, showMoving
                     Moving points
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
-                    checked={showVisits}
-                    onCheckedChange={setShowVisits}
+                    checked={showTimeline}
+                    onCheckedChange={setShowTimeline}
                 >
-                    Visits
+                    Timeline
                 </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
         </DropdownMenu>

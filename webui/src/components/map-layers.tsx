@@ -7,7 +7,7 @@ import type { Checked } from "@/types/checked";
 import L, { LatLngBounds, type LatLngBoundsExpression } from "leaflet";
 import { renderToStaticMarkup } from "react-dom/server";
 import { useAuth } from "@/hooks/use-auth";
-import { Battery, BatteryCharging, BatteryFull, BatteryLow, Car, Clock, Compass, Gauge, TrendingUp, Wifi, Route, Smartphone, PlaneTakeoff, PlaneLanding } from "lucide-react";
+import { Battery, BatteryCharging, BatteryFull, BatteryLow, Car, Clock, Compass, Gauge, TrendingUp, Wifi, Route, Smartphone, PlaneTakeoff, PlaneLanding, CarFront, CircleDot } from "lucide-react";
 import { useCallback, useEffect, useMemo } from "react";
 import { formatDistanceStrict, formatDistanceToNow } from "date-fns";
 import { MapControl } from "./map-control";
@@ -21,7 +21,7 @@ export type MarkersProps = React.ComponentProps<"div"> & {
     showLines?: Checked,
     showLastKnown?: Checked,
     showMovingPoints?: Checked,
-    showVisits?: Checked,
+    showTimeline?: Checked,
     bounded: boolean,
     onBoundsChange: (bounds: LatLngBounds) => void
 }
@@ -80,7 +80,7 @@ type Layers = {
     visits: Visit[]
 }
 
-export function MapLayers({ locations, showLines, showPoints, showMovingPoints, showLastKnown, lastKnowLocation, showVisits, bounded, onBoundsChange }: MarkersProps) {
+export function MapLayers({ locations, showLines, showPoints, showMovingPoints, showLastKnown, lastKnowLocation, showTimeline: showTimeline, bounded, onBoundsChange }: MarkersProps) {
     const { userInfo } = useAuth();
     const isMobile = useIsMobile();
     const map = useMap();
@@ -136,8 +136,11 @@ export function MapLayers({ locations, showLines, showPoints, showMovingPoints, 
             const startAt = Date.parse(prev.properties.timestamp);
             const endAt = Date.parse(cur.properties.timestamp);
 
-            if (prevVisit.name === cur.properties.geocode?.features.at(0)?.properties?.name) prevVisit.endAt = new Date(cur.properties.timestamp);
-            else if ((cur.properties.speed ?? 0) === 0) {
+            prevVisit.endAt = new Date(cur.properties.timestamp);
+            if ((prevVisit.name !== cur.properties.geocode?.features.at(0)?.properties?.name) &&
+                (cur.properties.speed ?? 0) === 0 &&
+                !cur.properties.motions?.includes('automotive')
+            ) {
                 const geocodeProps = cur.properties.geocode?.features.at(0)?.properties;
 
                 let address = '';
@@ -194,19 +197,28 @@ export function MapLayers({ locations, showLines, showPoints, showMovingPoints, 
     }, [locations]);
 
     return (<>
-        {showVisits && <MapControl position={isMobile ? "bottomright" : "topleft"} disableClickPropagation={true} disableScrollPropagation={true}>
-            <div className="leaflet-touch bg-sidebar rounded-xl border border-gray-300 w-[calc(100vw-20px)] md:w-[20vw] max-h-[25vh] md:max-h-[calc(90vh)] overflow-y-auto flex flex-col p-4 gap-4">
-                {visits.map((cur) => (
+        {showTimeline && <MapControl position={isMobile ? "bottomright" : "topleft"} disableClickPropagation={true} disableScrollPropagation={true}>
+            <div className="leaflet-touch bg-sidebar rounded-xl border border-gray-300 w-[calc(100vw-20px)] md:w-[20vw] max-h-[25vh] md:max-h-[calc(90vh)] overflow-y-auto flex flex-col p-2">
+                {visits.map((cur, i) => (
                     <div key={`${cur.name}-${cur.startAt.getTime()}`}
-                        className="flex flex-col gap-1 cursor-pointer"
+                        className="flex gap-4 cursor-pointer"
                         onClick={() => map.setView(cur.coordinates)}>
-                        <div className="inline-flex gap-2 items-center"><span className="font-semibold">{cur.name ?? '?'}</span>{cur.mode?.includes('automotive') && <Car className="size-4" />}</div>
-                        {cur.name === 'Moving' && <div>
-                            <span>{cur.distance?.toFixed(2)} km · </span>
-                            <span>{formatDistanceStrict(cur.endAt, cur.startAt)}</span>
-                        </div>}
-                        {cur.address && <span>{cur.address}</span>}
-                        <span>{cur.startAt.toLocaleTimeString()} - {cur.endAt.toLocaleTimeString()}</span>
+                        <div className="flex flex-col">
+                            {i > 0 && <div className="w-1 h-full bg-gray-300 mx-auto" />}
+                            <div className="items-center mx-2 my-4">
+                                {cur.name === 'Moving' ? <CarFront className="mx-auto" /> : <CircleDot className="mx-auto" />}
+                            </div>
+                            <div className="w-1 h-full bg-gray-300 mx-auto" />
+                        </div>
+                        <div className="flex flex-col gap-1 py-4">
+                            <span className="font-semibold">{cur.name ?? '?'}</span>
+                            {cur.name === 'Moving' && <div>
+                                <span>{cur.distance?.toFixed(2)} km · </span>
+                                <span>{formatDistanceStrict(cur.endAt, cur.startAt)}</span>
+                            </div>}
+                            {cur.address && <span>{cur.address}</span>}
+                            <span>{cur.startAt.toLocaleTimeString()} - {cur.endAt.toLocaleTimeString()}</span>
+                        </div>
                     </div>
                 ))}
                 {visits.length === 0 && <span>No location recorded</span>}
