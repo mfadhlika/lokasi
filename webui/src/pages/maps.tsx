@@ -49,7 +49,8 @@ export default function MapsPage() {
     }, [date, device, bounded, bounds]);
 
     useEffect(() => {
-        if (!layerSettings.showLastKnown) return
+        if (!layerSettings.showLastKnown) return;
+        else locationService.unsubscribeLastLocation();
 
         locationService.fetchLastLocation()
             .then(({ data }) => {
@@ -64,7 +65,11 @@ export default function MapsPage() {
         } catch (error) {
             console.error(error);
         }
-    }, [layerSettings.showLastKnown]);
+
+        return () => {
+            locationService.unsubscribeLastLocation();
+        }
+    }, [layerSettings.showLastKnown, userInfo]);
 
     const handleDate = (newDate: DateRange | undefined) => {
         setFilter({
