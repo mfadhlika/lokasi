@@ -62,6 +62,7 @@ export const AuthProvider = ({ children }: React.ComponentProps<"div">) => {
 
     useEffect(() => {
         if (!stompClient.connected && accessToken) stompClient.activate();
+        else if (stompClient.connected && !accessToken) stompClient.deactivate();
     }, [accessToken]);
 
     return (
