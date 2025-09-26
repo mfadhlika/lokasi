@@ -1,10 +1,9 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useEffect, useState } from "react";
-import { axiosInstance } from "@/lib/request.ts";
 import { Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { deviceService } from "@/services/device-service";
 import { toast } from "sonner";
-import type { Response } from "@/types/response";
 
 export interface DeviceSelectProps {
     className?: string,
@@ -16,12 +15,12 @@ export const DeviceSelect = ({ className, selectedDevice, onSelectedDevice }: De
     const [devices, setDevices] = useState<string[]>([]);
 
     useEffect(() => {
-        axiosInstance.get<Response<string[]>>("v1/user/devices")
-            .then(({ data }) => setDevices(data.data))
+        deviceService.fetchDevices()
+            .then(res => setDevices(res.data))
             .catch(err => {
-                toast.error(`Failed to get user's devices: ${err}`);
+                toast.error("faled to fetch trips", err);
             });
-    }, []);
+    });
 
     return (
         <Select value={selectedDevice} onValueChange={onSelectedDevice}>
