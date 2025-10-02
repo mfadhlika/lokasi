@@ -22,12 +22,12 @@ import {
     useSidebar,
 } from "@/components/ui/sidebar"
 import { useNavigate } from "react-router"
-import { useAuth } from "@/hooks/use-auth"
+import { useAuthStore } from "@/hooks/use-auth"
 import { Button } from "./ui/button"
 
 export function NavUser() {
     const { isMobile } = useSidebar()
-    const { userInfo, logout } = useAuth();
+    const { userInfo, logout } = useAuthStore();
     const navigate = useNavigate();
 
     return (
@@ -40,7 +40,7 @@ export function NavUser() {
                             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                         >
                             <Avatar className="h-8 w-8 rounded-lg">
-                                <AvatarFallback className="rounded-lg">{userInfo?.username.at(0)?.toUpperCase()}</AvatarFallback>
+                                <AvatarFallback className="rounded-lg">{userInfo?.username?.at(0)?.toUpperCase()}</AvatarFallback>
                             </Avatar>
                             <div className="grid flex-1 text-left text-sm leading-tight">
                                 <span className="truncate font-medium">{userInfo?.username}</span>
@@ -55,7 +55,7 @@ export function NavUser() {
                         sideOffset={4}
                     >
                         <DropdownMenuItem>
-                            <Button variant="link" className="inline-flex gap-2 items-center" onClick={() => { logout(() => navigate("/login")) }}>
+                            <Button variant="link" className="inline-flex gap-2 items-center" onClick={() => { logout(); navigate("/login"); }}>
                                 <LogOut />
                                 Log out
                             </Button>

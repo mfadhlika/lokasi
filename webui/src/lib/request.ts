@@ -3,6 +3,8 @@ import { toast } from "sonner";
 import type { Login } from "@/types/responses/login";
 import type { Response } from "@/types/response";
 import router from "./router";
+import { authService } from "@/services/auth-service";
+import { useAuthStore } from "@/hooks/use-auth";
 
 let refreshTokenPromise: Promise<string> | null = null;
 let logoutPromise: Promise<void> | null = null;
@@ -17,8 +19,8 @@ const axiosInstance = axios.create({
 
 async function logout() {
     try {
-        await axiosInstance.delete("v1/logout");
-        localStorage.removeItem("accessToken");
+        await authService.logout();
+        useAuthStore.getState().logout();
         toast.error("Session expired. Please relogin");
 
         await router.navigate("/login", {
@@ -32,7 +34,7 @@ async function logout() {
 
 async function refreshToken(): Promise<string> {
     const { data } = await axiosInstance.get<Response<Login>>("v1/auth/refresh");
-    localStorage.setItem("accessToken", data.data.accessToken);
+    useAuthStore.getState().login(data.data.accessToken);
     return data.data.accessToken;
 };
 

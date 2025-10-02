@@ -1,4 +1,3 @@
-import { useAuth } from "@/hooks/use-auth";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { Input } from "@/components/ui/input.tsx";
@@ -12,10 +11,10 @@ import { FormControl, FormField, FormItem, FormLabel, Form, FormMessage } from "
 import type { AxiosError } from "axios";
 import { loginFormSchema } from "@/types/schema/login";
 import { authService } from "@/services/auth-service";
-
+import { useAuthStore } from "@/hooks/use-auth";
 
 export default function LoginPage() {
-    const { userInfo, login } = useAuth();
+    const { userInfo, login } = useAuthStore();
     const navigate = useNavigate();
 
     const loginForm = useForm<LoginRequest>({

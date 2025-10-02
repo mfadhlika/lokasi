@@ -14,6 +14,8 @@ class AuthService {
     validate = async (): Promise<Response> => {
         return await axiosInstance.get<Response>("v1/auth/validate").then(res => res.data);
     }
+
+    logout = async (): Promise<void> => axiosInstance.delete("v1/logout");
 }
 
 export const authService: AuthService = new AuthService();

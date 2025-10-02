@@ -21,9 +21,9 @@ export default defineConfig(({ mode }) => {
         },
         server: {
             proxy: {
-                '/api': `http://${env.VITE_API_BASE_URL}`,
+                '/api': env.VITE_API_BASE_URL,
                 '/api/ws': {
-                    target: `ws://${env.VITE_API_BASE_URL}`,
+                    target: env.VITE_WS_BASE_URL,
                     ws: true,
                 }
             }

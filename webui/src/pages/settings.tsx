@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { FormLabel, FormControl, FormItem, FormField, Form, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/hooks/use-auth";
 import { axiosInstance } from "@/lib/request";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -15,6 +14,7 @@ import { Header } from "@/components/header";
 import { toast } from "sonner";
 import type { Integration } from "@/types/integration";
 import type { Response } from "@/types/response";
+import { useAuthStore } from "@/hooks/use-auth";
 
 const accountFormSchema = z.object({
     username: z.string(),
@@ -36,7 +36,7 @@ const overlandFormSchema = z.object({
 
 
 function AccountSettingsTab() {
-    const { userInfo, logout } = useAuth();
+    const { userInfo, logout } = useAuthStore();
     const navigate = useNavigate();
 
     const accountForm = useForm<z.infer<typeof accountFormSchema>>({
@@ -55,9 +55,8 @@ function AccountSettingsTab() {
         })
             .then((_res) => {
                 if (values.username !== userInfo?.username) {
-                    logout(() => {
-                        navigate("/login");
-                    });
+                    logout();
+                    navigate("/login");
                 }
             })
             .catch(err => {

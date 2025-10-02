@@ -6,7 +6,7 @@ import * as turf from "@turf/turf";
 import type { Checked } from "@/types/checked";
 import L, { LatLngBounds, type LatLngBoundsExpression } from "leaflet";
 import { renderToStaticMarkup } from "react-dom/server";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuthStore } from "@/hooks/use-auth";
 import { Battery, BatteryCharging, BatteryFull, BatteryLow, Car, Clock, Compass, Gauge, TrendingUp, Wifi, Route, Smartphone, PlaneTakeoff, PlaneLanding, CarFront, CircleDot } from "lucide-react";
 import { useCallback, useEffect, useMemo } from "react";
 import { formatDistanceStrict, formatDistanceToNow } from "date-fns";
@@ -81,7 +81,7 @@ type Layers = {
 }
 
 export function MapLayers({ locations, showLines, showPoints, showMovingPoints, showLastKnown, lastKnowLocation, showTimeline: showTimeline, bounded, onBoundsChange }: MarkersProps) {
-    const { userInfo } = useAuth();
+    const { userInfo } = useAuthStore();
     const isMobile = useIsMobile();
     const map = useMap();
 

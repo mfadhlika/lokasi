@@ -1,80 +1,29 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import * as React from "react";
-import { jwtDecode } from "jwt-decode";
-import { axiosInstance } from "@/lib/request";
-import { toast } from "sonner";
-import type { Claim } from "@/types/claim";
 import { stompClient } from "@/lib/websocket";
-interface AuthContextType {
-    userInfo: {
-        username: string
-    } | null | undefined;
-    accessToken: string | null | undefined;
+import type { Claim } from "@/types/claim";
+import { jwtDecode } from "jwt-decode";
+import { create } from "zustand";
+
+
+export interface AuthStore {
+    userInfo: Claim | null;
+    accessToken: string | null;
     login: (accessToken: string) => void;
-    logout: (callback: () => void) => void;
+    logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType>({
-    userInfo: undefined,
-    accessToken: null,
-    login: (_accessToken: string) => void {
-
+export const useAuthStore = create<AuthStore>((set) => ({
+    accessToken: localStorage.getItem('accessToken'),
+    userInfo: localStorage.getItem('accessToken') ? jwtDecode<Claim>(localStorage.getItem('accessToken')!) : null,
+    setUserInfo: (userInfo: Claim) => set({ userInfo }),
+    login: (accessToken: string) => {
+        localStorage.setItem('accessToken', accessToken);
+        const userInfo = jwtDecode<Claim>(accessToken);
+        set({ accessToken, userInfo });
+        stompClient.activate();
     },
-    logout: (_callback: () => void) => void {
-
-    },
-});
-
-export const AuthProvider = ({ children }: React.ComponentProps<"div">) => {
-    const [accessToken, setAccessToken] = useState<string | null>(localStorage.getItem("accessToken"));
-
-    const login = (accessToken: string) => {
-        if (!accessToken) return;
-        localStorage.setItem("accessToken", accessToken);
-        setAccessToken(accessToken);
-    };
-
-    const logout = (callback: () => void) => {
-        axiosInstance.delete("v1/logout").then(() => {
-            localStorage.removeItem("accessToken");
-            setAccessToken(null);
-            callback();
-        }).catch(err => {
-            console.error(err);
-            toast.error("logging out failed", err);
-        });
-    };
-
-    const value = useMemo(() => {
-        let decoded;
-        if (accessToken) decoded = jwtDecode<Claim>(accessToken);
-
-        return {
-            accessToken,
-            userInfo: decoded && {
-                username: decoded.username ?? ""
-            },
-            login,
-            logout,
-        };
-    }, [accessToken]);
-
-
-    useEffect(() => {
-        if (!stompClient.connected && accessToken) stompClient.activate();
-        else if (stompClient.connected && !accessToken) stompClient.deactivate();
-    }, [accessToken]);
-
-    return (
-        <AuthContext.Provider value={value}>
-            {children}
-        </AuthContext.Provider>
-    );
-};
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const useAuth = () => {
-    return useContext(AuthContext);
-}
-
-export default AuthProvider;
+    logout: () => {
+        localStorage.removeItem('accessToken');
+        stompClient.deactivate();
+        set({ accessToken: null, userInfo: null });
+    }
+}));

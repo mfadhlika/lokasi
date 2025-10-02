@@ -20,7 +20,7 @@ export const DeviceSelect = ({ className, selectedDevice, onSelectedDevice }: De
             .catch(err => {
                 toast.error("faled to fetch trips", err);
             });
-    });
+    }, []);
 
     return (
         <Select value={selectedDevice} onValueChange={onSelectedDevice}>

@@ -6,11 +6,11 @@ import {
 } from "@/components/ui/dropdown-menu.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { User } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth.tsx";
+import { useAuthStore } from "@/hooks/use-auth.tsx";
 import { useNavigate } from "react-router";
 
 export const AccountDropdown = () => {
-    const { logout } = useAuth();
+    const { logout } = useAuthStore();
     const navigate = useNavigate();
 
     return (
@@ -22,9 +22,10 @@ export const AccountDropdown = () => {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="z-10000">
-                <DropdownMenuItem onClick={() => logout(() => {
-                    navigate("/login")
-                })}>
+                <DropdownMenuItem onClick={() => {
+                    logout();
+                    navigate("/login");
+                }}>
                     Logout
                 </DropdownMenuItem>
             </DropdownMenuContent>
