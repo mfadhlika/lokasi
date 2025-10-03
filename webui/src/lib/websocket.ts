@@ -1,16 +1,8 @@
-
-import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 
-
-const socket = new SockJS('/api/ws');
-
 const stompClient = new Client({
-    webSocketFactory: () => socket,
+    brokerURL: '/api/ws',
     reconnectDelay: 5000,
-    connectHeaders: {
-        Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-    },
     debug: console.debug,
     beforeConnect: (c) => {
         console.info('connecting to ' + c.brokerURL);
