@@ -2,116 +2,145 @@ package com.fadhlika.lokasi.integration;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
 import com.fadhlika.lokasi.LokasiApplication;
 import com.fadhlika.lokasi.config.DatabaseConfigTestContext;
+import com.fadhlika.lokasi.dto.owntracks.Cmd;
+import com.fadhlika.lokasi.dto.owntracks.Message;
+import com.fadhlika.lokasi.dto.owntracks.Request;
+import com.fadhlika.lokasi.dto.owntracks.Tour;
+import com.fadhlika.lokasi.dto.owntracks.Waypoint;
 
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.hamcrest.Matchers.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = LokasiApplication.class)
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = LokasiApplication.class)
 @ContextConfiguration(classes = DatabaseConfigTestContext.class)
-@AutoConfigureMockMvc
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class OwntracksControllerIntegrationTest {
   @Autowired
-  private MockMvc mvc;
+  private TestRestTemplate testRestTemplate;
 
   @Test
   public void publishLocation() throws Exception {
-    mvc.perform(post("/api/owntracks")
-        .header("Authorization", "Basic b3dudHJhY2tzOm93bnRyYWNrcw==")
-        .header("X-Limit-D", "tes-device")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content("""
-            {
-              "_type": "location",
-              "tid": "my_device_id",
-              "tst": 1672531200,
-              "lat": -1.23456,
-              "lon": 12.34567,
-              "acc": 10,
-              "alt": 50,
-              "batt": 95,
-              "vel": 15,
-              "cog": 270
-            }"""))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(0)));
+
+    com.fadhlika.lokasi.dto.owntracks.Location location = new com.fadhlika.lokasi.dto.owntracks.Location(10, 50, 95,
+        null, 270, -1.23456,
+        12.34567, null, null,
+        null, 1672531200, null, 15, null, null, null, null, null, null, null, null, null, null, null, null,
+        0,
+        null, null);
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    headers.setBasicAuth("owntracks", "owntracks");
+    headers.add("X-Limit-D", "tes-device");
+
+    HttpEntity<com.fadhlika.lokasi.dto.owntracks.Location> request = new HttpEntity<>(location, headers);
+
+    @SuppressWarnings("unchecked")
+    ResponseEntity<ArrayList<Message>> res = testRestTemplate
+        .withBasicAuth("owntracks", "owntracks")
+        .exchange("/api/owntracks", HttpMethod.POST, request, (Class<ArrayList<Message>>) ((Class) ArrayList.class));
+
+    assertEquals(res.getStatusCode(), HttpStatusCode.valueOf(200));
+
+    ArrayList<Message> messages = res.getBody();
+
+    assertNotNull(messages);
+    assertEquals(messages.size(), 0);
   }
 
   @Test
   public void createTour() throws Exception {
-    mvc.perform(post("/api/owntracks")
-        .header("Authorization", "Basic b3dudHJhY2tzOm93bnRyYWNrcw==")
-        .header("X-Limit-D", "tes-device")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content("""
-            {
-              "_type": "request",
-              "request": "tour",
-              "tour": {
-                "label": "Meeting with C. in Essen",
-                "from": "2022-08-01T05:35:58",
-                "to": "2022-08-02T15:00:58"
-              }
-            }"""))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$._type", equalTo("cmd")))
-        .andExpect(jsonPath("$.action", equalTo("response")))
-        .andExpect(jsonPath("$.request", equalTo("tour")))
-        .andExpect(jsonPath("$.status", equalTo(200)))
-        .andExpect(jsonPath("$.tour.label", equalTo("Meeting with C. in Essen")))
-        .andExpect(jsonPath("$.tour.from", equalTo("2022-08-01T05:35:58")))
-        .andExpect(jsonPath("$.tour.to", equalTo("2022-08-02T15:00:58")));
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    headers.setBasicAuth("owntracks", "owntracks");
+    headers.add("X-Limit-D", "tes-device");
 
-    mvc.perform(post("/api/owntracks")
-        .header("Authorization", "Basic b3dudHJhY2tzOm93bnRyYWNrcw==")
-        .header("X-Limit-D", "tes-device")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content("""
-            {
-              "_type": "request",
-              "request": "tours"
-            }"""))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$._type", equalTo("cmd")))
-        .andExpect(jsonPath("$.action", equalTo("response")))
-        .andExpect(jsonPath("$.request", equalTo("tours")))
-        .andExpect(jsonPath("$.ntours", equalTo(1)))
-        .andExpect(jsonPath("$.tours[0].label", equalTo("Meeting with C. in Essen")))
-        .andExpect(jsonPath("$.tours[0].from", equalTo("2022-08-01T05:35:58")))
-        .andExpect(jsonPath("$.tours[0].to", equalTo("2022-08-02T15:00:58")));
+    Tour tour = new Tour("Meeting with C. in Essen", LocalDateTime.parse("2022-08-01T05:35:58").atZone(ZoneOffset.UTC),
+        LocalDateTime.parse("2022-08-02T15:00:58").atZone(ZoneOffset.UTC), null, null);
 
+    Request req = new Request("tour", tour, null);
+
+    HttpEntity<Request> request = new HttpEntity<>(req, headers);
+
+    ResponseEntity<Cmd> res = testRestTemplate
+        .withBasicAuth("owntracks", "owntracks")
+        .exchange("/api/owntracks", HttpMethod.POST, request, Cmd.class);
+
+    assertEquals(res.getStatusCode(), HttpStatusCode.valueOf(200));
+
+    Cmd cmd = res.getBody();
+
+    assertNotNull(cmd);
+    assertEquals(cmd._type(), "cmd");
+    assertEquals(cmd.action(), "response");
+    assertEquals(cmd.request(), "tour");
+    assertEquals(cmd.status(), 200);
+    assertEquals(cmd.tour().label(), "Meeting with C. in Essen");
+    assertEquals(cmd.tour().from(), "2022-08-01T05:35:58");
+    assertEquals(cmd.tour().to(), "2022-08-02T15:00:58");
+
+    req = new Request("tours", null, null);
+
+    request = new HttpEntity<>(req, headers);
+
+    res = testRestTemplate
+        .withBasicAuth("owntracks", "owntracks")
+        .exchange("/api/owntracks", HttpMethod.POST, request, Cmd.class);
+
+    assertEquals(res.getStatusCode(), HttpStatusCode.valueOf(200));
+
+    cmd = res.getBody();
+
+    assertNotNull(cmd);
+    assertEquals(cmd._type(), "cmd");
+    assertEquals(cmd.action(), "response");
+    assertEquals(cmd.request(), "tours");
+    assertEquals(cmd.tours().size(), 1);
+    assertEquals(cmd.tours().get(0).label(), "Meeting with C. in Essen");
+    assertEquals(cmd.tours().get(0).from(), "2022-08-01T05:35:58");
+    assertEquals(cmd.tours().get(0).to(), "2022-08-02T15:00:58");
   }
 
   @Test
   public void publishWaypoint() throws Exception {
-    mvc.perform(post("/api/owntracks")
-        .header("Authorization", "Basic b3dudHJhY2tzOm93bnRyYWNrcw==")
-        .header("X-Limit-D", "tes-device")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content("""
-            {
-                "_type": "waypoint",
-                "desc": "Here-4a23e5",
-                "lat": -1.23456,
-                "lon": 12.34567,
-                "rad": 10,
-                "tst": 1756003551,
-                "uuid": null,
-                "major": null,
-                "minor": null,
-                "rid": "4a23e5"
-            }"""))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(0)));
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    headers.setBasicAuth("owntracks", "owntracks");
+    headers.add("X-Limit-D", "tes-device");
+
+    Waypoint waypoint = new Waypoint("Here-4a23e5", -1.23456, 12.34567, 10, 1756003551, null, null, null, "4a23e5");
+
+    HttpEntity<Waypoint> request = new HttpEntity<>(waypoint, headers);
+
+    @SuppressWarnings("unchecked")
+    ResponseEntity<ArrayList<Message>> res = testRestTemplate
+        .withBasicAuth("owntracks", "owntracks")
+        .exchange("/api/owntracks", HttpMethod.POST, request, (Class<ArrayList<Message>>) ((Class) ArrayList.class));
+
+    assertEquals(res.getStatusCode(), HttpStatusCode.valueOf(200));
+
+    ArrayList<Message> messages = res.getBody();
+
+    assertNotNull(messages);
+    assertEquals(messages.size(), 0);
   }
 }
