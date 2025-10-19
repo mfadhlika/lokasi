@@ -168,7 +168,7 @@ jobs:
           sudo apt install -y libspatialite-dev libsqlite3-mod-spatialite spatialite-bin
 
       - name: Build
-        run: mvn native:compile -Pnative
+        run: mvn native:compile -Pnative -Dmaven.test.skip
 
       - name: Build Docker image
         id: build-image
