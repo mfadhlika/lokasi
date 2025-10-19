@@ -2,6 +2,7 @@ package com.fadhlika.lokasi.dto;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 public class Response<T> {
@@ -13,6 +14,7 @@ public class Response<T> {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public final List<String> errors;
 
+    @JsonCreator
     public Response(T data, String message, List<String> errors) {
         this.data = data;
         this.message = message;

@@ -52,8 +52,10 @@ class OwntracksMqttConfig {
         DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
         MqttConnectOptions options = new MqttConnectOptions();
         options.setServerURIs(servers);
-        options.setUserName(username);
-        options.setPassword(password.toCharArray());
+        if (!username.isEmpty())
+            options.setUserName(username);
+        if (!password.isEmpty())
+            options.setPassword(password.toCharArray());
         factory.setConnectionOptions(options);
         return factory;
     }
@@ -63,8 +65,7 @@ class OwntracksMqttConfig {
         MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
                 "lokasi",
                 mqttClientFactory(),
-                "owntracks/+/+"
-        );
+                "owntracks/+/+");
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(1);
@@ -83,11 +84,14 @@ class OwntracksMqttConfig {
         }).handle(message -> {
             String topic = message.getHeaders().get("mqtt_receivedTopic", String.class);
 
+            logger.info("handle message %s", topic);
+
             String username;
             String deviceId;
             String command;
             try {
-                Pattern pattern = Pattern.compile("owntracks/(?<username>[a-zA-Z0-9-_]+)/(?<deviceId>[a-zA-Z0-9-_]+)/?(?<command>[a-zA-Z0-9-_]*)");
+                Pattern pattern = Pattern.compile(
+                        "owntracks/(?<username>[a-zA-Z0-9-_]+)/(?<deviceId>[a-zA-Z0-9-_]+)/?(?<command>[a-zA-Z0-9-_]*)");
                 Matcher matcher = pattern.matcher(topic);
 
                 matcher.find();
@@ -102,7 +106,8 @@ class OwntracksMqttConfig {
 
             switch (command) {
                 case "" ->
-                    this.owntracksMqttController.addLocation(username, deviceId, (com.fadhlika.lokasi.dto.owntracks.Location) message.getPayload());
+                    this.owntracksMqttController.addLocation(username, deviceId,
+                            (com.fadhlika.lokasi.dto.owntracks.Location) message.getPayload());
                 case "cmd" -> {
                 }
                 default ->

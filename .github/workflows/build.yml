@@ -2,11 +2,11 @@ name: build
 
 on:
   push:
-    branches: ["main"]
-    tags: ["v*.*.*"]
+    branches: ['main']
+    tags: ['v*.*.*']
     paths-ignore:
-      - "Readme.md"
-      - ".github/screenshots/**"
+      - 'Readme.md'
+      - '.github/screenshots/**'
 
 env:
   REGISTRY: ghcr.io
@@ -14,7 +14,7 @@ env:
 
 jobs:
   test-webui:
-    name: "Test Web UI"
+    name: 'Test Web UI'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -36,16 +36,32 @@ jobs:
         run: npm run test
 
   test-api:
-    name: "Test API"
+    name: 'Test API'
     runs-on: ubuntu-latest
+
+    services:
+      mosquitto:
+        image: eclipse-mosquitto
+        ports:
+          - 1883:1883
+        volumes:
+          - /tmp/docker/mosquitto/config:/mosquitto/config
+        options: --name mosquitto
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Prepare mosquitto config
+        run: |
+          sudo mkdir -p /tmp/docker/mosquitto/config
+          echo -e 'listener 1883\nallow_anonymous true\nlog_type error warning notice information\n' | sudo tee /tmp/docker/mosquitto/config/mosquitto.conf
+          docker restart mosquitto
+
       - uses: graalvm/setup-graalvm@v1
         with:
-          java-version: "24"
-          distribution: "graalvm"
+          java-version: '24'
+          distribution: 'graalvm'
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Spatialite
@@ -53,11 +69,18 @@ jobs:
           sudo apt update && \
           sudo apt install -y libspatialite-dev libsqlite3-mod-spatialite spatialite-bin
 
-      - name: Test
+      - name: Running tests
         run: mvn test
+        env:
+          MQTT_ENABLE: true
+          MQTT_SERVER: tcp://127.0.0.1:1883
+          ADMIN_USERNAME: test
+          ADMIN_PASSWORD: test
+          JWT_SECRET: jwt-secret-for-test
+          JWT_REFRESH_SECRET: jwt-refresh-secret-for-test
 
   build-webui:
-    name: "Build Web UI"
+    name: 'Build Web UI'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -86,7 +109,7 @@ jobs:
           path: ./webui/dist
 
   build:
-    name: "Build Application"
+    name: 'Build Application'
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
@@ -114,8 +137,8 @@ jobs:
 
       - uses: graalvm/setup-graalvm@v1
         with:
-          java-version: "24"
-          distribution: "graalvm"
+          java-version: '24'
+          distribution: 'graalvm'
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Prepare
