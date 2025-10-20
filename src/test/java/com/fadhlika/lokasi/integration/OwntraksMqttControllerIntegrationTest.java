@@ -1,9 +1,15 @@
 package com.fadhlika.lokasi.integration;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.paho.client.mqttv3.IMqttClient;
+import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -18,6 +24,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
@@ -26,7 +33,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
@@ -37,6 +43,7 @@ import com.fadhlika.lokasi.dto.Auth;
 import com.fadhlika.lokasi.dto.FeatureCollection;
 import com.fadhlika.lokasi.dto.LoginRequest;
 import com.fadhlika.lokasi.dto.Response;
+import com.fadhlika.lokasi.dto.owntracks.Cmd;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -49,8 +56,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class OwntraksMqttControllerIntegrationTest {
         private final Logger logger = LoggerFactory.getLogger(OwntraksMqttControllerIntegrationTest.class);
 
-        @Autowired
-        MqttPahoClientFactory mqttClientFactory;
+        @Value("${mqtt.server}")
+        private String mqttServer;
 
         @Autowired
         private TestRestTemplate testRestTemplate;
@@ -65,9 +72,8 @@ public class OwntraksMqttControllerIntegrationTest {
         @BeforeAll
         public void setUp() throws MqttException, JsonMappingException, JsonProcessingException {
                 try {
-                        client = mqttClientFactory
-                                        .getClientInstance(mqttClientFactory.getConnectionOptions().getServerURIs()[0],
-                                                        MqttClient.generateClientId());
+                        client = new MqttClient(mqttServer, "test");
+
                         client.connect();
                 } catch (MqttException e) {
                         logger.error("Failed to connect mqtt broker {}: {}", client.getServerURI(), e.getMessage());
@@ -91,7 +97,7 @@ public class OwntraksMqttControllerIntegrationTest {
         }
 
         @Test
-        public void addLocation() throws MqttPersistenceException, MqttException, InterruptedException,
+        public void publishLocation() throws MqttPersistenceException, MqttException, InterruptedException,
                         JsonMappingException, JsonProcessingException {
                 MqttMessage msg = new MqttMessage("""
                                 {
@@ -128,11 +134,63 @@ public class OwntraksMqttControllerIntegrationTest {
                 assertNotNull(locationRes);
                 assertNotNull(locationRes.data);
                 assertNotNull(locationRes.data.features());
-                assertEquals(locationRes.data.features().size(), 1);
+                assertEquals(1, locationRes.data.features().size());
 
                 GeometryFactory gf = new GeometryFactory();
                 Geometry geometry = gf.createPoint(new Coordinate(12.34567, -1.23456));
 
                 assertEquals(locationRes.data.features().get(0).getGeometry(), geometry);
+        }
+
+        @Test
+        public void createTour() {
+                CountDownLatch lock = new CountDownLatch(1);
+
+                var listener = new IMqttMessageListener() {
+                        public Cmd cmd;
+
+                        @Override
+                        public void messageArrived(String topic, MqttMessage message) {
+                                try {
+                                        cmd = mapper.readValue(message.getPayload(), Cmd.class);
+
+                                        client.unsubscribe("owntracks/test/my_device_id/cmd");
+                                } catch (Exception e) {
+                                        e.printStackTrace();
+                                } finally {
+                                        lock.countDown();
+                                }
+                        }
+                };
+
+                assertDoesNotThrow(
+                                () -> client.subscribe("owntracks/test/my_device_id/cmd", listener));
+
+                MqttMessage msg = new MqttMessage("""
+                                {
+                                  "_type": "request",
+                                  "request": "tour",
+                                  "tour": {
+                                          "label":"Meeting with C. in Essen",
+                                          "from": "2022-08-01T05:35:58",
+                                          "to": "2022-08-02T15:00:58"
+                                  }
+                                }""".getBytes());
+
+                assertDoesNotThrow(() -> client.publish("owntracks/test/my_device_id/request", msg));
+
+                assertDoesNotThrow(() -> assertTrue(lock.await(15, TimeUnit.SECONDS)), "didn't receive message");
+
+                assertNotNull(listener.cmd);
+                assertEquals("cmd", listener.cmd._type());
+                assertEquals("response", listener.cmd.action());
+                assertEquals("tour", listener.cmd.request());
+                assertEquals(200, listener.cmd.status());
+                assertNotNull(listener.cmd.tour());
+                assertEquals("Meeting with C. in Essen", listener.cmd.tour().label());
+                assertEquals("2022-08-01T05:35:58", listener.cmd.tour().from());
+                assertEquals("2022-08-02T15:00:58", listener.cmd.tour().to());
+                assertNotNull(listener.cmd.tour().uuid());
+
         }
 }
