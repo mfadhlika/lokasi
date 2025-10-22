@@ -62,56 +62,6 @@ class OwntracksMqttConfig {
         return handler;
     }
 
-    // @Bean
-    // public IntegrationFlow mqttInFlow(ClientManager<IMqttAsyncClient,
-    // MqttConnectOptions> clientManager) {
-    // MqttPahoMessageDrivenChannelAdapter messageProducer = new
-    // MqttPahoMessageDrivenChannelAdapter(clientManager,
-    // "owntracks/+/+", "owntracks/+/+/cmd", "owntracks/+/+/request");
-    // return IntegrationFlow.from(messageProducer).transform(m -> {
-    // ObjectMapper mapper = new ObjectMapper();
-    // try {
-    // return mapper.readValue(m.toString(), Message.class);
-    // } catch (JsonProcessingException e) {
-    // throw new RuntimeException(e);
-    // }
-    // }).handle(message -> {
-    // String topic = message.getHeaders().get("mqtt_receivedTopic", String.class);
-
-    // logger.info("handle message %s", topic);
-
-    // String username;
-    // String deviceId;
-    // String command;
-    // try {
-    // Pattern pattern = Pattern.compile(
-    // "owntracks/(?<username>[a-zA-Z0-9-_]+)/(?<deviceId>[a-zA-Z0-9-_]+)/?(?<command>[a-zA-Z0-9-_]*)");
-    // Matcher matcher = pattern.matcher(topic);
-
-    // matcher.find();
-
-    // username = matcher.group("username");
-    // deviceId = matcher.group("deviceId");
-    // command = matcher.group("command");
-    // } catch (Exception e) {
-    // logger.error("error extracting topic {}: {}", topic, e.getMessage());
-    // return;
-    // }
-
-    // this.owntracksMqttController.handleMessage(command, username, deviceId,
-    // (com.fadhlika.lokasi.dto.owntracks.Message) message.getPayload());
-    // }).get();
-
-    // }
-
-    // @Bean
-    // @ServiceActivator(inputChannel = "mqttOutboundChannel")
-    // public IntegrationFlow mqttOutFlow(
-    // ClientManager<IMqttAsyncClient, MqttConnectOptions> clientManager) {
-
-    // return f -> f.handle(new MqttPahoMessageHandler(clientManager));
-    // }
-
     @Bean
     public MessageChannel mqttOutboundChannel() {
         return new DirectChannel();

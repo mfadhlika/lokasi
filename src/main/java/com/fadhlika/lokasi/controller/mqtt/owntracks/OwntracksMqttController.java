@@ -1,6 +1,7 @@
 package com.fadhlika.lokasi.controller.mqtt.owntracks;
 
 import com.fadhlika.lokasi.dto.owntracks.Cmd;
+import com.fadhlika.lokasi.gateways.MqttGateway;
 import com.fadhlika.lokasi.model.Trip;
 import com.fadhlika.lokasi.model.User;
 import com.fadhlika.lokasi.service.LocationService;
@@ -48,7 +49,7 @@ public class OwntracksMqttController {
     private TripService tripService;
 
     @Autowired
-    private MessageChannel mqttOutboundChannel;
+    private MqttGateway mqttGateway;
 
     @ServiceActivator(inputChannel = "mqttInboundChannel")
     public void handleMessage(String payload, @Header(MqttHeaders.RECEIVED_TOPIC) String topic)
@@ -99,10 +100,8 @@ public class OwntracksMqttController {
                                 String.format("%s/trips/%s", baseUrl, trip.uuid())));
 
                 try {
-                    String res = mapper.writeValueAsString(cmd);
-                    Message<String> resMessage = MessageBuilder.withPayload(res).setHeader(MqttHeaders.TOPIC,
-                            String.format("owntracks/%s/%s/cmd", username, deviceId)).build();
-                    mqttOutboundChannel.send(resMessage);
+                    String resPayload = mapper.writeValueAsString(cmd);
+                    mqttGateway.publish(String.format("owntracks/%s/%s/cmd", username, deviceId), resPayload);
                 } catch (JsonProcessingException e) {
                     logger.error("failed to serialize tour creation response", e);
                 }
