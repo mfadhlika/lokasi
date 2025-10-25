@@ -1,35 +1,41 @@
 package com.fadhlika.lokasi.controller.mqtt.owntracks;
 
 import com.fadhlika.lokasi.dto.owntracks.Cmd;
+import com.fadhlika.lokasi.dto.owntracks.Message;
+import com.fadhlika.lokasi.exception.UnhandledMqttMessage;
 import com.fadhlika.lokasi.gateways.MqttGateway;
+import com.fadhlika.lokasi.model.MqttMessage;
 import com.fadhlika.lokasi.model.Trip;
 import com.fadhlika.lokasi.model.User;
 import com.fadhlika.lokasi.service.LocationService;
+import com.fadhlika.lokasi.service.MqttService;
+import com.fadhlika.lokasi.service.OwntracksMqttService;
 import com.fadhlika.lokasi.service.TripService;
 import com.fadhlika.lokasi.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.lang.classfile.ClassFile.Option;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.mqtt.support.MqttHeaders;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 public class OwntracksMqttController {
     private final Logger logger = LoggerFactory.getLogger(OwntracksMqttController.class);
 
@@ -40,74 +46,80 @@ public class OwntracksMqttController {
     private ObjectMapper mapper;
 
     @Autowired
-    private LocationService locationService;
+    private OwntracksMqttService owntracksMqttService;
 
     @Autowired
     private UserService userService;
 
     @Autowired
-    private TripService tripService;
+    private MqttService mqttService;
 
     @Autowired
     private MqttGateway mqttGateway;
 
     @ServiceActivator(inputChannel = "mqttInboundChannel")
-    public void handleMessage(String payload, @Header(MqttHeaders.RECEIVED_TOPIC) String topic)
-            throws JsonMappingException, JsonProcessingException {
-        logger.info("handle message %s", topic);
+    public void handleMessage(String payload, @Header(MqttHeaders.RECEIVED_TOPIC) String topic,
+            @Header(MqttHeaders.ID) String id) {
+        logger.info("handle message {} from {}", id, topic);
 
-        String username;
-        String deviceId;
-        String command;
-        Pattern pattern = Pattern.compile(
-                "owntracks/(?<username>[a-zA-Z0-9-_]+)/(?<deviceId>[a-zA-Z0-9-_]+)/?(?<command>[a-zA-Z0-9-_]*)");
-        Matcher matcher = pattern.matcher(topic);
+        UUID messageSerial = mqttService.saveMessage(payload, topic);
 
-        matcher.find();
+        try {
+            String username;
+            String deviceId;
+            String command;
+            Pattern pattern = Pattern.compile(
+                    "owntracks/(?<username>[a-zA-Z0-9-_]+)/(?<deviceId>[a-zA-Z0-9-_]+)/?(?<command>[a-zA-Z0-9-_]*)");
+            Matcher matcher = pattern.matcher(topic);
 
-        username = matcher.group("username");
-        deviceId = matcher.group("deviceId");
-        command = matcher.group("command");
+            matcher.find();
 
-        User user = (User) userService.loadUserByUsername(username);
+            username = matcher.group("username");
+            deviceId = matcher.group("deviceId");
+            command = matcher.group("command");
 
-        com.fadhlika.lokasi.dto.owntracks.Message message = mapper.readValue(payload,
-                com.fadhlika.lokasi.dto.owntracks.Message.class);
+            User user = (User) userService.loadUserByUsername(username);
 
-        switch (message) {
-            case com.fadhlika.lokasi.dto.owntracks.Location location:
-                try {
-                    this.locationService.saveLocation(location.toLocation(user.getId(), deviceId));
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
+            com.fadhlika.lokasi.dto.owntracks.Message message = mapper.readValue(payload,
+                    com.fadhlika.lokasi.dto.owntracks.Message.class);
+
+            Optional<?> res = this.owntracksMqttService.handleMessage(user, deviceId, message);
+
+            if (res.isPresent()) {
+                var value = res.get();
+                if (value instanceof List) {
+                    @SuppressWarnings("unchecked")
+                    List<com.fadhlika.lokasi.dto.owntracks.Message> messages = (List<com.fadhlika.lokasi.dto.owntracks.Message>) value;
+                    for (com.fadhlika.lokasi.dto.owntracks.Message msg : messages) {
+                        String resPayload = mapper.writeValueAsString(message);
+                        switch (msg) {
+                            case com.fadhlika.lokasi.dto.owntracks.Cmd _:
+                                mqttGateway.publish(String.format("owntracks/%s/%s/cmd", username, deviceId),
+                                        resPayload);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                } else {
+                    com.fadhlika.lokasi.dto.owntracks.Message msg = (com.fadhlika.lokasi.dto.owntracks.Message) value;
+                    String resPayload = mapper.writeValueAsString(msg);
+                    switch (msg) {
+                        case com.fadhlika.lokasi.dto.owntracks.Cmd _:
+                            mqttGateway.publish(String.format("owntracks/%s/%s/cmd", username, deviceId),
+                                    resPayload);
+                            break;
+                        default:
+                            break;
+                    }
                 }
+            }
 
-                break;
-            case com.fadhlika.lokasi.dto.owntracks.Request request:
-                Trip trip = this.tripService.saveTrip(
-                        new Trip(user.getId(), request.tour().label(),
-                                LocalDateTime
-                                        .parse(request.tour().from(), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-                                        .atZone(ZoneOffset.UTC),
-                                LocalDateTime.parse(request.tour().to(), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-                                        .atZone(ZoneOffset.UTC),
-                                true));
-
-                Cmd cmd = new com.fadhlika.lokasi.dto.owntracks.Cmd("response", 200,
-                        new com.fadhlika.lokasi.dto.owntracks.Tour(trip.title(),
-                                trip.startAt(),
-                                trip.endAt(), trip.uuid(),
-                                String.format("%s/trips/%s", baseUrl, trip.uuid())));
-
-                try {
-                    String resPayload = mapper.writeValueAsString(cmd);
-                    mqttGateway.publish(String.format("owntracks/%s/%s/cmd", username, deviceId), resPayload);
-                } catch (JsonProcessingException e) {
-                    logger.error("failed to serialize tour creation response", e);
-                }
-            default:
-                break;
+            mqttService.updateMessageStatus(messageSerial, MqttMessage.Status.PROCESSED);
+        } catch (Exception e) {
+            logger.error("error processing message: ", e);
+            mqttService.updateMessageStatus(messageSerial, MqttMessage.Status.ERROR, e.getMessage());
         }
-
     }
+
 }

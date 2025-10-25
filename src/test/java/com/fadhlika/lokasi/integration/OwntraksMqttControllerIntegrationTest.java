@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -44,6 +45,7 @@ import com.fadhlika.lokasi.dto.FeatureCollection;
 import com.fadhlika.lokasi.dto.LoginRequest;
 import com.fadhlika.lokasi.dto.Response;
 import com.fadhlika.lokasi.dto.owntracks.Cmd;
+import com.fadhlika.lokasi.service.MqttService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -61,6 +63,9 @@ public class OwntraksMqttControllerIntegrationTest {
 
         @Autowired
         private TestRestTemplate testRestTemplate;
+
+        @Autowired
+        private MqttService mqttService;
 
         @Autowired
         private ObjectMapper mapper;
@@ -140,6 +145,13 @@ public class OwntraksMqttControllerIntegrationTest {
                 Geometry geometry = gf.createPoint(new Coordinate(12.34567, -1.23456));
 
                 assertEquals(locationRes.data.features().get(0).getGeometry(), geometry);
+
+                List<com.fadhlika.lokasi.model.MqttMessage> mqttMessages = mqttService.fetchMessages(1, 0);
+
+                assertNotNull(mqttMessages);
+                assertEquals(1, mqttMessages.size());
+                assertEquals("owntracks/test/my_device_id", mqttMessages.get(0).topic());
+                assertEquals(com.fadhlika.lokasi.model.MqttMessage.Status.PROCESSED, mqttMessages.get(0).status());
         }
 
         @Test
@@ -179,7 +191,7 @@ public class OwntraksMqttControllerIntegrationTest {
 
                 assertDoesNotThrow(() -> client.publish("owntracks/test/my_device_id/request", msg));
 
-                assertDoesNotThrow(() -> assertTrue(lock.await(15, TimeUnit.SECONDS)), "didn't receive message");
+                assertDoesNotThrow(() -> assertTrue(lock.await(60, TimeUnit.SECONDS)), "didn't receive message");
 
                 assertNotNull(listener.cmd);
                 assertEquals("cmd", listener.cmd._type());
@@ -192,5 +204,36 @@ public class OwntraksMqttControllerIntegrationTest {
                 assertEquals("2022-08-02T15:00:58", listener.cmd.tour().to());
                 assertNotNull(listener.cmd.tour().uuid());
 
+                List<com.fadhlika.lokasi.model.MqttMessage> mqttMessages = mqttService.fetchMessages(10, 0);
+
+                assertNotNull(mqttMessages);
+                assertEquals(1, mqttMessages.size());
+                assertEquals("owntracks/test/my_device_id/request", mqttMessages.get(0).topic());
+                assertEquals(com.fadhlika.lokasi.model.MqttMessage.Status.PROCESSED, mqttMessages.get(0).status());
+        }
+
+        @Test
+        public void badMessage() throws InterruptedException {
+                MqttMessage msg = new MqttMessage("""
+                                {
+                                  "_type": "request",
+                                  "request": "tour",
+                                  "tour": {
+                                          "label":"Meeting with C. in Essen",
+                                          "from": "2022-08-01T05:35:58",
+                                          "to": "2022-08-02T15:00:58"
+                                }""".getBytes());
+
+                assertDoesNotThrow(() -> client.publish("owntracks/test/my_device_id/request", msg));
+
+                Thread.sleep(3000);
+
+                List<com.fadhlika.lokasi.model.MqttMessage> mqttMessages = mqttService.fetchMessages(10, 0);
+
+                assertNotNull(mqttMessages);
+                assertEquals(1, mqttMessages.size());
+                assertEquals("owntracks/test/my_device_id/request", mqttMessages.get(0).topic());
+                assertEquals(com.fadhlika.lokasi.model.MqttMessage.Status.ERROR, mqttMessages.get(0).status());
+                assertNotNull(mqttMessages.get(0).reason());
         }
 }

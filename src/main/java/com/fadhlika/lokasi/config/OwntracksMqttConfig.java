@@ -1,8 +1,6 @@
 package com.fadhlika.lokasi.config;
 
-import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,8 +9,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
-import org.springframework.integration.mqtt.core.ClientManager;
-import org.springframework.integration.mqtt.core.Mqttv3ClientManager;
+import org.springframework.integration.mqtt.core.DefaultMqttPahoClientFactory;
+import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.messaging.MessageChannel;
@@ -33,32 +31,35 @@ class OwntracksMqttConfig {
     private final Logger logger = LoggerFactory.getLogger(OwntracksMqttConfig.class);
 
     @Bean
-    public ClientManager<IMqttAsyncClient, MqttConnectOptions> clientManager() {
+    public MqttPahoClientFactory mqttClientFactory() {
+        DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
         MqttConnectOptions options = new MqttConnectOptions();
         options.setServerURIs(servers);
+        options.setAutomaticReconnect(true);
+
         if (!username.isEmpty())
             options.setUserName(username);
         if (!password.isEmpty())
             options.setPassword(password.toCharArray());
-        Mqttv3ClientManager clientManager = new Mqttv3ClientManager(options, "lokasi");
-        clientManager.setPersistence(new MqttDefaultFilePersistence());
-        return clientManager;
+
+        factory.setConnectionOptions(options);
+        return factory;
     }
 
     @Bean
     public MqttPahoMessageDrivenChannelAdapter inboundAdapter(
-            ClientManager<IMqttAsyncClient, MqttConnectOptions> mqttClientManager) {
-        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(mqttClientManager,
-                "owntracks/+/+", "owntracks/+/+/cmd", "owntracks/+/+/request");
+            MqttPahoClientFactory mqttClientFactory) {
+        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter("lokasi_sub",
+                mqttClientFactory, "owntracks/+/+", "owntracks/+/+/request");
+        adapter.setQos(1);
         adapter.setOutputChannel(mqttInboundChannel());
         return adapter;
     }
 
     @Bean
     @ServiceActivator(inputChannel = "mqttOutboundChannel")
-    public MqttPahoMessageHandler outboundAdapter(
-            ClientManager<IMqttAsyncClient, MqttConnectOptions> mqttClientManager) {
-        MqttPahoMessageHandler handler = new MqttPahoMessageHandler(mqttClientManager);
+    public MqttPahoMessageHandler outboundAdapter(MqttPahoClientFactory mqttClientFactory) {
+        MqttPahoMessageHandler handler = new MqttPahoMessageHandler("lokasi_pub", mqttClientFactory);
         return handler;
     }
 
