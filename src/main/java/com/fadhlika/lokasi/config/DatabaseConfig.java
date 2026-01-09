@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import org.flywaydb.core.Flyway;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,14 +19,16 @@ import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
 public class DatabaseConfig {
-    @Value("${lokasi.data_dir}")
-    private String dataDir;
+    @Value("${lokasi.db_path}")
+    private String dbPath;
+
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseConfig.class);
 
     @Bean
     @Primary
     public DataSource mainDataSource() throws SQLException {
         SQLiteDataSource sqliteDataSource = new SQLiteDataSource();
-        sqliteDataSource.setUrl(String.format("jdbc:sqlite:%s/lokasi.db", dataDir));
+        sqliteDataSource.setUrl(String.format("jdbc:sqlite:%s", dbPath));
         sqliteDataSource.setLoadExtension(true);
         sqliteDataSource.setJournalMode("WAL");
 

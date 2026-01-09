@@ -15,6 +15,7 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -36,10 +37,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
 import com.fadhlika.lokasi.LokasiApplication;
-import com.fadhlika.lokasi.config.DatabaseConfigTestContext;
 import com.fadhlika.lokasi.dto.Auth;
 import com.fadhlika.lokasi.dto.FeatureCollection;
 import com.fadhlika.lokasi.dto.LoginRequest;
@@ -52,9 +52,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = LokasiApplication.class)
-@ContextConfiguration(classes = DatabaseConfigTestContext.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestInstance(Lifecycle.PER_CLASS)
+@TestPropertySource(locations = "classpath:test.properties")
 public class OwntraksMqttControllerIntegrationTest {
         private final Logger logger = LoggerFactory.getLogger(OwntraksMqttControllerIntegrationTest.class);
 
@@ -99,6 +99,11 @@ public class OwntraksMqttControllerIntegrationTest {
                 });
 
                 token = loginRes.data.accessToken();
+        }
+
+        @AfterAll
+        public void tearDown() throws MqttException {
+                client.disconnect();
         }
 
         @Test

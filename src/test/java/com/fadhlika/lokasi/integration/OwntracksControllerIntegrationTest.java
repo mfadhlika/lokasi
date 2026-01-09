@@ -1,6 +1,8 @@
 package com.fadhlika.lokasi.integration;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -12,7 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import com.fadhlika.lokasi.LokasiApplication;
-import com.fadhlika.lokasi.config.DatabaseConfigTestContext;
 import com.fadhlika.lokasi.dto.owntracks.Cmd;
 import com.fadhlika.lokasi.dto.owntracks.Message;
 import com.fadhlika.lokasi.dto.owntracks.Request;
@@ -21,7 +22,7 @@ import com.fadhlika.lokasi.dto.owntracks.Waypoint;
 
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -31,8 +32,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = LokasiApplication.class)
-@ContextConfiguration(classes = DatabaseConfigTestContext.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@TestInstance(Lifecycle.PER_CLASS)
+@TestPropertySource(locations = "classpath:test.properties")
 public class OwntracksControllerIntegrationTest {
   @Autowired
   private TestRestTemplate testRestTemplate;
