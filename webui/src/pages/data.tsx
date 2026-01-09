@@ -23,7 +23,7 @@ export default function DataPage() {
     const limit = filter.limit || 25;
 
     useEffect(() => {
-        locationService.fetchLocations({ start: date?.from, end: date?.to, device })
+        locationService.fetchLocations({ start: date?.from, end: date?.to, device, limit, offset })
             .then(({ data }) => {
                 const newData = data.features.map(feature => {
                     return {

@@ -17,6 +17,8 @@ class LocationService {
         if (query.end) params.set('end', query.end.toJSON());
         if (query.device && query.device != 'all') params.append('device', query.device);
         if (query.bounds) params.set('bounds', query.bounds.toBBoxString());
+        if (query.limit) params.set('limit', query.limit.toString());
+        if (query.offset) params.set('offset', query.offset.toString());
 
         return await axiosInstance
             .get<Response<FeatureCollection<Point, PointProperties>>>(`v1/locations?${params.toString()}`)
