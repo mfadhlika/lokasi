@@ -53,7 +53,7 @@ public class PlaceRepository {
 
     public void createPlace(Place place) {
         jdbcClient.sql("""
-                INSERT INTO place(
+                INSERT OR IGNORE INTO place(
                     provider,
                     geometry,
                     type,
