@@ -23,6 +23,7 @@ import { locationService } from "@/services/location-service";
 import type { Trip } from "@/types/requests/trip";
 import { tripFormSchema } from "@/types/schema/trip";
 import { tripService } from "@/services/trip-service";
+import { v4 as uuidv4 } from 'uuid'; // For version 4 (random)
 
 export type NewTripDialogProps = React.ComponentProps<"div"> & {
     onClose?: () => void,
@@ -60,7 +61,10 @@ export const NewTripDialog = ({ className, onClose, trip, children }: NewTripDia
     }, [open, startAt, endAt]);
 
     const onSubmit = (values: Trip) => {
-        tripService.createTrip(values)
+        tripService.createTrip({
+            uuid: uuidv4(),
+            ...values
+        })
             .then(_ => {
                 toast.success("Trip saved successfully");
                 setOpen(false);
