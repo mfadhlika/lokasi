@@ -84,6 +84,8 @@ public class ReverseGeocodeServiceTest {
                         "RW 02",
                         "Jalan Medan Merdeka Utara",
                         "Jawa",
+                        "",
+                        "",
                         new ArrayList<>() {
                             {
                                 add(106.8267455);
