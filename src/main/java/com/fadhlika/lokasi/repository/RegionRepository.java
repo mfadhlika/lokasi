@@ -72,6 +72,8 @@ public class RegionRepository {
     }
 
     public List<Region> fetchRegions(int userId) {
-        return jdbcClient.sql("SELECT * FROM region WHERE user_id = ?").param(userId).query(rowMapper).list();
+        return jdbcClient.sql(
+                "SELECT id, user_id, desc, ST_AsBinary(geometry) AS geometry,  beacon_uuid, beacon_major, beacon_minor, rid, geocode, created_at FROM region WHERE user_id = ?")
+                .param(userId).query(rowMapper).list();
     }
 }

@@ -22,7 +22,7 @@ public class Response<T> {
     }
 
     public Response(T data) {
-        this(data, "", null);
+        this(data, "success", null);
     }
 
     public Response(String message) {
