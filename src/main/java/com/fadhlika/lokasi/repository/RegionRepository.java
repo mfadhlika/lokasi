@@ -6,6 +6,9 @@ import java.sql.ResultSet;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKBReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Repository;
 
 import com.fadhlika.lokasi.dto.FeatureCollection;
 import com.fadhlika.lokasi.model.Region;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Repository
@@ -22,6 +26,8 @@ public class RegionRepository {
 
     @Autowired
     private ObjectMapper mapper;
+
+    private final WKBReader wkbReader = new WKBReader();
 
     private final RowMapper<Region> rowMapper = (ResultSet rs, int rowNum) -> {
         FeatureCollection geocode = null;
@@ -33,30 +39,35 @@ public class RegionRepository {
                 throw new RuntimeException(e);
             }
         }
+        byte[] point = rs.getBytes("geometry");
+        Geometry geometry;
+        try {
+            geometry = wkbReader.read(point);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
 
-        return new Region(rs.getInt("id"), rs.getInt("user_id"), rs.getString("desc"), rs.getDouble("lat"),
-                rs.getDouble("lon"), rs.getInt("rad"), rs.getString("beacon_uuid"), rs.getInt("beacon_major"),
+        return new Region(rs.getInt("id"), rs.getInt("user_id"), rs.getString("desc"), geometry,
+                rs.getString("beacon_uuid"), rs.getInt("beacon_major"),
                 rs.getInt("beacon_minor"), rs.getString("rid"), geocode,
                 ZonedDateTime.parse(rs.getString("created_at")));
     };
 
-    public void createRegion(Region region) {
+    public void createRegion(Region region) throws JsonProcessingException {
         jdbcClient
                 .sql("""
-                            INSERT INTO region(user_id, desc, lat, lon, rad, beacon_uuid, beacon_major, beacon_minor, rid, geocode, created_at)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            INSERT INTO region(user_id, desc, geometry, beacon_uuid, beacon_major, beacon_minor, rid, geocode, created_at)
+                            VALUES (?, ?, ST_GeomFromText(?), ?, ?, ?, ?, jsonb(?), ?)
                         """)
-                .param(region.userId())
-                .param(region.desc())
-                .param(region.lat())
-                .param(region.lon())
-                .param(region.rad())
-                .param(region.beaconUUID())
-                .param(region.beaconMajor())
-                .param(region.beaconMinor())
-                .param(region.rid())
-                .param(region.geocode())
-                .param(region.createdAt())
+                .param(region.getUserId())
+                .param(region.getDesc())
+                .param(region.getGeometry())
+                .param(region.getBeaconUUID())
+                .param(region.getBeaconMajor())
+                .param(region.getBeaconMinor())
+                .param(region.getRid())
+                .param(mapper.writeValueAsString(region.getGeocode()))
+                .param(region.getCreatedAt())
                 .update();
     }
 

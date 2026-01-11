@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.locationtech.jts.algorithm.MinimumBoundingCircle;
+import org.locationtech.jts.geom.Coordinate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +27,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
-public class OwntracksMqttService {
+public class OwntracksService {
 
-    private final Logger logger = LoggerFactory.getLogger(OwntracksMqttService.class);
+    private final Logger logger = LoggerFactory.getLogger(OwntracksService.class);
 
     @Value("${lokasi.base_url}")
     private String baseUrl;
@@ -65,16 +67,21 @@ public class OwntracksMqttService {
         this.locationService.saveLocation(location.toLocation(user.getId(), deviceId));
 
         List<Waypoint> waypoints = this.regionService.fetchRegions(user.getId()).stream()
-                .map(region -> new Waypoint(
-                        region.desc(),
-                        region.lat(),
-                        region.lon(),
-                        region.rad(),
-                        Math.toIntExact(region.createdAt().toEpochSecond()),
-                        region.beaconUUID(),
-                        region.beaconMajor(),
-                        region.beaconMinor(),
-                        region.rid()))
+                .map(region -> {
+                    Coordinate coord = region.getGeometry().getCoordinate();
+                    MinimumBoundingCircle circle = new MinimumBoundingCircle(region.getGeometry());
+
+                    return new Waypoint(
+                            region.getDesc(),
+                            coord.y,
+                            coord.x,
+                            (int) circle.getRadius(),
+                            Math.toIntExact(region.getCreatedAt().toEpochSecond()),
+                            region.getBeaconUUID(),
+                            region.getBeaconMajor(),
+                            region.getBeaconMinor(),
+                            region.getRid());
+                })
                 .toList();
         if (!waypoints.isEmpty())
             res.add(new Cmd("setWaypoints", new Waypoints(null, waypoints)));
@@ -123,10 +130,15 @@ public class OwntracksMqttService {
 
     public Optional<Void> handleMessageWaypoint(User user, String deviceId,
             com.fadhlika.lokasi.dto.owntracks.Waypoint waypoint) {
-        regionService.createRegion(new Region(user.getId(), waypoint.desc(), waypoint.lat(), waypoint.lon(),
-                waypoint.rad(), waypoint.uuid(), waypoint.major(), waypoint.minor(), waypoint.rid(),
-                Instant.ofEpochSecond(waypoint.tst()).atZone(ZoneOffset.UTC)));
+        try {
+            regionService.createRegion(new Region(user.getId(), waypoint.desc(), waypoint.lat(), waypoint.lon(),
+                    waypoint.rad(), waypoint.uuid(), waypoint.major(), waypoint.minor(), waypoint.rid(),
+                    Instant.ofEpochSecond(waypoint.tst()).atZone(ZoneOffset.UTC)));
 
-        return Optional.empty();
+            return Optional.empty();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw ex;
+        }
     }
 }

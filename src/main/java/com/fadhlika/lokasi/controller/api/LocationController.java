@@ -107,7 +107,7 @@ public class LocationController {
 
                         Feature feature = new Feature(location.getGeometry(), props);
                         return ResponseEntity.ok().body(new Response<>(feature, "success"));
-                } catch (NoSuchElementException _) {
+                } catch (NoSuchElementException e) {
                         return ResponseEntity.status(HttpStatus.NO_CONTENT)
                                         .body(new Response<>("last location doesn't exist"));
                 }

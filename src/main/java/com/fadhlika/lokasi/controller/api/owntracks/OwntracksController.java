@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fadhlika.lokasi.dto.owntracks.Message;
 import com.fadhlika.lokasi.model.User;
-import com.fadhlika.lokasi.service.OwntracksMqttService;
+import com.fadhlika.lokasi.service.OwntracksService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
@@ -37,7 +37,7 @@ public class OwntracksController {
         private String baseUrl;
 
         @Autowired
-        private OwntracksMqttService owntracksMqttService;
+        private OwntracksService owntracksMqttService;
 
         @PostMapping
         public ResponseEntity<?> pub(@RequestHeader("X-Limit-D") String deviceId,

@@ -9,13 +9,12 @@ import com.fadhlika.lokasi.model.Trip;
 import com.fadhlika.lokasi.model.User;
 import com.fadhlika.lokasi.service.LocationService;
 import com.fadhlika.lokasi.service.MqttService;
-import com.fadhlika.lokasi.service.OwntracksMqttService;
+import com.fadhlika.lokasi.service.OwntracksService;
 import com.fadhlika.lokasi.service.TripService;
 import com.fadhlika.lokasi.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.lang.classfile.ClassFile.Option;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -46,7 +45,7 @@ public class OwntracksMqttController {
     private ObjectMapper mapper;
 
     @Autowired
-    private OwntracksMqttService owntracksMqttService;
+    private OwntracksService owntracksService;
 
     @Autowired
     private UserService userService;
@@ -83,7 +82,7 @@ public class OwntracksMqttController {
             com.fadhlika.lokasi.dto.owntracks.Message message = mapper.readValue(payload,
                     com.fadhlika.lokasi.dto.owntracks.Message.class);
 
-            Optional<?> res = this.owntracksMqttService.handleMessage(user, deviceId, message);
+            Optional<?> res = this.owntracksService.handleMessage(user, deviceId, message);
 
             if (res.isPresent()) {
                 var value = res.get();
@@ -93,7 +92,7 @@ public class OwntracksMqttController {
                     for (com.fadhlika.lokasi.dto.owntracks.Message msg : messages) {
                         String resPayload = mapper.writeValueAsString(message);
                         switch (msg) {
-                            case com.fadhlika.lokasi.dto.owntracks.Cmd _:
+                            case com.fadhlika.lokasi.dto.owntracks.Cmd e:
                                 mqttGateway.publish(String.format("owntracks/%s/%s/cmd", username, deviceId),
                                         resPayload);
                                 break;
@@ -105,7 +104,7 @@ public class OwntracksMqttController {
                     com.fadhlika.lokasi.dto.owntracks.Message msg = (com.fadhlika.lokasi.dto.owntracks.Message) value;
                     String resPayload = mapper.writeValueAsString(msg);
                     switch (msg) {
-                        case com.fadhlika.lokasi.dto.owntracks.Cmd _:
+                        case com.fadhlika.lokasi.dto.owntracks.Cmd e:
                             mqttGateway.publish(String.format("owntracks/%s/%s/cmd", username, deviceId),
                                     resPayload);
                             break;

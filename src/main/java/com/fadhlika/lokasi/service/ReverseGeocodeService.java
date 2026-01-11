@@ -1,7 +1,7 @@
 package com.fadhlika.lokasi.service;
 
-import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import org.locationtech.jts.geom.Coordinate;
@@ -112,8 +112,8 @@ public class ReverseGeocodeService {
                 Thread.sleep(1000);
             }
 
-            Duration duration = start.until(Instant.now());
-            logger.info("reverse geocoded {} locations in {}s", i, duration.getSeconds());
+            long duration = start.until(Instant.now(), ChronoUnit.SECONDS);
+            logger.info("reverse geocoded {} locations in {}s", i, duration);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
