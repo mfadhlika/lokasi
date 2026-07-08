@@ -3,6 +3,8 @@ package com.fadhlika.kelana.repository;
 import com.fadhlika.kelana.dto.Stats;
 import java.sql.ResultSet;
 import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -14,14 +16,20 @@ public class StatsRepository {
     @Autowired
     private JdbcClient jdbClient;
 
-    private final RowMapper<Stats> rowMapper = (ResultSet rs, int rowNum) -> new Stats(
-            rs.getInt("total_points"),
-            rs.getInt("total_reverse_geocoded_points"),
-            rs.getInt("total_cities_visited"),
-            rs.getInt("total_countries_visited"),
-            rs
-                    .getObject("last_point_timestamp", OffsetDateTime.class)
-                    .toZonedDateTime());
+    private final RowMapper<Stats> rowMapper = (ResultSet rs, int rowNum) -> {
+
+        OffsetDateTime lastPointTimestampOS = rs.getObject("last_point_timestamp", OffsetDateTime.class);
+        ZonedDateTime lastPointTimestamp = null;
+        if (lastPointTimestampOS != null) {
+            lastPointTimestamp = lastPointTimestampOS.toZonedDateTime();
+        }
+        return new Stats(
+                rs.getInt("total_points"),
+                rs.getInt("total_reverse_geocoded_points"),
+                rs.getInt("total_cities_visited"),
+                rs.getInt("total_countries_visited"),
+                lastPointTimestamp);
+    };
 
     public Stats getStats(int userId) {
         return jdbClient
