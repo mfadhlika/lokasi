@@ -1,6 +1,5 @@
 package com.fadhlika.kelana.controller.api;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,11 +20,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 @RestController
 @RequestMapping("/api/v1/integration")
 public class IntegrationController {
-    @Autowired
-    private IntegrationService integrationService;
+    private final IntegrationService integrationService;
 
-    @Autowired
-    private OwntracksService owntracksService;
+    private final OwntracksService owntracksService;
+
+    IntegrationController(IntegrationService integrationService, OwntracksService owntracksService) {
+        this.integrationService = integrationService;
+        this.owntracksService = owntracksService;
+    }
 
     @PutMapping
     public Response<Integration> saveIntegration(@RequestBody SaveIntegrationRequest request) {

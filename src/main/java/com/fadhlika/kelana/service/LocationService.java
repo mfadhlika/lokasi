@@ -11,7 +11,6 @@ import java.util.Optional;
 import org.locationtech.jts.geom.Geometry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -34,22 +33,27 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 @Service
 public class LocationService {
 
+    @SuppressWarnings("unused")
     private static final Logger logger = LoggerFactory.getLogger(LocationService.class);
 
     @Value("${reverse_geocode.batch_size}")
     private int batchSize;
 
-    @Autowired
-    private LocationRepository locationRepository;
+    private final LocationRepository locationRepository;
 
-    @Autowired
-    private ReverseGeocodeService reverseGeocodeService;
+    private final ReverseGeocodeService reverseGeocodeService;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    private SimpMessagingTemplate simpMessagingTemplate;
+    private final SimpMessagingTemplate simpMessagingTemplate;
+
+    LocationService(LocationRepository locationRepository, ReverseGeocodeService reverseGeocodeService,
+            UserService userService, SimpMessagingTemplate simpMessagingTemplate) {
+        this.locationRepository = locationRepository;
+        this.reverseGeocodeService = reverseGeocodeService;
+        this.userService = userService;
+        this.simpMessagingTemplate = simpMessagingTemplate;
+    }
 
     public void saveLocation(Location location) {
         try {

@@ -1,6 +1,5 @@
 package com.fadhlika.kelana.controller.api;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,8 +21,11 @@ public class AuthController {
     @Value("${jwt.refresh-expiry}")
     private Long jwtRefreshExpiry;
 
-    @Autowired
-    private JwtAuthService jwtAuthService;
+    private final JwtAuthService jwtAuthService;
+
+    AuthController(JwtAuthService jwtAuthService) {
+        this.jwtAuthService = jwtAuthService;
+    }
 
     @PostMapping("/api/v1/login")
     public Response<Auth> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {

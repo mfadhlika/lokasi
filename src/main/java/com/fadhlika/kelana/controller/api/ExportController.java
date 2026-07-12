@@ -3,7 +3,6 @@ package com.fadhlika.kelana.controller.api;
 import java.io.IOException;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,8 +24,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RestController
 @RequestMapping("/api/v1/exports")
 public class ExportController {
-    @Autowired
-    private ExportService exportService;
+    private final ExportService exportService;
+
+    ExportController(ExportService exportService) {
+        this.exportService = exportService;
+    }
 
     @PostMapping
     public ResponseEntity<Response<Void>> exportLocations(@RequestBody Export export) {

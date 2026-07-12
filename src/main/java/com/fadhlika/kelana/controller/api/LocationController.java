@@ -11,7 +11,6 @@ import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.geom.Geometry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,10 +33,14 @@ import com.fadhlika.kelana.service.LocationService;
 @RequestMapping("/api/v1/locations")
 public class LocationController {
 
+        @SuppressWarnings("unused")
         private static final Logger logger = LoggerFactory.getLogger(LocationController.class);
 
-        @Autowired
-        private LocationService locationService;
+        private final LocationService locationService;
+
+        LocationController(LocationService locationService) {
+                this.locationService = locationService;
+        }
 
         @GetMapping
         public Response<FeatureCollection> getLocations(

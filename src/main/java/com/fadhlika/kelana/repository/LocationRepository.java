@@ -23,12 +23,12 @@ import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.core.simple.JdbcClient.MappedQuerySpec;
 import org.springframework.jdbc.core.simple.JdbcClient.StatementSpec;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -40,19 +40,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Repository
 public class LocationRepository {
 
+    @SuppressWarnings("unused")
     private static final Logger logger = LoggerFactory.getLogger(LocationRepository.class);
 
-    @Autowired
-    private JdbcClient jdbcClient;
+    private final JdbcClient jdbcClient;
 
     private final WKBReader wkbReader = new WKBReader();
 
-    @Autowired
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
     private final RowMapper<Location> locationRowMapper = new RowMapper<Location>() {
         @Override
-        public Location mapRow(ResultSet rs, int rowNum) throws SQLException {
+        public Location mapRow(@NonNull ResultSet rs, int rowNum) throws SQLException {
             Location location;
             byte[] point = rs.getBytes("geometry");
             try {
@@ -91,6 +90,11 @@ public class LocationRepository {
             return location;
         }
     };
+
+    LocationRepository(JdbcClient jdbcClient, ObjectMapper mapper) {
+        this.jdbcClient = jdbcClient;
+        this.mapper = mapper;
+    }
 
     public void createLocation(Location location) throws DataAccessException, JsonProcessingException {
         StringBuilder sqlBuilder = new StringBuilder("INSERT INTO location(");

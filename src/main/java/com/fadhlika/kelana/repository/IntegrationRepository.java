@@ -3,7 +3,6 @@ package com.fadhlika.kelana.repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -13,14 +12,17 @@ import com.fadhlika.kelana.model.Integration;
 @Repository
 public class IntegrationRepository {
 
-    @Autowired
-    private JdbcClient jdbcClient;
+    private final JdbcClient jdbcClient;
 
     private final RowMapper<Integration> rowMapper = (ResultSet rs, int rowNum) -> new Integration(
             rs.getInt("user_id"),
             rs.getString("owntracks_username"),
             rs.getString("owntracks_password"),
             rs.getString("overland_api_key"));
+
+    IntegrationRepository(JdbcClient jdbcClient) {
+        this.jdbcClient = jdbcClient;
+    }
 
     public void save(Integration integration) throws SQLException {
         jdbcClient

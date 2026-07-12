@@ -3,7 +3,6 @@ package com.fadhlika.kelana.controller.api;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,8 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RestController
 @RequestMapping("/api/v1/places")
 public class PlaceController {
-    @Autowired
-    private PlaceService placeService;
+    private final PlaceService placeService;
+
+    PlaceController(PlaceService placeService) {
+        this.placeService = placeService;
+    }
 
     @GetMapping
     public Response<List<Place>> fetchPlaces(

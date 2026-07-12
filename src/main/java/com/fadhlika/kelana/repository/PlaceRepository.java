@@ -11,7 +11,6 @@ import java.util.Optional;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -23,11 +22,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Repository
 public class PlaceRepository {
-    @Autowired
-    public JdbcClient jdbcClient;
+    public final JdbcClient jdbcClient;
 
-    @Autowired
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
     private final WKBReader wkbReader = new WKBReader();
 
@@ -46,7 +43,7 @@ public class PlaceRepository {
         InputStream geodataIS = rs.getAsciiStream("geodata");
         if (geodataIS != null) {
             try {
-                geodata = mapper.readValue(geodataIS, FeatureCollection.class);
+                geodata = ((PlaceRepository) this).mapper.readValue(geodataIS, FeatureCollection.class);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -69,6 +66,11 @@ public class PlaceRepository {
                 geodata,
                 rs.getObject("created_at", OffsetDateTime.class).toZonedDateTime());
     };
+
+    PlaceRepository(JdbcClient jdbcClient, ObjectMapper mapper) {
+        this.jdbcClient = jdbcClient;
+        this.mapper = mapper;
+    }
 
     public void createPlace(Place place) throws JsonProcessingException {
         jdbcClient.sql("""

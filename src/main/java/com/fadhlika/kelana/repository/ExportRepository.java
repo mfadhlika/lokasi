@@ -5,7 +5,6 @@ import java.sql.ResultSet;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -14,8 +13,7 @@ import com.fadhlika.kelana.model.Export;
 
 @Repository
 public class ExportRepository {
-    @Autowired
-    private JdbcClient jdbcClient;
+    private final JdbcClient jdbcClient;
 
     private final RowMapper<Export> rowMapper = (ResultSet rs, int rowNum) -> {
         return new Export(
@@ -28,6 +26,10 @@ public class ExportRepository {
                 rs.getBoolean("done"),
                 rs.getObject("created_at", OffsetDateTime.class).toZonedDateTime());
     };
+
+    ExportRepository(JdbcClient jdbcClient) {
+        this.jdbcClient = jdbcClient;
+    }
 
     public void save(Export export) throws IOException {
         jdbcClient.sql("""

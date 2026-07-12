@@ -10,7 +10,6 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.MultiLineString;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,8 +37,11 @@ public class TripController {
     @Value("${kelana.base_url}")
     private String baseUrl;
 
-    @Autowired
-    private TripService tripService;
+    private final TripService tripService;
+
+    TripController(TripService tripService) {
+        this.tripService = tripService;
+    }
 
     @PostMapping
     public Response<?> saveTrip(@RequestBody Trip trip) {

@@ -2,7 +2,6 @@ package com.fadhlika.kelana.controller.api;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,8 +25,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequestMapping("/api/v1/regions")
 public class RegionController {
-    @Autowired
-    private RegionService regionService;
+    private final RegionService regionService;
+
+    RegionController(RegionService regionService) {
+        this.regionService = regionService;
+    }
 
     @GetMapping
     public Response<FeatureCollection> getRegions() {

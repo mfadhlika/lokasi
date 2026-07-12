@@ -12,7 +12,6 @@ import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -26,11 +25,11 @@ import com.fadhlika.kelana.model.User;
 @Repository
 public class UserRepository {
 
+    @SuppressWarnings("unused")
     private static final Logger logger = LoggerFactory.getLogger(UserRepository.class);
 
     private final JdbcClient jdbcClient;
 
-    @Autowired
     public UserRepository(DataSource dataSource) {
         this.jdbcClient = JdbcClient.create(dataSource);
     }

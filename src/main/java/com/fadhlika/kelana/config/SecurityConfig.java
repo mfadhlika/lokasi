@@ -2,7 +2,6 @@ package com.fadhlika.kelana.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,6 +22,7 @@ import com.fadhlika.kelana.service.UserService;
 @EnableWebSecurity
 public class SecurityConfig {
 
+        @SuppressWarnings("unused")
         private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
         private final JwtAuthFilter jwtAuthFilter;
@@ -33,7 +33,6 @@ public class SecurityConfig {
 
         private final SecurityFilterException securityFilterException;
 
-        @Autowired
         public SecurityConfig(JwtAuthService jwtAuthService, UserService userService,
                         IntegrationService integrationService, SecurityFilterException securityFilterException) {
                 this.jwtAuthFilter = new JwtAuthFilter(jwtAuthService, userService);

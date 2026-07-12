@@ -2,7 +2,6 @@ package com.fadhlika.kelana.service;
 
 import java.sql.SQLException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +17,6 @@ public class IntegrationService {
 
     private final PasswordEncoder passwordEncoder;
 
-    @Autowired
     public IntegrationService(IntegrationRepository integrationRepository, PasswordEncoder passwordEncoder) {
         this.integrationRepository = integrationRepository;
         this.passwordEncoder = passwordEncoder;

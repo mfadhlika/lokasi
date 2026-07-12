@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -16,8 +15,7 @@ import com.fadhlika.kelana.model.Trip;
 
 @Repository
 public class TripRepository {
-    @Autowired
-    private JdbcClient jdbcClient;
+    private final JdbcClient jdbcClient;
 
     private final RowMapper<Trip> rowMapper = (ResultSet rs, int rowNum) -> {
         UUID uuid = null;
@@ -34,6 +32,10 @@ public class TripRepository {
                 uuid,
                 rs.getBoolean("is_public"));
     };
+
+    TripRepository(JdbcClient jdbcClient) {
+        this.jdbcClient = jdbcClient;
+    }
 
     public void saveTrip(Trip trip) {
         jdbcClient

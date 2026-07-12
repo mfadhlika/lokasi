@@ -2,7 +2,6 @@ package com.fadhlika.kelana.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
@@ -23,8 +22,11 @@ public class AdminGenerator implements CommandLineRunner {
     @Value("${admin.password}")
     private String adminPassword;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    AdminGenerator(UserService userService) {
+        this.userService = userService;
+    }
 
     @Override
     public void run(String... args) throws Exception {

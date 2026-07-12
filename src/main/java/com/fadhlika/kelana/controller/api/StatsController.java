@@ -1,6 +1,5 @@
 package com.fadhlika.kelana.controller.api;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,8 +13,11 @@ import com.fadhlika.kelana.service.StatsService;
 @RestController
 @RequestMapping("/api/v1/stats")
 public class StatsController {
-    @Autowired
-    private StatsService statsService;
+    private final StatsService statsService;
+
+    StatsController(StatsService statsService) {
+        this.statsService = statsService;
+    }
 
     @GetMapping
     public Response<Stats> getUserStats() {

@@ -11,6 +11,7 @@ import java.util.Base64.Decoder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -32,6 +33,7 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class OwntracksAuthFilter extends OncePerRequestFilter {
 
+    @SuppressWarnings("unused")
     private static final Logger logger = LoggerFactory.getLogger(OwntracksAuthFilter.class);
 
     private final UserService userService;
@@ -44,7 +46,8 @@ public class OwntracksAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain)
             throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
         String username = null;

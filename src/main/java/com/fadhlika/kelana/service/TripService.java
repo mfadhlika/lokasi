@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fadhlika.kelana.model.Location;
@@ -14,11 +13,14 @@ import com.fadhlika.kelana.repository.TripRepository;
 
 @Service
 public class TripService {
-    @Autowired
-    private TripRepository tripRepository;
+    private final TripRepository tripRepository;
 
-    @Autowired
-    private LocationRepository locationRepository;
+    private final LocationRepository locationRepository;
+
+    TripService(TripRepository tripRepository, LocationRepository locationRepository) {
+        this.tripRepository = tripRepository;
+        this.locationRepository = locationRepository;
+    }
 
     public Trip saveTrip(Trip trip) {
         tripRepository.saveTrip(trip);

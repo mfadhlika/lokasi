@@ -19,6 +19,7 @@ public class OverlandInputDeserializer extends JsonDeserializer<Feature> {
         GeoJsonReader reader = new GeoJsonReader();
         try {
             Geometry geometry = reader.read(p.getText());
+            @SuppressWarnings("unchecked")
             HashMap<String, Object> properties = p.readValueAs(HashMap.class);
             return new Feature(geometry, properties);
         } catch (ParseException e) {

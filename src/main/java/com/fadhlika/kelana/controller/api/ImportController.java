@@ -5,7 +5,6 @@ import com.fadhlika.kelana.model.Import;
 import com.fadhlika.kelana.model.User;
 import com.fadhlika.kelana.service.ImportService;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,8 +15,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/imports")
 public class ImportController {
-    @Autowired
-    private ImportService importService;
+    private final ImportService importService;
+
+    ImportController(ImportService importService) {
+        this.importService = importService;
+    }
 
     @PostMapping
     public Response<Void> importLocations(@RequestParam("source") String source,

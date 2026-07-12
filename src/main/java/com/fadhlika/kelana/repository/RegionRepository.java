@@ -10,7 +10,6 @@ import java.util.List;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -22,11 +21,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Repository
 public class RegionRepository {
-    @Autowired
-    private JdbcClient jdbcClient;
+    private final JdbcClient jdbcClient;
 
-    @Autowired
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
     private final WKBReader wkbReader = new WKBReader();
 
@@ -35,7 +32,7 @@ public class RegionRepository {
         InputStream geocodeIS = rs.getBinaryStream("geocode");
         if (geocodeIS != null) {
             try {
-                geocode = mapper.readValue(geocodeIS, FeatureCollection.class);
+                geocode = ((RegionRepository) this).mapper.readValue(geocodeIS, FeatureCollection.class);
             } catch (IOException e) {
             }
         }
@@ -52,6 +49,11 @@ public class RegionRepository {
                 rs.getInt("beacon_minor"), rs.getString("rid"), geocode,
                 rs.getObject("created_at", OffsetDateTime.class).toZonedDateTime());
     };
+
+    RegionRepository(JdbcClient jdbcClient, ObjectMapper mapper) {
+        this.jdbcClient = jdbcClient;
+        this.mapper = mapper;
+    }
 
     public void createRegions(List<Region> regions) throws JsonProcessingException {
         List<String> params = new ArrayList<>();

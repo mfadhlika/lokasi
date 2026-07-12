@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -19,7 +18,6 @@ public class ImportRepository {
 
     private final JdbcClient jdbcClient;
 
-    @Autowired
     public ImportRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcClient = JdbcClient.create(jdbcTemplate);
     }

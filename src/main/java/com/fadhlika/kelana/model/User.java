@@ -4,8 +4,6 @@
  */
 package com.fadhlika.kelana.model;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.List;

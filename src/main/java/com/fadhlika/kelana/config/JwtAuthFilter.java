@@ -8,6 +8,7 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -31,6 +32,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * @author fadhl
  */
 public class JwtAuthFilter extends OncePerRequestFilter {
+    @SuppressWarnings("unused")
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
 
     private final JwtAuthService jwtAuthService;
@@ -43,7 +45,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain)
             throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
         String jwt = null;
@@ -76,7 +79,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
         String path = request.getServletPath();
         return path.startsWith("/api/v1/login")
                 || path.startsWith("/api/v1/logout")

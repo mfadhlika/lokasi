@@ -34,6 +34,7 @@ public class DatabaseConfig {
     @Value("${spring.flyway.clean-disabled:false}")
     private boolean cleanDisabled;
 
+    @SuppressWarnings("unused")
     private static final Logger logger = LoggerFactory.getLogger(DatabaseConfig.class);
 
     @Bean

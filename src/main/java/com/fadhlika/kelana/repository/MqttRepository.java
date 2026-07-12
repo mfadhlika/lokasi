@@ -7,7 +7,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
@@ -15,8 +14,11 @@ import com.fadhlika.kelana.model.MqttMessage;
 
 @Repository
 public class MqttRepository {
-    @Autowired
-    private JdbcClient jdbcClient;
+    private final JdbcClient jdbcClient;
+
+    MqttRepository(JdbcClient jdbcClient) {
+        this.jdbcClient = jdbcClient;
+    }
 
     public void createMessage(UUID uuid, String topic, String payload) {
         jdbcClient

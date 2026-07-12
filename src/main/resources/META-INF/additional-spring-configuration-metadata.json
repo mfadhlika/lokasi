@@ -1,0 +1,99 @@
+{
+    "properties": [
+        {
+            "name": "kelana.backup_dir",
+            "type": "java.lang.String",
+            "description": "Directory for backup files'"
+        },
+        {
+            "name": "kelana.db_host",
+            "type": "java.lang.String",
+            "description": "Postgis database host"
+        },
+        {
+            "name": "kelana.db_port",
+            "type": "java.lang.String",
+            "description": "Postgis database port"
+        },
+        {
+            "name": "kelana.db_user",
+            "type": "java.lang.String",
+            "description": "Postgis database user"
+        },
+        {
+            "name": "kelana.db_name",
+            "type": "java.lang.String",
+            "description": "Postgis database name"
+        },
+        {
+            "name": "kelana.db_password",
+            "type": "java.lang.String",
+            "description": "Postgis database password"
+        },
+        {
+            "name": "kelana.base_url",
+            "type": "java.lang.String",
+            "description": "Public base url"
+        },
+        {
+            "name": "jwt.secret",
+            "type": "java.lang.String",
+            "description": "Secret for JWT"
+        },
+        {
+            "name": "jwt.refresh-secret",
+            "type": "java.lang.String",
+            "description": "Secret for JWT Refresh"
+        },
+        {
+            "name": "jwt.expiry",
+            "type": "java.lang.String",
+            "description": "JWT expiration in seconds"
+        },
+        {
+            "name": "jwt.refresh-expiry",
+            "type": "java.lang.String",
+            "description": "JWT Refresh expiration in seconds"
+        },
+        {
+            "name": "mqtt.enable",
+            "type": "java.lang.String",
+            "description": "Enable/disable MQTT"
+        },
+        {
+            "name": "mqtt.server",
+            "type": "java.lang.String",
+            "description": "MQTT host"
+        },
+        {
+            "name": "mqtt.username",
+            "type": "java.lang.String",
+            "description": "username for MQTT authentication"
+        },
+        {
+            "name": "mqtt.password",
+            "type": "java.lang.String",
+            "description": "Password for MQTT authentication"
+        },
+        {
+            "name": "admin.username",
+            "type": "java.lang.String",
+            "description": "Admin's username"
+        },
+        {
+            "name": "admin.password",
+            "type": "java.lang.String",
+            "description": "Admin's password"
+        },
+        {
+            "name": "photon.base_url",
+            "type": "java.lang.String",
+            "description": "Base url for photon reverse geocode"
+        },
+        {
+            "name": "reverse_geocode.batch_size",
+            "type": "java.lang.String",
+            "description": "Reverse geocode batch size"
+        }
+    ]
+}

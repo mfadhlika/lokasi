@@ -12,7 +12,6 @@ import java.util.zip.Checksum;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -35,11 +34,14 @@ public class ImportService {
 
     private static final Logger logger = LoggerFactory.getLogger(ImportService.class);
 
-    @Autowired
-    private LocationService locationService;
+    private final LocationService locationService;
 
-    @Autowired
-    private ImportRepository importRepository;
+    private final ImportRepository importRepository;
+
+    ImportService(LocationService locationService, ImportRepository importRepository) {
+        this.locationService = locationService;
+        this.importRepository = importRepository;
+    }
 
     private void saveImport(int userId, String source, String filename, InputStream content) {
         try {

@@ -28,6 +28,7 @@ class OwntracksMqttConfig {
     @Value("${mqtt.password}")
     private String password;
 
+    @SuppressWarnings("unused")
     private final Logger logger = LoggerFactory.getLogger(OwntracksMqttConfig.class);
 
     @Bean

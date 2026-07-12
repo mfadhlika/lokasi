@@ -5,7 +5,6 @@ import java.sql.ResultSet;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -13,8 +12,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class StatsRepository {
 
-    @Autowired
-    private JdbcClient jdbClient;
+    private final JdbcClient jdbClient;
 
     private final RowMapper<Stats> rowMapper = (ResultSet rs, int rowNum) -> {
 
@@ -30,6 +28,10 @@ public class StatsRepository {
                 rs.getInt("total_countries_visited"),
                 lastPointTimestamp);
     };
+
+    StatsRepository(JdbcClient jdbClient) {
+        this.jdbClient = jdbClient;
+    }
 
     public Stats getStats(int userId) {
         return jdbClient

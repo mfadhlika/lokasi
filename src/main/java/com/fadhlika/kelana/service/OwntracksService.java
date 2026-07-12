@@ -12,7 +12,6 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.locationtech.jts.geom.Coordinate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -36,20 +35,24 @@ public class OwntracksService {
     @Value("${kelana.base_url}")
     private String baseUrl;
 
-    @Autowired
-    private LocationService locationService;
+    private final LocationService locationService;
 
-    @Autowired
-    private TripService tripService;
+    private final TripService tripService;
 
-    @Autowired
-    private RegionService regionService;
+    private final RegionService regionService;
 
-    @Autowired
-    private MqttGateway mqttGateway;
+    private final MqttGateway mqttGateway;
 
-    @Autowired
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
+
+    OwntracksService(ObjectMapper mapper, LocationService locationService, TripService tripService,
+            RegionService regionService, MqttGateway mqttGateway) {
+        this.mapper = mapper;
+        this.locationService = locationService;
+        this.tripService = tripService;
+        this.regionService = regionService;
+        this.mqttGateway = mqttGateway;
+    }
 
     public Optional<?> handleMessage(User user, String deviceId, com.fadhlika.kelana.dto.owntracks.Message message)
             throws JsonProcessingException {

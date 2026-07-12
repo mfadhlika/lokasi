@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -23,11 +22,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ExportService {
     private static final Logger logger = LoggerFactory.getLogger(ExportService.class);
 
-    @Autowired
-    private ExportRepository exportRepository;
+    private final ExportRepository exportRepository;
 
-    @Autowired
-    private LocationService locationService;
+    private final LocationService locationService;
+
+    ExportService(ExportRepository exportRepository, LocationService locationService) {
+        this.exportRepository = exportRepository;
+        this.locationService = locationService;
+    }
 
     public Export exportLocations(Export export) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");

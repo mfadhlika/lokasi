@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,11 +21,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 @RestController
 public class OverlandController {
 
+    @SuppressWarnings("unused")
     private final Logger logger = LoggerFactory.getLogger(OverlandController.class);
 
     private final LocationService locationService;
 
-    @Autowired
     public OverlandController(LocationService locationService) {
         this.locationService = locationService;
     }

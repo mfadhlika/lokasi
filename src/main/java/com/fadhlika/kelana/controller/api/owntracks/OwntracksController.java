@@ -8,7 +8,6 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,13 +30,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 @RequestMapping("/api/owntracks")
 public class OwntracksController {
 
+        @SuppressWarnings("unused")
         private final Logger logger = LoggerFactory.getLogger(OwntracksController.class);
 
         @Value("${kelana.base_url}")
         private String baseUrl;
 
-        @Autowired
-        private OwntracksService owntracksService;
+        private final OwntracksService owntracksService;
+
+        OwntracksController(OwntracksService owntracksService) {
+                this.owntracksService = owntracksService;
+        }
 
         @PostMapping
         public ResponseEntity<?> pub(@RequestHeader("X-Limit-D") String deviceId,

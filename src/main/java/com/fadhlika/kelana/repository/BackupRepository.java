@@ -1,12 +1,9 @@
 package com.fadhlika.kelana.repository;
 
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
@@ -15,8 +12,12 @@ public class BackupRepository {
     @Value("${kelana.backup_dir}")
     private String backupDir;
 
-    @Autowired
-    private DataSource ds;
+    @SuppressWarnings("unused")
+    private final DataSource ds;
+
+    BackupRepository(DataSource ds) {
+        this.ds = ds;
+    }
 
     public void createBackup() throws SQLException {
 

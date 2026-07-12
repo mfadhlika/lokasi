@@ -11,12 +11,10 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import com.fadhlika.kelana.dto.Feature;
 import com.fadhlika.kelana.dto.FeatureCollection;
@@ -34,17 +32,18 @@ public class ReverseGeocodeService {
     @Value("${reverse_geocode.batch_size}")
     private int batchSize;
 
-    @Autowired
-    private LocationRepository locationRepository;
+    private final LocationRepository locationRepository;
 
-    @Autowired
-    private PhotonRepository photonRepository;
+    private final PhotonRepository photonRepository;
 
-    @Autowired
-    private PlaceRepository placeRepository;
+    private final PlaceRepository placeRepository;
 
-    @Autowired
-    private ObjectMapper mapper;
+    ReverseGeocodeService(LocationRepository locationRepository, PhotonRepository photonRepository,
+            PlaceRepository placeRepository, ObjectMapper mapper) {
+        this.locationRepository = locationRepository;
+        this.photonRepository = photonRepository;
+        this.placeRepository = placeRepository;
+    }
 
     @Async
     public void startReverseGeocode() {

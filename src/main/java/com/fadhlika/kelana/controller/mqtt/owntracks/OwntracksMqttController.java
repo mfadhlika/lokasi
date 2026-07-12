@@ -1,6 +1,5 @@
 package com.fadhlika.kelana.controller.mqtt.owntracks;
 
-import com.fadhlika.kelana.gateways.MqttGateway;
 import com.fadhlika.kelana.model.MqttMessage;
 import com.fadhlika.kelana.model.User;
 import com.fadhlika.kelana.service.MqttService;
@@ -16,7 +15,6 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -32,17 +30,21 @@ public class OwntracksMqttController {
     @Value("${kelana.base_url}")
     private String baseUrl;
 
-    @Autowired
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
-    @Autowired
-    private OwntracksService owntracksService;
+    private final OwntracksService owntracksService;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    private MqttService mqttService;
+    private final MqttService mqttService;
+
+    OwntracksMqttController(ObjectMapper mapper, OwntracksService owntracksService, UserService userService,
+            MqttService mqttService) {
+        this.mapper = mapper;
+        this.owntracksService = owntracksService;
+        this.userService = userService;
+        this.mqttService = mqttService;
+    }
 
     @ServiceActivator(inputChannel = "mqttInboundChannel")
     public void handleMessage(String payload, @Header(MqttHeaders.RECEIVED_TOPIC) String topic,
@@ -59,6 +61,7 @@ public class OwntracksMqttController {
         try {
             String username;
             String deviceId;
+            @SuppressWarnings("unused")
             String command;
             Pattern pattern = Pattern.compile(
                     "owntracks/(?<username>[a-zA-Z0-9-_]+)/(?<deviceId>[a-zA-Z0-9-_]+)/?(?<command>[a-zA-Z0-9-_]*)");
