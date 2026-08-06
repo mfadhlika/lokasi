@@ -16,7 +16,7 @@ import com.fadhlika.kelana.dto.PointProperties;
 import com.fadhlika.kelana.exception.InternalErrorException;
 import com.fadhlika.kelana.model.Export;
 import com.fadhlika.kelana.repository.ExportRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 public class ExportService {

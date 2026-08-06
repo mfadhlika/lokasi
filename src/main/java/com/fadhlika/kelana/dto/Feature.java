@@ -10,11 +10,11 @@ import org.locationtech.jts.geom.Geometry;
 import com.fadhlika.kelana.exception.InternalErrorException;
 import com.fadhlika.kelana.util.GeometryDeserializer;
 import com.fadhlika.kelana.util.GeometrySerializer;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class Feature {
 
@@ -27,6 +27,8 @@ public class Feature {
     private List<Double> bbox = new ArrayList<>();
 
     private HashMap<String, Object> properties;
+
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public Feature() {
 
@@ -47,7 +49,6 @@ public class Feature {
             this.bbox.add(coordinate.x);
             this.bbox.add(coordinate.y);
         }
-        ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
         this.properties = mapper.convertValue(properties, new TypeReference<>() {
         });
     }
@@ -61,7 +62,6 @@ public class Feature {
     }
 
     public <T> T convertProperties(TypeReference<T> typeRef) {
-        ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
         try {
             return mapper.convertValue(properties, typeRef);
         } catch (IllegalArgumentException ex) {

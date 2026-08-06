@@ -1,6 +1,5 @@
 package com.fadhlika.kelana.repository;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.ResultSet;
 import java.time.OffsetDateTime;
@@ -17,7 +16,7 @@ import org.springframework.stereotype.Repository;
 import com.fadhlika.kelana.dto.FeatureCollection;
 import com.fadhlika.kelana.model.Region;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 @Repository
 public class RegionRepository {
@@ -33,7 +32,7 @@ public class RegionRepository {
         if (geocodeIS != null) {
             try {
                 geocode = ((RegionRepository) this).mapper.readValue(geocodeIS, FeatureCollection.class);
-            } catch (IOException e) {
+            } catch (Exception e) {
             }
         }
         byte[] point = rs.getBytes("geometry");

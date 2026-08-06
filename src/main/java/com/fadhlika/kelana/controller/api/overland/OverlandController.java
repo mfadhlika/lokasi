@@ -16,7 +16,7 @@ import com.fadhlika.kelana.model.Location;
 import com.fadhlika.kelana.model.User;
 import com.fadhlika.kelana.service.LocationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.type.TypeReference;
 
 @RestController
 public class OverlandController {

@@ -25,7 +25,7 @@ import com.fadhlika.kelana.model.Region;
 import com.fadhlika.kelana.model.Trip;
 import com.fadhlika.kelana.model.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 public class OwntracksService {
@@ -193,7 +193,7 @@ public class OwntracksService {
         String payload = mapper.writeValueAsString(message);
 
         switch (message) {
-            case com.fadhlika.kelana.dto.owntracks.Cmd e:
+            case com.fadhlika.kelana.dto.owntracks.Cmd _:
                 String topic = String.format("owntracks/%s/%s/cmd", user.getUsername(), deviceId);
 
                 mqttGateway.publish(topic, payload);

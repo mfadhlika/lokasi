@@ -17,7 +17,7 @@ import org.springframework.messaging.MessageChannel;
 
 @Configuration
 @ConditionalOnProperty(value = "mqtt.enable", havingValue = "true")
-class OwntracksMqttConfig {
+public class OwntracksMqttConfig {
 
     @Value("${mqtt.server}")
     private String[] servers;

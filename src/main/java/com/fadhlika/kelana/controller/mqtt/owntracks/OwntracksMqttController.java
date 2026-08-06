@@ -5,7 +5,8 @@ import com.fadhlika.kelana.model.User;
 import com.fadhlika.kelana.service.MqttService;
 import com.fadhlika.kelana.service.OwntracksService;
 import com.fadhlika.kelana.service.UserService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Optional;

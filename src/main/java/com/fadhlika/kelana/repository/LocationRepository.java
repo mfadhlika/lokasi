@@ -4,7 +4,6 @@
  */
 package com.fadhlika.kelana.repository;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
 import java.time.OffsetDateTime;
@@ -32,7 +31,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * @author fadhl
@@ -83,7 +82,7 @@ public class LocationRepository {
             if (geocode != null) {
                 try {
                     location.setGeocode(mapper.readValue(geocode, FeatureCollection.class));
-                } catch (IOException e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }
@@ -240,7 +239,7 @@ public class LocationRepository {
                 Optional.empty()).single();
     }
 
-    public MappedQuerySpec<Location> findLocationsStatementSpecBuilder(
+    private MappedQuerySpec<Location> findLocationsStatementSpecBuilder(
             Optional<Integer> userId,
             Optional<ZonedDateTime> start,
             Optional<ZonedDateTime> end,

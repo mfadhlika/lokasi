@@ -4,6 +4,7 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,6 +48,15 @@ public class DatabaseConfig {
         config.setPassword(dbPassword);
 
         HikariDataSource ds = new HikariDataSource(config);
+        Flyway flyway = Flyway.configure()
+                .dataSource(ds)
+                .locations("classpath:db/migration")
+                .baselineVersion("0")
+                .cleanDisabled(cleanDisabled)
+                .load();
+
+        flyway.baseline();
+        flyway.migrate();
 
         return ds;
     }

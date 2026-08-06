@@ -18,7 +18,7 @@ import org.springframework.stereotype.Repository;
 import com.fadhlika.kelana.dto.FeatureCollection;
 import com.fadhlika.kelana.model.Place;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 @Repository
 public class PlaceRepository {
@@ -44,7 +44,7 @@ public class PlaceRepository {
         if (geodataIS != null) {
             try {
                 geodata = ((PlaceRepository) this).mapper.readValue(geodataIS, FeatureCollection.class);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }

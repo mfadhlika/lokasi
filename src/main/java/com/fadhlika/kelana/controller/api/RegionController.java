@@ -17,7 +17,7 @@ import com.fadhlika.kelana.exception.BadRequestException;
 import com.fadhlika.kelana.model.Region;
 import com.fadhlika.kelana.model.User;
 import com.fadhlika.kelana.service.RegionService;
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.type.TypeReference;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

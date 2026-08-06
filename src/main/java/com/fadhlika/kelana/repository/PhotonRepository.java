@@ -18,7 +18,7 @@ import org.springframework.stereotype.Repository;
 
 import com.fadhlika.kelana.dto.FeatureCollection;
 import com.fadhlika.kelana.exception.InternalErrorException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 @Repository
 public class PhotonRepository {

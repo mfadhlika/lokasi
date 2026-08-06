@@ -29,7 +29,7 @@ import com.fadhlika.kelana.repository.LocationRepository;
 import com.fadhlika.kelana.repository.PhotonRepository;
 import com.fadhlika.kelana.repository.PlaceRepository;
 import com.fadhlika.kelana.service.ReverseGeocodeService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
 public class ReverseGeocodeServiceTest {
