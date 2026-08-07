@@ -12,15 +12,16 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.locationtech.jts.geom.Coordinate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.fadhlika.kelana.config.OwntracksMqttConfig.MqttGateway;
 import com.fadhlika.kelana.dto.owntracks.Cmd;
 import com.fadhlika.kelana.dto.owntracks.Message;
 import com.fadhlika.kelana.dto.owntracks.Waypoint;
 import com.fadhlika.kelana.dto.owntracks.Waypoints;
 import com.fadhlika.kelana.exception.InternalErrorException;
-import com.fadhlika.kelana.gateways.MqttGateway;
 import com.fadhlika.kelana.model.Region;
 import com.fadhlika.kelana.model.Trip;
 import com.fadhlika.kelana.model.User;
@@ -46,7 +47,7 @@ public class OwntracksService {
     private final ObjectMapper mapper;
 
     OwntracksService(ObjectMapper mapper, LocationService locationService, TripService tripService,
-            RegionService regionService, MqttGateway mqttGateway) {
+            RegionService regionService, @Autowired(required = false) MqttGateway mqttGateway) {
         this.mapper = mapper;
         this.locationService = locationService;
         this.tripService = tripService;

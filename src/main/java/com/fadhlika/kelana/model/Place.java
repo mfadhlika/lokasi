@@ -8,8 +8,9 @@ import org.locationtech.jts.geom.Geometry;
 import com.fadhlika.kelana.dto.FeatureCollection;
 import com.fadhlika.kelana.util.GeometryDeserializer;
 import com.fadhlika.kelana.util.GeometrySerializer;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
 
 public record Place(
         int id,

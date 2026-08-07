@@ -14,6 +14,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import tools.jackson.databind.ObjectMapper;
 
@@ -21,6 +22,9 @@ import tools.jackson.databind.ObjectMapper;
 public class LocationTest {
         @Autowired
         private ObjectMapper mapper;
+
+        @MockitoBean
+        private com.fadhlika.kelana.config.OwntracksMqttConfig.MqttGateway mqttGateway;
 
         @Test
         public void givenBasicJsonMapToCorrectLocation() {

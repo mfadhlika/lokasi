@@ -157,6 +157,7 @@
 					<argLine>
 						-javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar
 						-Xshare:off
+						--add-opens java.base/java.net=ALL-UNNAMED
 					</argLine>
 					<forkedProcessExitTimeoutInSeconds>60</forkedProcessExitTimeoutInSeconds>
 				</configuration>

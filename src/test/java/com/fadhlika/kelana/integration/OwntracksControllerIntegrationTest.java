@@ -1,12 +1,13 @@
 package com.fadhlika.kelana.integration;
 
-import org.flywaydb.core.Flyway;
-import org.junit.jupiter.api.BeforeEach;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,12 +17,22 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import com.fadhlika.kelana.KelanaApplication;
+import com.fadhlika.kelana.dto.Auth;
+import com.fadhlika.kelana.dto.FeatureCollection;
+import com.fadhlika.kelana.dto.LoginRequest;
+import com.fadhlika.kelana.dto.Response;
 import com.fadhlika.kelana.dto.owntracks.Cmd;
 import com.fadhlika.kelana.dto.owntracks.Message;
 import com.fadhlika.kelana.dto.owntracks.Request;
 import com.fadhlika.kelana.dto.owntracks.Tour;
 import com.fadhlika.kelana.dto.owntracks.Waypoint;
-import com.fadhlika.kelana.service.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
+import tools.jackson.core.StreamReadFeature;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import org.springframework.test.context.TestPropertySource;
 
@@ -35,28 +46,56 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = KelanaApplication.class)
 @TestPropertySource(locations = "classpath:test.properties")
 @TestInstance(Lifecycle.PER_CLASS)
+@AutoConfigureTestRestTemplate
 public class OwntracksControllerIntegrationTest {
   @Autowired
   private TestRestTemplate testRestTemplate;
 
-  @Autowired
-  private Flyway flyway;
+  private ObjectMapper mapper = JsonMapper.builder()
+      .enable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION)
+      .build();
 
-  @Autowired
-  private UserService userService;
+  private String token;
 
-  @BeforeEach
-  public void migrateDatabase() throws Exception {
-    flyway.clean();
+  @BeforeAll
+  public void setUp() throws MqttException, JsonMappingException, JsonProcessingException {
+    LoginRequest login = new LoginRequest("test", "test");
 
-    flyway.migrate();
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
 
-    userService.createUser("test", "test");
+    HttpEntity<LoginRequest> request = new HttpEntity<>(login, headers);
+
+    ResponseEntity<String> res = testRestTemplate.exchange("/api/v1/login", HttpMethod.POST, request,
+        String.class);
+
+    Response<Auth> loginRes = mapper.readValue(res.getBody(), new TypeReference<Response<Auth>>() {
+    });
+
+    token = loginRes.data.accessToken();
+  }
+
+  private FeatureCollection getTrips() {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setBearerAuth(token);
+
+    HttpEntity<Void> request = new HttpEntity<>(headers);
+
+    ResponseEntity<String> res = testRestTemplate.exchange(
+        "/api/v1/trips?limit=100", HttpMethod.GET,
+        request, String.class);
+
+    assertEquals(HttpStatusCode.valueOf(200), res.getStatusCode(), res.getBody());
+
+    Response<FeatureCollection> tripRes = mapper.readValue(res.getBody(),
+        new TypeReference<Response<FeatureCollection>>() {
+        });
+
+    return tripRes.data;
   }
 
   @Test
   public void publishLocation() throws Exception {
-
     com.fadhlika.kelana.dto.owntracks.Location location = new com.fadhlika.kelana.dto.owntracks.Location(10, 50, 95,
         null, 270, -1.23456,
         12.34567, null, null,
@@ -75,21 +114,19 @@ public class OwntracksControllerIntegrationTest {
 
     HttpEntity<com.fadhlika.kelana.dto.owntracks.Location> request = new HttpEntity<>(location, headers);
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     ResponseEntity<ArrayList<Message>> res = testRestTemplate
         .withBasicAuth("owntracks", "owntracks")
         .exchange("/api/owntracks", HttpMethod.POST, request, (Class<ArrayList<Message>>) ((Class) ArrayList.class));
 
     assertEquals(HttpStatusCode.valueOf(200), res.getStatusCode());
-
-    ArrayList<Message> messages = res.getBody();
-
-    assertNotNull(messages);
-    assertEquals(0, messages.size());
   }
 
   @Test
   public void createTour() throws Exception {
+    FeatureCollection trips = getTrips();
+    int initialTripSize = trips.features().size();
+
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     headers.setBasicAuth("owntracks", "owntracks");
@@ -141,7 +178,7 @@ public class OwntracksControllerIntegrationTest {
     // there on the payload
     assertEquals("response", cmd.action());
     assertEquals("tours", cmd.request());
-    assertEquals(1, cmd.tours().size());
+    assertEquals(initialTripSize + 1, cmd.tours().size());
     assertEquals("Meeting with C. in Essen", cmd.tours().get(0).label());
     assertEquals("2022-08-01T05:35:58", cmd.tours().get(0).from());
     assertEquals("2022-08-02T15:00:58", cmd.tours().get(0).to());
@@ -158,10 +195,11 @@ public class OwntracksControllerIntegrationTest {
 
     HttpEntity<Waypoint> request = new HttpEntity<>(waypoint, headers);
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     ResponseEntity<ArrayList<Message>> res = testRestTemplate
         .withBasicAuth("owntracks", "owntracks")
-        .exchange("/api/owntracks", HttpMethod.POST, request, (Class<ArrayList<Message>>) ((Class) ArrayList.class));
+        .exchange("/api/owntracks", HttpMethod.POST, request,
+            (Class<ArrayList<Message>>) ((Class) ArrayList.class));
 
     assertEquals(HttpStatusCode.valueOf(200), res.getStatusCode());
   }

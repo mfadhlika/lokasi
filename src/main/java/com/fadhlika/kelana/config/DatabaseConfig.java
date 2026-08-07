@@ -48,6 +48,7 @@ public class DatabaseConfig {
         config.setPassword(dbPassword);
 
         HikariDataSource ds = new HikariDataSource(config);
+
         Flyway flyway = Flyway.configure()
                 .dataSource(ds)
                 .locations("classpath:db/migration")

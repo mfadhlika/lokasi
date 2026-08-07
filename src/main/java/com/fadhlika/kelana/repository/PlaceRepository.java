@@ -1,6 +1,5 @@
 package com.fadhlika.kelana.repository;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.ResultSet;
 import java.time.OffsetDateTime;

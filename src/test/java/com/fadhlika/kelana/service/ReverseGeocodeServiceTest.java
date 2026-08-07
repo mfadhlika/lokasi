@@ -28,7 +28,6 @@ import com.fadhlika.kelana.model.Place;
 import com.fadhlika.kelana.repository.LocationRepository;
 import com.fadhlika.kelana.repository.PhotonRepository;
 import com.fadhlika.kelana.repository.PlaceRepository;
-import com.fadhlika.kelana.service.ReverseGeocodeService;
 import tools.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)

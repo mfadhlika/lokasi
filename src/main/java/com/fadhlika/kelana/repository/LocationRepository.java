@@ -27,7 +27,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.core.simple.JdbcClient.MappedQuerySpec;
 import org.springframework.jdbc.core.simple.JdbcClient.StatementSpec;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -50,7 +49,7 @@ public class LocationRepository {
 
     private final RowMapper<Location> locationRowMapper = new RowMapper<Location>() {
         @Override
-        public Location mapRow(@NonNull ResultSet rs, int rowNum) throws SQLException {
+        public Location mapRow(ResultSet rs, int rowNum) throws SQLException {
             Location location;
             byte[] point = rs.getBytes("geometry");
             try {

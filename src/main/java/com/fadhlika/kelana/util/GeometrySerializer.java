@@ -1,17 +1,18 @@
 package com.fadhlika.kelana.util;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
+
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 
-import java.io.IOException;
-
-public class GeometrySerializer extends JsonSerializer<Geometry> {
+public class GeometrySerializer extends ValueSerializer<Geometry> {
 
     @Override
-    public void serialize(Geometry value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(Geometry value, JsonGenerator gen, SerializationContext ctxt)
+            throws JacksonException {
         GeoJsonWriter writer = new GeoJsonWriter();
         writer.setEncodeCRS(false);
         String str = writer.write(value);

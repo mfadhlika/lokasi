@@ -1,19 +1,23 @@
 package com.fadhlika.kelana.config;
 
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.annotation.MessagingGateway;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.mqtt.core.DefaultMqttPahoClientFactory;
 import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
+import org.springframework.integration.mqtt.support.MqttHeaders;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.handler.annotation.Header;
 
 @Configuration
 @ConditionalOnProperty(value = "mqtt.enable", havingValue = "true")
@@ -73,4 +77,10 @@ public class OwntracksMqttConfig {
     public MessageChannel mqttInboundChannel() {
         return new DirectChannel();
     }
+
+    @MessagingGateway(defaultRequestChannel = "mqttOutboundChannel")
+    public interface MqttGateway {
+        void publish(@Header(MqttHeaders.TOPIC) String topic, String payload) throws MqttException;
+    }
+
 }

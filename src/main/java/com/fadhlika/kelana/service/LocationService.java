@@ -26,6 +26,8 @@ import com.fadhlika.kelana.model.Location.BatteryState;
 import com.fadhlika.kelana.repository.LocationRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import tools.jackson.databind.ObjectMapper;
+
 /**
  *
  * @author fadhl
@@ -45,13 +47,16 @@ public class LocationService {
 
     private final UserService userService;
 
+    private final ObjectMapper mapper;
+
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     LocationService(LocationRepository locationRepository, ReverseGeocodeService reverseGeocodeService,
-            UserService userService, SimpMessagingTemplate simpMessagingTemplate) {
+            UserService userService, ObjectMapper mapper, SimpMessagingTemplate simpMessagingTemplate) {
         this.locationRepository = locationRepository;
         this.reverseGeocodeService = reverseGeocodeService;
         this.userService = userService;
+        this.mapper = mapper;
         this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
@@ -139,8 +144,9 @@ public class LocationService {
 
         User user = userService.getUserByUserId(location.getUserId());
         Feature feature = new Feature(location.getGeometry(), props);
+        String payload = mapper.writeValueAsString(feature);
         simpMessagingTemplate.convertAndSendToUser(user.getUsername(),
                 "/topic/last-known-location",
-                feature);
+                payload);
     }
 }

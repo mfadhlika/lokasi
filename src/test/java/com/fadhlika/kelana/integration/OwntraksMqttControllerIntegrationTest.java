@@ -15,10 +15,8 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
-import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -30,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -46,17 +45,19 @@ import com.fadhlika.kelana.dto.LoginRequest;
 import com.fadhlika.kelana.dto.Response;
 import com.fadhlika.kelana.dto.owntracks.Cmd;
 import com.fadhlika.kelana.service.MqttService;
-import com.fadhlika.kelana.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import tools.jackson.core.StreamReadFeature;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = KelanaApplication.class, properties = {
                 "mqtt.enable=true" })
 @TestPropertySource(locations = "classpath:test.properties")
 @TestInstance(Lifecycle.PER_CLASS)
+@AutoConfigureTestRestTemplate
 public class OwntraksMqttControllerIntegrationTest {
         private final Logger logger = LoggerFactory.getLogger(OwntraksMqttControllerIntegrationTest.class);
 
@@ -69,27 +70,13 @@ public class OwntraksMqttControllerIntegrationTest {
         @Autowired
         private MqttService mqttService;
 
-        @Autowired
-        private ObjectMapper mapper;
+        private ObjectMapper mapper = JsonMapper.builder()
+                        .enable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION)
+                        .build();
 
         private IMqttClient client;
 
         private String token;
-
-        @Autowired
-        private Flyway flyway;
-
-        @Autowired
-        private UserService userService;
-
-        @BeforeEach
-        public void clearDatabase() {
-                flyway.clean();
-
-                flyway.migrate();
-
-                userService.createUser("test", "test");
-        }
 
         @BeforeAll
         public void setUp() throws MqttException, JsonMappingException, JsonProcessingException {
@@ -123,9 +110,34 @@ public class OwntraksMqttControllerIntegrationTest {
                 client.disconnect();
         }
 
+        private FeatureCollection getLocations() {
+                HttpHeaders headers = new HttpHeaders();
+                headers.setBearerAuth(token);
+
+                HttpEntity<Void> request = new HttpEntity<>(headers);
+
+                ResponseEntity<String> res = testRestTemplate.exchange(
+                                "/api/v1/locations?limit=100", HttpMethod.GET,
+                                request, String.class);
+
+                assertEquals(HttpStatusCode.valueOf(200), res.getStatusCode(), res.getBody());
+
+                Response<FeatureCollection> locationRes = mapper.readValue(res.getBody(),
+                                new TypeReference<Response<FeatureCollection>>() {
+                                });
+
+                return locationRes.data;
+        }
+
         @Test
         public void publishLocation() throws MqttPersistenceException, MqttException, InterruptedException,
                         JsonMappingException, JsonProcessingException {
+                FeatureCollection locations = getLocations();
+                int initialLocationSize = locations.features().size();
+
+                List<com.fadhlika.kelana.model.MqttMessage> mqttMessages = mqttService.fetchMessages(100, 0);
+                int initialMessageSize = mqttMessages.size();
+
                 MqttMessage msg = new MqttMessage(
                                 "{\"batt\":40,\"lon\":12.34567,\"acc\":4,\"bs\":1,\"inrids\":[],\"created_at\":1768712755,\"p\":100.664,\"vac\":30,\"inregions\":[],\"lat\":-1.23456,\"topic\":\"owntracks/owntracks/iphone\",\"t\":\"u\",\"motionactivities\":[\"stationary\"],\"conn\":\"w\",\"m\":1,\"tst\":1672532200,\"alt\":-16,\"_type\":\"location\",\"tid\":\"NE\"}"
                                                 .getBytes());
@@ -142,7 +154,7 @@ public class OwntraksMqttControllerIntegrationTest {
                                 "/api/v1/locations?start=2023-01-01T00:00:00Z&end=2023-01-01T23:59:59Z", HttpMethod.GET,
                                 request, String.class);
 
-                assertEquals(HttpStatusCode.valueOf(200), res.getStatusCode());
+                assertEquals(HttpStatusCode.valueOf(200), res.getStatusCode(), res.getBody());
 
                 Response<FeatureCollection> locationRes = mapper.readValue(res.getBody(),
                                 new TypeReference<Response<FeatureCollection>>() {
@@ -151,17 +163,17 @@ public class OwntraksMqttControllerIntegrationTest {
                 assertNotNull(locationRes);
                 assertNotNull(locationRes.data);
                 assertNotNull(locationRes.data.features());
-                assertEquals(1, locationRes.data.features().size());
+                assertEquals(initialLocationSize + 1, locationRes.data.features().size());
 
                 GeometryFactory gf = new GeometryFactory();
                 Geometry geometry = gf.createPoint(new Coordinate(12.34567, -1.23456));
 
                 assertEquals(locationRes.data.features().get(0).getGeometry(), geometry);
 
-                List<com.fadhlika.kelana.model.MqttMessage> mqttMessages = mqttService.fetchMessages(1, 0);
+                mqttMessages = mqttService.fetchMessages(100, 0);
 
                 assertNotNull(mqttMessages);
-                assertEquals(1, mqttMessages.size());
+                assertEquals(initialMessageSize + 1, mqttMessages.size());
                 assertEquals("owntracks/test/my_device_id", mqttMessages.get(0).topic());
                 assertEquals(com.fadhlika.kelana.model.MqttMessage.Status.PROCESSED, mqttMessages.get(0).status());
         }
@@ -226,6 +238,9 @@ public class OwntraksMqttControllerIntegrationTest {
 
         @Test
         public void badMessage() throws InterruptedException {
+                List<com.fadhlika.kelana.model.MqttMessage> mqttMessages = mqttService.fetchMessages(100, 0);
+                int initialMessageSize = mqttMessages.size();
+
                 MqttMessage msg = new MqttMessage("""
                                 {
                                   "_type": "request",
@@ -240,9 +255,9 @@ public class OwntraksMqttControllerIntegrationTest {
 
                 Thread.sleep(5000);
 
-                List<com.fadhlika.kelana.model.MqttMessage> mqttMessages = mqttService.fetchMessages(1, 0);
+                mqttMessages = mqttService.fetchMessages(100, 0);
 
                 assertNotNull(mqttMessages);
-                assertEquals(0, mqttMessages.size());
+                assertEquals(initialMessageSize, mqttMessages.size());
         }
 }
